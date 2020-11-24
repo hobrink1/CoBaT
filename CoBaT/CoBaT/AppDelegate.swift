@@ -14,6 +14,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        // read the permanent stored data
+        GlobalStorage.unique.readPermanentStore()
+        
+        // get fresh data
+        RKIData.unique.getRKIData()
+        
+        // build the formatters
+        buildAllFormatters()
+        
         return true
     }
 
