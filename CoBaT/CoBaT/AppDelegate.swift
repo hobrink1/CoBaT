@@ -16,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         
         // read the permanent stored data
-        GlobalStorage.unique.readPermanentStore()
+        GlobalStorage.unique.restoreSavedRKIData()
         
         // get fresh data
         RKIData.unique.getRKIData()

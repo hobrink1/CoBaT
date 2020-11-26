@@ -13,6 +13,7 @@ import CoreLocation
 let debugDateFormatter = DateFormatter()
 let specialDateFormatter = DateFormatter()
 let shortSingleDateFormatter = DateFormatter()
+let shortSingleDateFormatterRKI = DateFormatter()
 let shortSingleDateFormatterTZ = DateFormatter()
 let mediumSingleDateFormatter = DateFormatter()
 let longSingleDateFormatter = DateFormatter()
@@ -55,7 +56,7 @@ let dateFormatterLocalizedWeekdayShort = DateFormatter()
 let dateFormatterLocalizedYear = DateFormatter()
 let dateFormatterLocalizedMonthName = DateFormatter()
 
-
+let RKIDateFormatter = DateFormatter()
 
 
 // -----------------------------------------------------------------------------------------------------------
@@ -150,7 +151,7 @@ func buildAllFormatters() {
     shortSingleDateTimeFormatter.dateStyle = .short
     shortSingleDateTimeFormatter.timeStyle = .short
     //shortSingleDateTimeFormatter.doesRelativeDateFormatting = true
-    shortSingleDateTimeFormatter.locale = Locale(identifier: preferredLanguage)
+    //shortSingleDateTimeFormatter.locale = Locale(identifier: preferredLanguage)
 
     
     MediumSingleTimeFormatter.dateStyle = .none
@@ -204,6 +205,18 @@ func buildAllFormatters() {
     shortSingleDateFormatter.doesRelativeDateFormatting = true
     shortSingleDateFormatter.locale = Locale(identifier: preferredLanguage)
 
+    // as the RKI sits in Berlin the date has to be for that timeZone,
+    // otherwise the day checks might fail (day in LA might be different)
+    // the timeZone "Europe/Berlin" also considers the daylight saving adjustments
+    // we use the local "de" to get a unique result, no matter what user settings are changed
+    shortSingleDateFormatterRKI.dateStyle = .short
+    shortSingleDateFormatterRKI.timeStyle = .none
+    shortSingleDateFormatterRKI.doesRelativeDateFormatting = false
+    shortSingleDateFormatterRKI.timeZone = TimeZone(identifier: "Europe/Berlin")
+    shortSingleDateFormatter.locale = Locale(identifier: "de_DE")
+    
+    
+    
     // use of the standard "Short Style" ... attention: the format is localized
     shortSingleDateFormatterTZ.dateStyle = .short
     shortSingleDateFormatterTZ.timeStyle = .none
@@ -339,8 +352,13 @@ func buildAllFormatters() {
     dateFormatterLocalizedYear.setLocalizedDateFormatFromTemplate("yyyy")
     dateFormatterLocalizedMonthName.setLocalizedDateFormatFromTemplate("MMMM")
     
+    // RKI County data uses the date format "25.11.2020, 00:00 Uhr"
+    RKIDateFormatter.dateFormat = "dd.MM.yyyy', 'HH:mm' Uhr'"
+    RKIDateFormatter.locale = Locale(identifier: "de")
     
-    
+//    dateFormatter.locale = Locale(identifier: "en_US_POSIX") // set locale to reliable US_POSIX
+//    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+//    let date = dateFormatter.date(from:isoDate)!
     //        let dateFormatter = DateFormatter()
     //        let date = Date(timeIntervalSinceReferenceDate: 410220000)
     //

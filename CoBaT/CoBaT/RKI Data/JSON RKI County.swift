@@ -172,7 +172,7 @@ struct RKI_County_Attributes: Codable {
     var bl: RKI_County_Bl
     var blid: String
     var county: String
-    var lastUpdate: RKI_County_LastUpdate
+    var lastUpdate: String
     var cases7Per100K: Double
     var recovered: JSONNull?
     var ewzBl: Int
@@ -278,7 +278,8 @@ fileprivate extension RKI_County_Attributes {
         bl: RKI_County_Bl? = nil,
         blid: String? = nil,
         county: String? = nil,
-        lastUpdate: RKI_County_LastUpdate? = nil,
+        //lastUpdate: RKI_County_LastUpdate? = nil,
+        lastUpdate: String? = nil,
         cases7Per100K: Double? = nil,
         recovered: JSONNull?? = nil,
         ewzBl: Int? = nil,
@@ -375,9 +376,11 @@ enum RKI_County_FkS3: String, Codable {
     case r = "R"
 }
 
+/*
 enum RKI_County_LastUpdate: String, Codable {
     case the241120200000Uhr = "24.11.2020, 00:00 Uhr"
 }
+*/
 
 enum RKI_County_Nbd: String, Codable {
     case ja = "ja"

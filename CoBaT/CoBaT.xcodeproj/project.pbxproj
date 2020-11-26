@@ -17,6 +17,7 @@
 		F22D00C12567B5D500C908AA /* CoBaTUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F22D00C02567B5D500C908AA /* CoBaTUITests.swift */; };
 		F22D00D1256872B100C908AA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F22D00A92567B5D500C908AA /* LaunchScreen.storyboard */; };
 		F22D00D5256872B200C908AA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F22D00A92567B5D500C908AA /* LaunchScreen.storyboard */; };
+		F273D76C256E4D860002E15B /* CovidRating.swift in Sources */ = {isa = PBXBuildFile; fileRef = F273D76B256E4D860002E15B /* CovidRating.swift */; };
 		F2AD3056256D00B700FDDE4B /* JSON RKI County.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD3055256D00B700FDDE4B /* JSON RKI County.swift */; };
 		F2AD305F256D035E00FDDE4B /* JSON RKI State.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD305E256D035E00FDDE4B /* JSON RKI State.swift */; };
 		F2AD3064256D043900FDDE4B /* JSON RKI Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD3063256D043900FDDE4B /* JSON RKI Helpers.swift */; };
@@ -63,6 +64,7 @@
 		F22D00DA256872B700C908AA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		F22D00E725687CD900C908AA /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Main.strings; sourceTree = "<group>"; };
 		F22D00EB25687CD900C908AA /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
+		F273D76B256E4D860002E15B /* CovidRating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CovidRating.swift; sourceTree = "<group>"; };
 		F2AD3055256D00B700FDDE4B /* JSON RKI County.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSON RKI County.swift"; sourceTree = "<group>"; };
 		F2AD305E256D035E00FDDE4B /* JSON RKI State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSON RKI State.swift"; sourceTree = "<group>"; };
 		F2AD3063256D043900FDDE4B /* JSON RKI Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSON RKI Helpers.swift"; sourceTree = "<group>"; };
@@ -126,13 +128,13 @@
 				F22D00AC2567B5D500C908AA /* Info.plist */,
 				F22D009E2567B5D300C908AA /* AppDelegate.swift */,
 				F22D00A02567B5D300C908AA /* SceneDelegate.swift */,
-				F2ED1097256DAFDE003E2C41 /* Formatters.swift */,
 				F2AD3054256D007D00FDDE4B /* RKI Data */,
 				F2AD306A256D0AA500FDDE4B /* Background Service */,
 				F2AD3069256D0A7200FDDE4B /* Location Service */,
 				F2AD3068256D0A5900FDDE4B /* Global Storage */,
 				F2AD305A256D00CF00FDDE4B /* UI */,
 				F2AD3070256D109600FDDE4B /* User Notifications */,
+				F273D76A256E4D600002E15B /* Helpers */,
 				F22D00A42567B5D300C908AA /* Main.storyboard */,
 				F22D00A72567B5D500C908AA /* Assets.xcassets */,
 				F22D00A92567B5D500C908AA /* LaunchScreen.storyboard */,
@@ -156,6 +158,15 @@
 				F22D00C22567B5D500C908AA /* Info.plist */,
 			);
 			path = CoBaTUITests;
+			sourceTree = "<group>";
+		};
+		F273D76A256E4D600002E15B /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				F2ED1097256DAFDE003E2C41 /* Formatters.swift */,
+				F273D76B256E4D860002E15B /* CovidRating.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 		F2AD3054256D007D00FDDE4B /* RKI Data */ = {
@@ -378,6 +389,7 @@
 				F2AD3064256D043900FDDE4B /* JSON RKI Helpers.swift in Sources */,
 				F22D009F2567B5D300C908AA /* AppDelegate.swift in Sources */,
 				F2ED107E256D6E69003E2C41 /* BrowseCountyDataTableViewController.swift in Sources */,
+				F273D76C256E4D860002E15B /* CovidRating.swift in Sources */,
 				F2AD3072256D10D400FDDE4B /* RKI Data.swift in Sources */,
 				F2ED108B256D9806003E2C41 /* CountyTableViewCell.swift in Sources */,
 				F2ED1098256DAFDE003E2C41 /* Formatters.swift in Sources */,

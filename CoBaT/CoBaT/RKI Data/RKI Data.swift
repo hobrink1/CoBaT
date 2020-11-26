@@ -102,7 +102,7 @@ class RKIData: NSObject {
                                                 
                                                 // convert it to string and print it (used for testing AND
                                                 // for quickType webside to generate the "JSON RKI ....swift" files
-                                                // print("\(String(data: data!, encoding: .utf8) ?? "Convertion data to string failed")")
+                                                 print("\(String(data: data!, encoding: .utf8) ?? "Convertion data to string failed")")
                                                 
                                                 // handle the content
                                                 self.handleRKIContent(data!, singleDataSet.RKI_DataType)
@@ -214,43 +214,81 @@ class RKIData: NSObject {
                 print("handleRKIContent after decoding")
                 
                 // we will provide an array of converted values
-                var newDataArray: [GlobalStorage.RKICountyDataStruct] = []
+                var newDataArray: [GlobalStorage.RKIDataStruct] = []
                 
                 // Walk over data and build array
                 for singleItem in countyData.features {
                     
-                    newDataArray.append(GlobalStorage.RKICountyDataStruct(
-                                            stateName: singleItem.attributes.bl.rawValue,
-                                            countyName: singleItem.attributes.gen,
-                                            Covid7DaysCasesPer100K: singleItem.attributes.cases7Per100K))
+                    print("RKI County Date: \"\(singleItem.attributes.lastUpdate)\"")
+                    let updateDate : Date
+                    if let myDate = RKIDateFormatter.date(from:singleItem.attributes.lastUpdate) {
+                        updateDate = myDate
+                    } else {
+                        updateDate = Date()
+                        
+                        GlobalStorage.unique.storeLastError(
+                            errorText: "CoBaT.RKIData.handleRKIContent.County: Error: could not get updateDate from \"\(singleItem.attributes.lastUpdate)\", use current date \"\(updateDate)\" instead"
+                        )
+                    }
+                    
+                    print("State Update Date: \(shortSingleDateTimeFormatter.string(from: updateDate)), RKI:\(shortSingleDateFormatterRKI.string(from: updateDate))")
+
+
+                    newDataArray.append(GlobalStorage.RKIDataStruct(
+                                            stateID: singleItem.attributes.blid,
+                                            name: singleItem.attributes.gen,
+                                            kindOf: singleItem.attributes.bez.rawValue,
+                                            inhabitants: singleItem.attributes.ewz,
+                                            cases: singleItem.attributes.cases,
+                                            deaths: singleItem.attributes.deaths,
+                                            casesPer100k: singleItem.attributes.casesPer100K,
+                                            cases7DaysPer100K: singleItem.attributes.cases7Per100K,
+                                            timeStamp: updateDate.timeIntervalSinceReferenceDate))
                 }
 
                 GlobalStorage.unique.refresh_RKICountyData(newRKICountyData: newDataArray)
-                print("handleRKIContent done")
-
+                print("handleRKIContent County done")
+                
+                
                 
             case .state:
-                print("State")
                 
-                let welcomeResult = try newJSONDecoder().decode(RKI_State_JSON.self, from: data)
+                print("handleRKIContent State")
                 
-                //let welcomeResult = try RKI_County_JSON(json)
+                let stateData = try newJSONDecoder().decode(RKI_State_JSON.self, from: data)
                 
-                print("receive 3:")
-                
-                // let test = welcomeResult.
+                print("handleRKIContent after decoding")
+
+                // we will provide an array of converted values
+                var newDataArray: [GlobalStorage.RKIDataStruct] = []
                 
                 //            if welcomeResult.features != nil {
-                for singleItem in welcomeResult.features {
+                for singleItem in stateData.features {
                     //if let test1 = singleItem.attributes!.bl {
-                    print("\(singleItem.attributes.cases7BlPer100K), \(singleItem.attributes.cases7BlPer100K))")
+                    
+                    let secondsSince1970: TimeInterval = TimeInterval(Double(singleItem.attributes.aktualisierung) / 1_000)
+                    let lastUpdateRKI: Date = Date(timeIntervalSince1970: secondsSince1970)
+                    let lastUpdateTimeInterval: TimeInterval = lastUpdateRKI.timeIntervalSinceReferenceDate
+                    let lastUpdate: Date = Date(timeIntervalSinceReferenceDate: lastUpdateTimeInterval)
+                    
+                    print("State Update Date: \(shortSingleDateTimeFormatter.string(from: lastUpdate)), RKI:\(shortSingleDateFormatterRKI.string(from: lastUpdate))")
+
+                    newDataArray.append(GlobalStorage.RKIDataStruct(
+                                            stateID: "\(singleItem.attributes.objectid1)",
+                                            name: singleItem.attributes.lanEwgen,
+                                            kindOf: singleItem.attributes.lanEwbez,
+                                            inhabitants: singleItem.attributes.lanEwewz,
+                                            cases: singleItem.attributes.fallzahl,
+                                            deaths: singleItem.attributes.death,
+                                            casesPer100k: singleItem.attributes.faelle100000_ew,
+                                            cases7DaysPer100K: singleItem.attributes.cases7BlPer100K,
+                                            timeStamp: lastUpdateTimeInterval))
+
                     //}
                 }
-                
-            //            for singleItem in welcomeResult.features! {
-            //                print("\(String(describing: singleItem.attributes!.lanEwBEZ)), \(String(describing: singleItem.attributes!.objectid1)): \(String(describing: singleItem.attributes!.cases7BlPer100K))")
-            //            }
-            
+                GlobalStorage.unique.refresh_RKIStateData(newRKIStateData: newDataArray)
+                print("handleRKIContent State done")
+
             }
             
             
