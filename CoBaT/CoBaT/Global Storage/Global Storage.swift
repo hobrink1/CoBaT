@@ -55,12 +55,16 @@ final class GlobalStorage: NSObject {
     private let permanentStore = UserDefaults.standard
 
     // usefull constants to index the right Level
-    public let RKIDataState: Int = 0
-    public let RKIDataCounty: Int = 1
+    public let RKIDataCountry: Int = 0
+    public let RKIDataState: Int = 1
+    public let RKIDataCounty: Int = 2
     
     // size of storage
     private let maxNumberOfDaysStored: Int = 7
     private let maxNumberOfErrorsStored: Int = 20
+    
+    // Version of permanent storage
+    private let VersionOfPermanentStorage: Int = 2
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - RKI Data API
@@ -77,16 +81,16 @@ final class GlobalStorage: NSObject {
         
         GlobalStorageQueue.async(flags: .barrier, execute: {
 
-            print("read the permanent store is not fully implemented yet")
+            print("restoreSavedRKIData just started")
             
             // try to read the stored county data
-            if let loadedRKICountyData = self.permanentStore.object(
+            if let loadedRKIData = self.permanentStore.object(
                 forKey: "CoBaT.RKIData") {
                 
-                if let loadedRKICountyDataTimeStamps = self.permanentStore.object(
+                if let loadedRKIDataTimeStamps = self.permanentStore.object(
                     forKey: "CoBaT.RKIDataTimeStamps") {
                     
-                    let loadedRKICountyDataLastUpdated = self.permanentStore.double(
+                    let loadedRKIDataLastUpdated = self.permanentStore.double(
                         forKey: "CoBaT.RKIDataLastUpdated")
                     
                     let loadedRKIDataLastRetreived = self.permanentStore.double(
@@ -96,17 +100,147 @@ final class GlobalStorage: NSObject {
                     // got the data, try to decode it
                     do {
                         
-                        let myRKICountyData = try JSONDecoder().decode([[[RKIDataStruct]]].self,
-                                                                       from: (loadedRKICountyData as? Data)!)
+                        let myRKIData = try JSONDecoder().decode([[[RKIDataStruct]]].self,
+                                                                       from: (loadedRKIData as? Data)!)
                         
-                        let myRKICountyDataTimeStamps = try JSONDecoder().decode([[TimeInterval]].self,
-                                                                                 from: (loadedRKICountyDataTimeStamps as? Data)!)
+                        let myRKIDataTimeStamps = try JSONDecoder().decode([[TimeInterval]].self,
+                                                                                 from: (loadedRKIDataTimeStamps as? Data)!)
                         
-                        // if we got to here, no errors encountered, so store it
-                        self.RKIData = myRKICountyData
-                        self.RKIDataTimeStamps = myRKICountyDataTimeStamps
-                        self.RKIDataLastUpdated = loadedRKICountyDataLastUpdated
-                        self.RKIDataLastRetreived = loadedRKIDataLastRetreived
+                        // if we got to here, no errors encountered
+                        
+                        // now we have to check if we probably have to migrate data
+                        // V1: Initial version
+                        // V2: added country level
+                        var currentVersionOfPermanentStorage = self.permanentStore.integer(
+                            forKey: "CoBaT.VersionOfPermanentStorage")
+                        
+                        // check the version
+                        if currentVersionOfPermanentStorage == self.VersionOfPermanentStorage {
+                            
+                            // we have the current version, so restore the date
+                            self.RKIData = myRKIData
+                            self.RKIDataTimeStamps = myRKIDataTimeStamps
+                            self.RKIDataLastUpdated = loadedRKIDataLastUpdated
+                            self.RKIDataLastRetreived = loadedRKIDataLastRetreived
+                            
+                            // rebuild the delta values
+                            self.rebuildRKIDeltas()
+
+                        } else {
+                            
+                            // make a working copy of the loaded data
+                            var migratedRKIData = myRKIData
+                            var migratedRKIDataTimeStamps = myRKIDataTimeStamps
+
+                            // loop until all migrations are done
+                            while currentVersionOfPermanentStorage != self.VersionOfPermanentStorage {
+                                
+                                // check the version and the possible migration strategy
+                                switch currentVersionOfPermanentStorage {
+                                
+                                case 0, 1:
+                                    // we have to add the country level
+                                    
+                                    // first step, copy the data one level up, to make room for the country level, which is level 0
+                                    
+                                    // copy county data to level 2 by appending
+                                    migratedRKIData.append(migratedRKIData[1])
+                                    
+                                    // copy state data to former county level
+                                    migratedRKIData[1] = migratedRKIData[0]
+                                    
+                                    // clean level 0
+                                    migratedRKIData[0].removeAll()
+                                    
+                                    // build new country data from state data
+                                    
+                                    // loop over stored days in state data
+                                    for dayIndex in 0 ..< migratedRKIData[1].count {
+                                        
+                                        // shortcut for current record
+                                        let currentStateDayData = migratedRKIData[1][dayIndex]
+                                        
+                                        // preoare the calculation
+                                        var inhabitants: Int = 0
+                                        var cases: Int = 0
+                                        var deaths: Int = 0
+                                        var cases7Days: Double = 0
+
+                                        // loop over the states
+                                        for singleState in currentStateDayData {
+                                            
+                                            // do some sums
+                                            inhabitants         += singleState.inhabitants
+                                            cases               += singleState.cases
+                                            deaths              += singleState.deaths
+                                            
+                                            // for the case in 7 days we have to calculate this number
+                                            cases7Days          += Double(singleState.cases7DaysPer100K)
+                                                                    * Double(singleState.inhabitants)
+                                                                    / 100_000.0
+                                        }
+                                        
+                                        // we calculate the casesPer100k and the cases7DaysPer100K
+                                        let casesPer100k: Double   = Double(cases) * 100_000.0 / Double(inhabitants)
+                                        let cases7DaysPer100K: Double = cases7Days * 100_000.0 / Double(inhabitants)
+                                        
+                                        // get the timeStamp
+                                        let timeStamp = self.RKIDataGetBestTimeStamp(currentStateDayData)
+                                        
+                                        // build the struct
+                                        let countryDataOfDay = RKIDataStruct(
+                                            stateID: "0",
+                                            name: "Deutschland",
+                                            kindOf: "Land",
+                                            inhabitants: inhabitants,
+                                            cases: cases,
+                                            deaths: deaths,
+                                            casesPer100k: casesPer100k,
+                                            cases7DaysPer100K: cases7DaysPer100K,
+                                            timeStamp: timeStamp)
+                                        
+                                        // store the struct as an array of a single struct
+                                        migratedRKIData[0].append([countryDataOfDay])
+                                    }
+                                    
+                                    // now we have to migrate the timeStamps
+                                    // we just copy county and state data, we keep level 0,
+                                    // as the timestamps for level 0 and 1 have the same values
+                                    migratedRKIDataTimeStamps.append(migratedRKIDataTimeStamps[1])
+                                    migratedRKIDataTimeStamps[1] = migratedRKIDataTimeStamps[0]
+                                    
+                                    // set the new version
+                                    currentVersionOfPermanentStorage = 2
+                                    self.storeLastError(errorText: "CoBaT.GlobalStorage.restoreSavedRKIData: just migrated the stored data from version 1 to version 2")
+                                    break
+                                    
+                                    
+                                default:
+                                    
+                                    // unknown version, just report nd do not restore the date
+                                    self.storeLastError(errorText: "CoBaT.GlobalStorage.restoreSavedRKIData: Error: version of permanent storage (\(currentVersionOfPermanentStorage)) is unknown, current version is: \(self.VersionOfPermanentStorage), do not restore data, as it might be not usefull")
+                                    
+                                    break
+                                    
+                                } // case
+                                
+                            } // loop
+                            
+                            // OK, we did the migration, so store the migrated values ...
+                            self.RKIData = migratedRKIData
+                            self.RKIDataTimeStamps = migratedRKIDataTimeStamps
+                            self.RKIDataLastUpdated = loadedRKIDataLastUpdated
+                            self.RKIDataLastRetreived = loadedRKIDataLastRetreived
+
+                            // and force a save to secure what we have done
+                            self.saveRKIData()
+                            
+                            
+                            // rebuild the delta values
+                            self.rebuildRKIDeltas()
+
+                            
+                        } // Check version
                                                 
                     } catch let error as NSError {
                         
@@ -126,7 +260,7 @@ final class GlobalStorage: NSObject {
                 self.storeLastError(errorText: "CoBaT.GlobalStorage.restoreSavedRKIData: Error: could not read RKIData")
             }
             
-            print("got them")
+            print("restoreSavedRKIData done")
         })
     }
     
@@ -148,6 +282,8 @@ final class GlobalStorage: NSObject {
         
         // call the local methode to handle all, just tell that this are county datas
         self.refresh_RKIData(self.RKIDataState, newRKIStateData)
+        
+        
     }
   
     /**
@@ -167,8 +303,6 @@ final class GlobalStorage: NSObject {
         // call the local methode to handle all, just tell that this are county datas
         self.refresh_RKIData(self.RKIDataCounty, newRKICountyData)
     }
-    
-
     
     
     // ---------------------------------------------------------------------------------------------
@@ -213,26 +347,38 @@ final class GlobalStorage: NSObject {
     // - the state data has about 16 datasets per day, the county data has about 412 data sets per day
     //
     // to store all data in a single array we use a three level structure
-    // first index level is the kind of data set (state or county) (index 0 = state, index 1 = county)
+    // first index level is the kind of data set (state or county) (index 0 = Country, 1 = state, 2 = county)
     // second index level are the up to maxNumberOfDaysStored days (index 0 = today, index 7 = same day last week)
-    // third index level are the data sets per state or county
+    // third index level are the data sets per state or county, for Ccountry there is only one record ("Deutschland")
     //
-    // example: "State (0), yesterday (1), Bavaria (9), cases" looks like: RKIData[0][1][9].cases
+    // example: "State (1), today (0), Bavaria (9), cases" looks like: RKIData[1][0][9].cases
     
-    public var RKIData : [[[RKIDataStruct]]] = [[], []]        // initialise with two empty arrays, so first index level not empty
+    public var RKIData : [[[RKIDataStruct]]] = [[], [], []]   // initialise with three empty arrays, avoid empty level
+    
+    
+    // We use this to precalculate the deltas (differneces to yesterday and to 7 days back).
+    // So for the second index (days) we use 0 for today, 1 for deltas to yesterday and 2 for deltas to 7 days back.
+    // This colums are only filled if suitable data are available
+    // This array is recalculated each time the data in RKIData[] changed
+    // this array will not stored permanently!
+    
+    public var RKIDataDeltas : [[[RKIDataStruct]]] = [[], [], []]   // initialise with three empty arrays, avoid empty level
+
     
     // TimeStamps per array item
     // we use a different array to make sure we can compare new and old [RKIDataStruct] by hash values
     // use the same logic as on RKIData, but only two index levels
-    // first index level is the kind of data set (state or county) (index 0 = state, index 1 = county)
+    // first index level is the kind of data set (country, state or county) (index 0 = country, 1 = state, 2 = county)
     // second index level are the up to maxNumberOfDaysStored days (index 0 = today, index 7 = same day last week)
     //
-    // example: "State (0), yesterday (1), timestamp" looks like: RKIDataTimeStamps[0][1]
+    // example: "Country (0), yesterday (1), timestamp" looks like: RKIDataTimeStamps[0][1]
     
-    public var RKIDataTimeStamps : [[TimeInterval]] = [[], []]       // initialise with two empty arrays, so first index level not empty
+    public var RKIDataTimeStamps : [[TimeInterval]] = [[], [], []]       // initialise with two empty arrays, so first index level not empty
+    
     
     // the timeStamp the data was last updated (updates only if data changed)
     public var RKIDataLastUpdated: TimeInterval = 0
+    
     
     // the timeStamp data was last retrieved
     public var RKIDataLastRetreived: TimeInterval = 0
@@ -254,7 +400,7 @@ final class GlobalStorage: NSObject {
         // we have to consider four different cases:
         
         // case 1: RKIData is empty, so just add the new item (addNewData())
-        // case 2: There is a difference to the existing data, but from the same day, so an update (replaceData0())
+        // case 2: There is a difference to the existing data, but from the same day, so an update (replaceDataOfToday())
         // case 3: new item is from a different day (addNewData())
         // case 4: data are the same, so ignore it
         
@@ -264,7 +410,7 @@ final class GlobalStorage: NSObject {
             if self.RKIData[kindOf].isEmpty == true {
                 
                 // case 1: RKIData is empty, so just add the new item (addNewData())
-                print("case 1: RKIData is empty, so just add the new item (addNewData())")
+                print("refresh_RKIData case 1: RKIData is empty, so just add the new item (addNewData())")
                 
                 // take the best timeStamp
                 let oldestTimeStamp = self.RKIDataGetBestTimeStamp(newRKIData)
@@ -291,15 +437,15 @@ final class GlobalStorage: NSObject {
                     if oldDate == newDate {
                     
                         // case 2: There is a difference to the existing data, but from the same day,
-                        // so just an update (replaceData0())
-                        print("case 2: oldDate (\(oldDate) == newDate(\(newDate)) -> replaceData0()")
+                        // so just an update (replaceDataOfToday())
+                        print("refresh_RKIData case 2: oldDate (\(oldDate) == newDate(\(newDate)) -> replaceData0()")
 
-                        self.replaceData0(kindOf, newRKIData, oldestTimeStamp)
+                        self.replaceDataOfToday(kindOf, newRKIData, oldestTimeStamp)
 
                     } else {
                     
                         // case 3: new item is from a different day (addNewData())
-                        print("case 3: oldDate (\(oldDate) != newDate(\(newDate)) -> addNewData()")
+                        print("refresh_RKIData case 3: oldDate (\(oldDate) != newDate(\(newDate)) -> addNewData()")
                         
                         self.addNewData(kindOf, newRKIData, oldestTimeStamp)
                     }
@@ -307,11 +453,11 @@ final class GlobalStorage: NSObject {
                 } else {
                     
                     // case 4: data are the same, so ignore it
-                    print ("case 4: data are the same, so ignore it")
+                    print ("refresh_RKIData case 4: data sets are equal, so do not update")
                 }
             }
             
-            // at least we have a new retrieving data
+            // at least we have a new retrieving date
             self.RKIDataLastRetreived = CFAbsoluteTimeGetCurrent()
 
             // make it permamnent
@@ -336,46 +482,59 @@ final class GlobalStorage: NSObject {
      - Returns: nothing
      
      */
-    private func addNewData(_ kindOf: Int,
+    private func addNewData(_ kindOfArea: Int,
                             _ newRKIData: [RKIDataStruct],
                             _ timeStamp: TimeInterval) {
         
         GlobalStorageQueue.async(flags: .barrier, execute: {
             
-            if self.RKIData[kindOf].isEmpty == true {
+            print("addNewData just started")
+            
+            if self.RKIData[kindOfArea].isEmpty == true {
                 
-                self.RKIData[kindOf].append(newRKIData)
-                self.RKIDataTimeStamps[kindOf].append(timeStamp)
+                self.RKIData[kindOfArea].append(newRKIData)
+                self.RKIDataTimeStamps[kindOfArea].append(timeStamp)
 
            } else {
                 
-            while self.RKIData[kindOf].count > self.maxNumberOfDaysStored {
+            while self.RKIData[kindOfArea].count > self.maxNumberOfDaysStored {
                     
-                    self.RKIData[kindOf].removeLast()
-                    self.RKIDataTimeStamps[kindOf].removeLast()
+                    self.RKIData[kindOfArea].removeLast()
+                    self.RKIDataTimeStamps[kindOfArea].removeLast()
                 }
                 
-                self.RKIData[kindOf].insert(newRKIData, at: 0)
-                self.RKIDataTimeStamps[kindOf].insert(timeStamp, at: 0)
+                self.RKIData[kindOfArea].insert(newRKIData, at: 0)
+                self.RKIDataTimeStamps[kindOfArea].insert(timeStamp, at: 0)
+            }
+            
+            // check if state data were chenged
+            if kindOfArea == self.RKIDataState {
+                // yes state data changed, so rebuild country data
+                self.rebuildCountryData()
             }
             
             // remember the timeStamp
             self.RKIDataLastUpdated = CFAbsoluteTimeGetCurrent()
             
-            // just for testing
-            for item in self.RKIData[kindOf][0] {
-                print("addNewData, RKIData[\(kindOf)][0]: \(item.kindOf) \(item.name): \(item.cases7DaysPer100K), \(Date(timeIntervalSinceReferenceDate: item.timeStamp))")
-            }
-            print("addNewData, RKIDataTimeStamps[\(kindOf)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOf][0]))")
-
             // make it permanant
-            self.storeRKIData()
+            self.saveRKIData()
             
+
+            // just for testing
+            for item in self.RKIData[kindOfArea][0] {
+                print("addNewData, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): \(item.cases7DaysPer100K), \(Date(timeIntervalSinceReferenceDate: item.timeStamp))")
+            }
+            print("addNewData, RKIDataTimeStamps[\(kindOfArea)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOfArea][0]))")
+
             
            // TODO: TODO: local notification
-            
 
-            print("all good")
+            
+            // rebuild the delta values
+            self.rebuildRKIDeltas()
+
+
+            print("addNewData all good")
         })
     }
     
@@ -393,41 +552,248 @@ final class GlobalStorage: NSObject {
      - Returns: nothing
      
      */
-    private func replaceData0(_ kindOf: Int,
-                              _ newRKIData: [RKIDataStruct],
-                              _ timeStamp: TimeInterval) {
+    private func replaceDataOfToday(_ kindOfArea: Int,
+                                    _ newRKIData: [RKIDataStruct],
+                                    _ timeStamp: TimeInterval) {
         
         GlobalStorageQueue.async(flags: .barrier, execute: {
             
-            if self.RKIData[kindOf].isEmpty == true {
+            print("replaceDataOfToday just started")
+            
+            if self.RKIData[kindOfArea].isEmpty == true {
                 
-                self.RKIData[kindOf].append(newRKIData)
-                self.RKIDataTimeStamps[kindOf].append(timeStamp)
+                self.RKIData[kindOfArea].append(newRKIData)
+                self.RKIDataTimeStamps[kindOfArea].append(timeStamp)
                 
             } else {
                 
-                self.RKIData[kindOf][0] = newRKIData
-                self.RKIDataTimeStamps[kindOf][0] = timeStamp
+                self.RKIData[kindOfArea][0] = newRKIData
+                self.RKIDataTimeStamps[kindOfArea][0] = timeStamp
+            }
+            
+            // check if state data were chenged
+            if kindOfArea == self.RKIDataState {
+                // yes state data changed, so rebuild country data
+                self.rebuildCountryData()
             }
             
             // remember the timeStamp
             self.RKIDataLastUpdated = CFAbsoluteTimeGetCurrent()
             
-            // just for testing
-            for item in self.RKIData[kindOf][0] {
-                print("replaceData0, RKIData[\(kindOf)][0]: \(item.kindOf) \(item.name): \(item.cases7DaysPer100K), \(Date(timeIntervalSinceReferenceDate: item.timeStamp))")
-            }
-            print("replaceData0, RKIDataTimeStamps[\(kindOf)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOf][0]))")
-
-            // make it permanant
-            self.storeRKIData()
-            
-            
             // TODO: TODO: local notification
 
-            print("all good")
+            
+            // just for testing
+            for item in self.RKIData[kindOfArea][0] {
+                print("replaceDataOfToday, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): \(item.cases7DaysPer100K), \(Date(timeIntervalSinceReferenceDate: item.timeStamp))")
+            }
+            print("replaceDataOfToday, RKIDataTimeStamps[\(kindOfArea)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOfArea][0]))")
 
+            // make it permanant
+            self.saveRKIData()
+            
+            // rebuild the delta values
+            self.rebuildRKIDeltas()
         })
+    }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     Rebuilds the country data out of the state data. Country data are just an aggregation of the states.
+     
+     Has to be called inside a "GlobalStorageQueue.async(flags: .barrier, ..." closure
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func rebuildCountryData() {
+        
+        // To make it more robust, ALL country data for ALL days will be rebuild.
+        // There is only 16 states times (max) 7 days, so there is no real problem with performance etc.
+        
+        print("rebuildCountryData just started")
+
+        // clean level for country data
+        self.RKIData[RKIDataCountry].removeAll()
+        
+        // build new country data from state data
+        
+        // loop over stored days in state data
+        for dayIndex in 0 ..< self.RKIData[RKIDataState].count {
+            
+            // shortcut for current record
+            let currentStateDayData = self.RKIData[RKIDataState][dayIndex]
+            
+            // preoare the calculation
+            var inhabitants: Int = 0
+            var cases: Int = 0
+            var deaths: Int = 0
+            var cases7Days: Double = 0
+
+            // loop over the states
+            for singleState in currentStateDayData {
+                
+                // do some sums
+                inhabitants         += singleState.inhabitants
+                cases               += singleState.cases
+                deaths              += singleState.deaths
+                
+                // for the case in 7 days we have to calculate this number
+                cases7Days          += Double(singleState.cases7DaysPer100K)
+                                        * Double(singleState.inhabitants)
+                                        / 100_000.0
+            }
+            
+            // we calculate the casesPer100k and the cases7DaysPer100K
+            let casesPer100k: Double   = Double(cases) * 100_000.0 / Double(inhabitants)
+            let cases7DaysPer100K: Double = cases7Days * 100_000.0 / Double(inhabitants)
+            
+            // get the timeStamp
+            let timeStamp = self.RKIDataGetBestTimeStamp(currentStateDayData)
+            
+            // build the struct
+            let countryDataOfDay = RKIDataStruct(
+                stateID: "0",
+                name: "Deutschland",
+                kindOf: "Land",
+                inhabitants: inhabitants,
+                cases: cases,
+                deaths: deaths,
+                casesPer100k: casesPer100k,
+                cases7DaysPer100K: cases7DaysPer100K,
+                timeStamp: timeStamp)
+            
+            // store the struct as an array of a single struct
+            self.RKIData[RKIDataCountry].append([countryDataOfDay])
+        }
+        
+        // we just copy county and state data as the timestamps for countries and states have the same values
+        self.RKIDataTimeStamps[RKIDataCountry] = self.RKIDataTimeStamps[RKIDataState]
+    }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     rebuilds the RKIDataDeltas[].
+     
+     Has to be called inside a "GlobalStorageQueue.async(flags: .barrier, ..." closure
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func rebuildRKIDeltas() {
+        
+        print("rebuildRKIDeltas just started")
+
+        // first step, remove the old data, and make sure we have an empty array per area level
+        self.RKIDataDeltas = [ [], [], [] ]
+        
+        // loop over level 0 (country, state, county)
+        for areaIndex in 0 ..< self.RKIData.count {
+            
+            // build a shortcut
+            let currentArea = self.RKIData[areaIndex]
+            
+            // check how many days we have for that area
+            let numberOfDaysAvailable = currentArea.count
+            
+            
+            // check if we have at least data of today
+            if numberOfDaysAvailable > 0 {
+                
+                // copy the data of today
+                self.RKIDataDeltas[areaIndex].append(currentArea[0])
+                
+                // check if we have data from yesterday
+                if numberOfDaysAvailable > 1 {
+                    
+                    // we have historical data
+                    // we loop over the data of yesterday and
+                    // if there is another day available over the data of the last day.
+                    
+                    // we use an array of indexes to loop over the relevant data
+                    
+                    // we start with the index of yesterday
+                    var arrayOfDayIndexes: [Int] = [1]
+                    
+                    // check if we have another day
+                    if numberOfDaysAvailable > 2 {
+                        
+                        // yes, ther is at least a third day (up to 7 days over the time)
+                        // so remember the index of the last day
+                        arrayOfDayIndexes.append(numberOfDaysAvailable - 1)
+                    }
+                    
+                    // loop over the days
+                    for dayIndex in arrayOfDayIndexes {
+                        
+                        // buffer to build up new data
+                        var newDeltaData: [RKIDataStruct] = []
+                        
+                        // we use a flags to decide if the new data can be used
+                        var noErrors: Bool = true
+
+                        // build deltas for yesterday
+                        for areaMemberIndex in 0 ..< currentArea[0].count {
+                            
+                            // build shortcut
+                            let areaMemberToday = currentArea[0][areaMemberIndex]
+                            let areaMemberOldDay = currentArea[dayIndex][areaMemberIndex]
+                            
+                            // check the consistency (same name)
+                            if areaMemberToday.name == areaMemberOldDay.name {
+                                
+                                // both records have same name, so go ahead
+                                let inhabitantsDelta        = areaMemberToday.inhabitants       - areaMemberOldDay.inhabitants
+                                let casesDelta              = areaMemberToday.cases             - areaMemberOldDay.cases
+                                let deathsDelta             = areaMemberToday.deaths            - areaMemberOldDay.deaths
+                                let casesPer100kDelta       = areaMemberToday.casesPer100k      - areaMemberOldDay.casesPer100k
+                                let cases7DaysPer100KDelta  = areaMemberToday.cases7DaysPer100K - areaMemberOldDay.cases7DaysPer100K
+                                
+                                newDeltaData.append(RKIDataStruct(
+                                                        stateID:            areaMemberToday.stateID,
+                                                        name:               areaMemberToday.name,
+                                                        kindOf:             areaMemberToday.kindOf,
+                                                        inhabitants:        inhabitantsDelta,
+                                                        cases:              casesDelta,
+                                                        deaths:             deathsDelta,
+                                                        casesPer100k:       casesPer100kDelta,
+                                                        cases7DaysPer100K:  cases7DaysPer100KDelta,
+                                                        timeStamp:          areaMemberOldDay.timeStamp))
+                                
+                            } else {
+                                
+                                // names are different, so data structure might have been changed, break loop and discard data
+                                noErrors = false
+                                
+                                print ("CoBaT.GlobalStorage.rebuildRKIDeltas: Day \(dayIndex): areaMemberToday.name (\"\(areaMemberToday.name)\") != areaMemberYesterday.name (\"\(areaMemberOldDay.name)\"), set error, break loop")
+                                break
+                            }
+                            
+                        } // loop area members
+                        
+                        if noErrors == true {
+                            
+                            self.RKIDataDeltas[areaIndex].append(newDeltaData)
+                            
+                        } else {
+                            
+                            // encode did fail, log the message
+                            self.storeLastError(errorText: "CoBaT.GlobalStorage.rebuildRKIDeltas: Error: we have an inconsitency in yesterday data of RKIData[\(areaIndex)], no deltas for yesterday and 7 days stored")
+                            
+                        } // noErrors
+                        
+                    } // loop over days
+                    
+                } // available days > 1
+                
+            } else {
+                
+                print("rebuildRKIDeltas no data available, do nothing")
+            }
+            
+        } // loop over country, state, county
+        
+        // local notifications
     }
     
     /**
@@ -437,26 +803,34 @@ final class GlobalStorage: NSObject {
      
      -----------------------------------------------------------------------------------------------
      */
-    private func storeRKIData() {
+    private func saveRKIData() {
         
-        // make it permamnent, by encode it to JSON and store it
-        do {
-            // try to encode the county data and the timeStamps
-            let encodedRKICountyData = try JSONEncoder().encode(self.RKIData)
-            let encodedRKICountyDataTimeStamps = try JSONEncoder().encode(self.RKIDataTimeStamps)
+        // make sure we have consistent data
+        GlobalStorageQueue.async(execute: {
             
-            // if we got to here, no errors encountered, so store it
-            self.permanentStore.set(encodedRKICountyData, forKey: "CoBaT.RKIData")
-            self.permanentStore.set(encodedRKICountyDataTimeStamps, forKey: "CoBaT.RKIDataTimeStamps")
-            self.permanentStore.set(RKIDataLastUpdated, forKey: "CoBaT.RKIDataLastUpdated")
-            
-            print("storeRKIData done!")
+            print("saveRKIData just started")
 
-        } catch let error as NSError {
-            
-            // encode did fail, log the message
-            self.storeLastError(errorText: "CoBaT.GlobalStorage.storeRKIData: Error: JSON encoder could not encode RKIData: error: \"\(error.description)\"")
-        }
+            // make it permamnent, by encode it to JSON and store it
+            do {
+                // try to encode the county data and the timeStamps
+                let encodedRKIData = try JSONEncoder().encode(self.RKIData)
+                let encodedRKIDataTimeStamps = try JSONEncoder().encode(self.RKIDataTimeStamps)
+                
+                // if we got to here, no errors encountered, so store it
+                self.permanentStore.set(encodedRKIData, forKey: "CoBaT.RKIData")
+                self.permanentStore.set(encodedRKIDataTimeStamps, forKey: "CoBaT.RKIDataTimeStamps")
+                self.permanentStore.set(self.RKIDataLastUpdated, forKey: "CoBaT.RKIDataLastUpdated")
+                
+                self.permanentStore.set(self.VersionOfPermanentStorage, forKey: "CoBaT.VersionOfPermanentStorage")
+                
+                print("saveRKIData done!")
+                
+            } catch let error as NSError {
+                
+                // encode did fail, log the message
+                self.storeLastError(errorText: "CoBaT.GlobalStorage.saveRKIData: Error: JSON encoder could not encode RKIData: error: \"\(error.description)\"")
+            }
+        })
     }
 
     /**
@@ -529,7 +903,7 @@ final class GlobalStorage: NSObject {
             
             // TODO: TODO: local notification
             // local notification
-            print("storeLastError: notifiucation is still missing")
+            print("storeLastError: notification is still missing")
         })
     }
     

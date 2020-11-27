@@ -22,29 +22,59 @@ class BrowseCountyDataTableViewController: UITableViewController {
     
     // local copy of County Data, susetted by selected State
     var localDataArray: [GlobalStorage.RKIDataStruct] = []
-    
+    var localDataArrayDelta0: [GlobalStorage.RKIDataStruct]?
+    var localDataArrayDelta7: [GlobalStorage.RKIDataStruct]?
+
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Helper
     // ---------------------------------------------------------------------------------------------
     func RefreshLocalData() {
         
-        // we use the main thread as our working thread, so we have no problems in UI updates
-        DispatchQueue.main.async {
-            
             //let test = GlobalStorage.unique.RKIData[0]
             // read the current content of the global storage
-            self.localDataArray = GlobalStorageQueue.sync(execute: {
+            GlobalStorageQueue.sync(execute: {
                 
                 
                 // get the global storage, filtered to the current selected state
-                GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty][0].filter(
+                self.localDataArray = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty][0].filter(
                     { $0.stateID == "7"})
+                
+                // check if we got data
+                if self.localDataArray.isEmpty == false {
+                    
+                    // yes we have data, so try to find the values of yesterday
+                    let numberOfDays = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty].count
+                    
+                    // check if we have at least one more day
+                    if numberOfDays > 1 {
+                        
+                        // OK we have at least one more day, so get the "yesterday" values
+                        self.localDataArrayDelta0 = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty][0].filter(
+                            { $0.stateID == "7"})
+                        
+                        // check if we found something
+                        if self.localDataArrayDelta0?.isEmpty == false {
+                            
+                            // yes we have data!
+                            
+                        }
+
+                    }
+                    
+                    
+                }
             })
             
+        
+        
+        
             // sort the local copy
             self.localDataArray.sort( by: { $0.name < $1.name } )
-            
+        
+        // we use the main thread as our working thread, so we have no problems in UI updates
+        DispatchQueue.main.async {
+
             // reload the cells
             self.tableView.reloadData()
          }

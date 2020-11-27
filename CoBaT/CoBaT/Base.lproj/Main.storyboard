@@ -21,7 +21,7 @@
                                 <rect key="frame" x="137" y="433" width="140" height="30"/>
                                 <state key="normal" title="Browse County Data"/>
                                 <connections>
-                                    <segue destination="7o9-3E-0G4" kind="show" id="q8L-5I-lnt"/>
+                                    <segue destination="7o9-3E-0G4" kind="presentation" id="q8L-5I-lnt"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -32,7 +32,7 @@
                             <constraint firstItem="XIt-ZA-nI5" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="eXz-kD-hLy"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="CoBaT" id="cad-xM-uFD"/>
+                    <navigationItem key="navigationItem" id="cad-xM-uFD"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
@@ -45,7 +45,7 @@
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="qqS-9P-H7O"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="mwZ-fb-3OH">
-                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="56"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -61,18 +61,18 @@
         <scene sceneID="CgV-aH-DDD">
             <objects>
                 <viewController storyboardIdentifier="BrowseCountyViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="AIJ-bD-iB1" customClass="BrowseCountyViewController" customModule="CoBaT" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="hGZ-EL-XYm">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                    <view key="view" opaque="NO" contentMode="scaleToFill" id="hGZ-EL-XYm">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xqW-ia-eeX">
-                                <rect key="frame" x="0.0" y="153.5" width="414" height="708.5"/>
+                                <rect key="frame" x="0.0" y="121.5" width="414" height="686.5"/>
                                 <connections>
                                     <segue destination="jvs-tC-ce9" kind="embed" id="orh-Vf-a6k"/>
                                 </connections>
                             </containerView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="explanation" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VeJ-vo-yhs">
-                                <rect key="frame" x="0.0" y="88" width="414" height="40"/>
+                                <rect key="frame" x="5" y="56" width="404" height="40"/>
                                 <constraints>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="gtn-ze-uOn"/>
                                 </constraints>
@@ -81,31 +81,32 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Usage" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PZm-YN-dKm">
-                                <rect key="frame" x="0.0" y="133" width="414" height="20.5"/>
+                                <rect key="frame" x="0.0" y="101" width="414" height="20.5"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleCaption2"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="&lt; Select" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="f8z-Wr-D31">
-                                <rect key="frame" x="0.0" y="133" width="414" height="20.5"/>
+                                <rect key="frame" x="0.0" y="101" width="414" height="20.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Details &gt;" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nKo-69-zGh">
-                                <rect key="frame" x="0.0" y="133" width="414" height="20.5"/>
+                                <rect key="frame" x="0.0" y="101" width="414" height="20.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="yLO-7R-eSD"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="f8z-Wr-D31" firstAttribute="top" secondItem="PZm-YN-dKm" secondAttribute="top" id="260-7z-714"/>
                             <constraint firstItem="xqW-ia-eeX" firstAttribute="leading" secondItem="yLO-7R-eSD" secondAttribute="leading" id="4lo-a7-XQQ"/>
-                            <constraint firstItem="VeJ-vo-yhs" firstAttribute="leading" secondItem="yLO-7R-eSD" secondAttribute="leading" id="5Ri-V2-beQ"/>
+                            <constraint firstItem="VeJ-vo-yhs" firstAttribute="leading" secondItem="yLO-7R-eSD" secondAttribute="leading" constant="5" id="5Ri-V2-beQ"/>
                             <constraint firstItem="yLO-7R-eSD" firstAttribute="trailing" secondItem="nKo-69-zGh" secondAttribute="trailing" id="B2F-hg-0Uv"/>
-                            <constraint firstItem="yLO-7R-eSD" firstAttribute="trailing" secondItem="VeJ-vo-yhs" secondAttribute="trailing" id="VEm-14-3Ja"/>
+                            <constraint firstItem="yLO-7R-eSD" firstAttribute="trailing" secondItem="VeJ-vo-yhs" secondAttribute="trailing" constant="5" id="VEm-14-3Ja"/>
                             <constraint firstItem="xqW-ia-eeX" firstAttribute="top" secondItem="f8z-Wr-D31" secondAttribute="bottom" id="YxB-KE-AIy"/>
                             <constraint firstItem="yLO-7R-eSD" firstAttribute="bottom" secondItem="xqW-ia-eeX" secondAttribute="bottom" id="dUF-f9-kLL"/>
                             <constraint firstItem="nKo-69-zGh" firstAttribute="leading" secondItem="yLO-7R-eSD" secondAttribute="leading" id="eV9-hV-kjC"/>
@@ -152,7 +153,7 @@
             <objects>
                 <tableViewController storyboardIdentifier="BrowseCountyDataTableViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="jvs-tC-ce9" customClass="BrowseCountyDataTableViewController" customModule="CoBaT" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" dataMode="prototypes" style="plain" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="6gj-tE-jma">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="708.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="686.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <color key="separatorColor" systemColor="systemBackgroundColor"/>

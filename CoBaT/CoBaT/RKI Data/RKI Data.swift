@@ -63,6 +63,8 @@ class RKIData: NSObject {
      */
     public func getRKIData() {
         
+        print("getRKIData just started")
+        
         // walk over the array with the configurations
         for singleDataSet in RKI_DataTab {
             
@@ -74,6 +76,7 @@ class RKIData: NSObject {
                     with: url,
                     completionHandler: { data, response, error in
                         
+                        print("getRKIData.completionHandler just started")
                         // check if there are errors
                         if error == nil {
                             
@@ -102,7 +105,7 @@ class RKIData: NSObject {
                                                 
                                                 // convert it to string and print it (used for testing AND
                                                 // for quickType webside to generate the "JSON RKI ....swift" files
-                                                 print("\(String(data: data!, encoding: .utf8) ?? "Convertion data to string failed")")
+                                                // print("\(String(data: data!, encoding: .utf8) ?? "Convertion data to string failed")")
                                                 
                                                 // handle the content
                                                 self.handleRKIContent(data!, singleDataSet.RKI_DataType)
@@ -219,11 +222,23 @@ class RKIData: NSObject {
                 // Walk over data and build array
                 for singleItem in countyData.features {
                     
-                    print("RKI County Date: \"\(singleItem.attributes.lastUpdate)\"")
+                    //print("RKI County Date: \"\(singleItem.attributes.lastUpdate)\"")
+                    
+                    // RKI reports the timestamp as a formatted string, so we have to convert that
+                    // by means of a formatter (see Formatters.swift"
+                    
+                    // this will store the final timestamp
                     let updateDate : Date
+                    
+                    // try to convert the string into a Date() object
                     if let myDate = RKIDateFormatter.date(from:singleItem.attributes.lastUpdate) {
+                        
+                        // success: so we can use that
                         updateDate = myDate
+                        
                     } else {
+                        
+                        // failed: take the current timestamp as the timestamp and report it
                         updateDate = Date()
                         
                         GlobalStorage.unique.storeLastError(
@@ -231,9 +246,9 @@ class RKIData: NSObject {
                         )
                     }
                     
-                    print("State Update Date: \(shortSingleDateTimeFormatter.string(from: updateDate)), RKI:\(shortSingleDateFormatterRKI.string(from: updateDate))")
+                    //print("State Update Date: \(shortSingleDateTimeFormatter.string(from: updateDate)), RKI:\(shortSingleDateFormatterRKI.string(from: updateDate))")
 
-
+                    // append the new data
                     newDataArray.append(GlobalStorage.RKIDataStruct(
                                             stateID: singleItem.attributes.blid,
                                             name: singleItem.attributes.gen,
@@ -246,6 +261,7 @@ class RKIData: NSObject {
                                             timeStamp: updateDate.timeIntervalSinceReferenceDate))
                 }
 
+                // refresh our global storage
                 GlobalStorage.unique.refresh_RKICountyData(newRKICountyData: newDataArray)
                 print("handleRKIContent County done")
                 
@@ -262,17 +278,18 @@ class RKIData: NSObject {
                 // we will provide an array of converted values
                 var newDataArray: [GlobalStorage.RKIDataStruct] = []
                 
-                //            if welcomeResult.features != nil {
+                // walk over new data
                 for singleItem in stateData.features {
-                    //if let test1 = singleItem.attributes!.bl {
                     
+                    // RKI reports the timestamp as milliseconds since 1970, so we have to convert
                     let secondsSince1970: TimeInterval = TimeInterval(Double(singleItem.attributes.aktualisierung) / 1_000)
                     let lastUpdateRKI: Date = Date(timeIntervalSince1970: secondsSince1970)
                     let lastUpdateTimeInterval: TimeInterval = lastUpdateRKI.timeIntervalSinceReferenceDate
-                    let lastUpdate: Date = Date(timeIntervalSinceReferenceDate: lastUpdateTimeInterval)
                     
-                    print("State Update Date: \(shortSingleDateTimeFormatter.string(from: lastUpdate)), RKI:\(shortSingleDateFormatterRKI.string(from: lastUpdate))")
+                    // let lastUpdate: Date = Date(timeIntervalSinceReferenceDate: lastUpdateTimeInterval)
+                    //print("State Update Date: \(shortSingleDateTimeFormatter.string(from: lastUpdate)), RKI:\(shortSingleDateFormatterRKI.string(from: lastUpdate))")
 
+                    // store the new data
                     newDataArray.append(GlobalStorage.RKIDataStruct(
                                             stateID: "\(singleItem.attributes.objectid1)",
                                             name: singleItem.attributes.lanEwgen,
@@ -286,11 +303,12 @@ class RKIData: NSObject {
 
                     //}
                 }
+                
+                // store it in global storage
                 GlobalStorage.unique.refresh_RKIStateData(newRKIStateData: newDataArray)
                 print("handleRKIContent State done")
 
             }
-            
             
         } catch let error as NSError {
             
@@ -299,9 +317,5 @@ class RKIData: NSObject {
             return
         }
     }
-    
-
-
-    
-    
+        
 }

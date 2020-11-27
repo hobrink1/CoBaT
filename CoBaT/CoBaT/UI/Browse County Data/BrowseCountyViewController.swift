@@ -56,7 +56,7 @@ class BrowseCountyViewController: UIViewController {
      */
     func showExplanation() {
         
-        let numberOfDataRecords: Int = GlobalStorage.unique.RKIData[0].count
+        let numberOfDataRecords: Int = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty].count
         
         if numberOfDataRecords == 0 {
             
