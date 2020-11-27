@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="CoBaT/Base.lproj/LaunchScreen.storyboard" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="12.2" build-num="12B45b"/>
+    </header>
+    <body>
+      <trans-unit id="Dh6-df-8KI.text" xml:space="preserve">
+        <source>Corona</source>
+        <target>Corona</target>
+        <note>Class = "UILabel"; text = "Corona"; ObjectID = "Dh6-df-8KI";</note>
+      </trans-unit>
+      <trans-unit id="XjO-bC-Gj5.text" xml:space="preserve">
+        <source>Traffic light</source>
+        <target>Traffic light</target>
+        <note>Class = "UILabel"; text = "Traffic light"; ObjectID = "XjO-bC-Gj5";</note>
+      </trans-unit>
+      <trans-unit id="fPt-mr-kuP.text" xml:space="preserve">
+        <source>Bavaria</source>
+        <target>Bavaria</target>
+        <note>Class = "UILabel"; text = "Bavaria"; ObjectID = "fPt-mr-kuP";</note>
+      </trans-unit>
+      <trans-unit id="q1n-I8-kVx.text" xml:space="preserve">
+        <source>CoBaT</source>
+        <target>CoBaT</target>
+        <note>Class = "UILabel"; text = "CoBaT"; ObjectID = "q1n-I8-kVx";</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="CoBaT/Base.lproj/Main.storyboard" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="12.2" build-num="12B45b"/>
+    </header>
+    <body>
+      <trans-unit id="Ein-kT-0rt.title" xml:space="preserve">
+        <source>sort</source>
+        <target>sort</target>
+        <note>Class = "UIBarButtonItem"; title = "sort"; ObjectID = "Ein-kT-0rt";</note>
+      </trans-unit>
+      <trans-unit id="L3h-VT-fkr.text" xml:space="preserve">
+        <source>Value</source>
+        <target>Value</target>
+        <note>Class = "UILabel"; text = "Value"; ObjectID = "L3h-VT-fkr";</note>
+      </trans-unit>
+      <trans-unit id="PZm-YN-dKm.text" xml:space="preserve">
+        <source>Usage</source>
+        <target>Usage</target>
+        <note>Class = "UILabel"; text = "Usage"; ObjectID = "PZm-YN-dKm";</note>
+      </trans-unit>
+      <trans-unit id="VeJ-vo-yhs.text" xml:space="preserve">
+        <source>explanation</source>
+        <target>explanation</target>
+        <note>Class = "UILabel"; text = "explanation"; ObjectID = "VeJ-vo-yhs";</note>
+      </trans-unit>
+      <trans-unit id="XIt-ZA-nI5.normalTitle" xml:space="preserve">
+        <source>Browse County Data</source>
+        <target>Browse County Data</target>
+        <note>Class = "UIButton"; normalTitle = "Browse County Data"; ObjectID = "XIt-ZA-nI5";</note>
+      </trans-unit>
+      <trans-unit id="akU-M1-woJ.title" xml:space="preserve">
+        <source>Browse Records</source>
+        <target>Browse Records</target>
+        <note>Class = "UINavigationItem"; title = "Browse Records"; ObjectID = "akU-M1-woJ";</note>
+      </trans-unit>
+      <trans-unit id="eMS-uM-r7Y.text" xml:space="preserve">
+        <source>Label</source>
+        <target>Label</target>
+        <note>Class = "UILabel"; text = "Label"; ObjectID = "eMS-uM-r7Y";</note>
+      </trans-unit>
+      <trans-unit id="f8z-Wr-D31.text" xml:space="preserve">
+        <source>&lt; Select</source>
+        <target>&lt; Select</target>
+        <note>Class = "UILabel"; text = "&lt; Select"; ObjectID = "f8z-Wr-D31";</note>
+      </trans-unit>
+      <trans-unit id="nKo-69-zGh.text" xml:space="preserve">
+        <source>Details &gt;</source>
+        <target>Details &gt;</target>
+        <note>Class = "UILabel"; text = "Details &gt;"; ObjectID = "nKo-69-zGh";</note>
+      </trans-unit>
+      <trans-unit id="pvj-PQ-dzn.text" xml:space="preserve">
+        <source>Cases 7 per 100k</source>
+        <target>Cases 7 per 100k</target>
+        <note>Class = "UILabel"; text = "Cases 7 per 100k"; ObjectID = "pvj-PQ-dzn";</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="CoBaT/en.lproj/InfoPlist.strings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="12.2" build-num="12B45b"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleName" xml:space="preserve">
+        <source>CoBaT</source>
+        <target>CoBaT</target>
+        <note>Bundle name</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="CoBaT/en.lproj/Localizable.strings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="12.2" build-num="12B45b"/>
+    </header>
+    <body>
+      <trans-unit id="east one letter" xml:space="preserve">
+        <source>east one letter</source>
+        <target>east one letter</target>
+        <note>One Letter Abbreviation for direction east</note>
+      </trans-unit>
+      <trans-unit id="north one letter" xml:space="preserve">
+        <source>north one letter</source>
+        <target>north one letter</target>
+        <note>One Letter Abbreviation for direction North</note>
+      </trans-unit>
+      <trans-unit id="south one letter" xml:space="preserve">
+        <source>south one letter</source>
+        <target>south one letter</target>
+        <note>One Letter Abbreviation for direction south</note>
+      </trans-unit>
+      <trans-unit id="west one letter" xml:space="preserve">
+        <source>west one letter</source>
+        <target>west one letter</target>
+        <note>One Letter Abbreviation for direction west</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="CoBaTTests/en.lproj/InfoPlist.strings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="12.2" build-num="12B45b"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleName" xml:space="preserve">
+        <source>CoBaTTests</source>
+        <target>CoBaTTests</target>
+        <note>Bundle name</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="CoBaTUITests/en.lproj/InfoPlist.strings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="12.2" build-num="12B45b"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleName" xml:space="preserve">
+        <source>CoBaTUITests</source>
+        <target>CoBaTUITests</target>
+        <note>Bundle name</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
