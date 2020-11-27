@@ -421,7 +421,7 @@ final class GlobalStorage: NSObject {
             } else {
                 
                 // check if there are differences
-                if self.RKIData[kindOf][0].hashValue != newRKIData.hashValue {
+                if self.RKIData[kindOf][0].hashValue == newRKIData.hashValue {
 
                     // yes, there are differences, so check if the day changed
                     // take the best timeStamp of new data
@@ -585,7 +585,7 @@ final class GlobalStorage: NSObject {
             
             // just for testing
             for item in self.RKIData[kindOfArea][0] {
-                print("replaceDataOfToday, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): \(item.cases7DaysPer100K), \(Date(timeIntervalSinceReferenceDate: item.timeStamp))")
+                print("replaceDataOfToday, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): inz: \(item.cases7DaysPer100K), cases: \(item.cases)")
             }
             print("replaceDataOfToday, RKIDataTimeStamps[\(kindOfArea)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOfArea][0]))")
 
@@ -736,7 +736,7 @@ final class GlobalStorage: NSObject {
                         for areaMemberIndex in 0 ..< currentArea[0].count {
                             
                             // build shortcut
-                            let areaMemberToday = currentArea[0][areaMemberIndex]
+                            let areaMemberToday = currentArea[dayIndex - 1][areaMemberIndex]
                             let areaMemberOldDay = currentArea[dayIndex][areaMemberIndex]
                             
                             // check the consistency (same name)

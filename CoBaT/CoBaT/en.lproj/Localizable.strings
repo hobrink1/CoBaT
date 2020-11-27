@@ -1,0 +1,54 @@
+/* 
+  Localizable.strings
+  CoBaT
+
+  Created by Hartwig Hopfenzitz on 27.11.20.
+  
+*/
+
+
+/*
+ 
+ English
+ 
+ */
+
+
+/**************************************************************************************************
+ *
+ * class BrowseRKIViewController
+ *
+ **************************************************************************************************/
+
+/* Explanation if no data available */
+"Explanation-No-Data" = "Unfortunately there are no data records saved that can be displayed";
+
+/* Explanation if only one day of data available */
+"Explanation-One-Day" = "Cases: Total new infections\nIncidences: New infections in the last 7 days per 100,000 inhabitants\n\nEvery day, records are saved. As soon as the data for several days are available, the change compared to the penultimate and the oldest data set will be shown\n";
+
+/* Explanation if exactly two days of data are available */
+"Explanation-Two-Days" = "Cases: Total new infections\nIncidences: New infections in the last 7 days per 100,000 inhabitants\n\nIn addition, the change compared to the last data record";
+
+/* Explanation if three or more days of data are available */
+"Explanation-Three-Days" = "Cases: Total new infections\nIncidences: New infections in the last 7 days per 100,000 inhabitants\n\nAIn addition, the change compared to the penultimate and the %d. record";
+
+
+
+/**************************************************************************************************
+ *
+ * class BrowseRKIDataTableViewController
+ * func cellForRowAt:
+ *
+ **************************************************************************************************/
+
+/* Label text for cases */
+"label-cases" = "Cases:";
+
+/* Label text for incidences */
+"label-incidences" = "Incidences:";
+
+
+
+
+
+

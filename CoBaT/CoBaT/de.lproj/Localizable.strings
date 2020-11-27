@@ -1,0 +1,54 @@
+/* 
+  Localizable.strings
+  CoBaT
+
+  Created by Hartwig Hopfenzitz on 27.11.20.
+  
+*/
+
+
+/*
+ 
+ Deutsch
+ 
+ */
+
+
+/**************************************************************************************************
+ *
+ * class BrowseRKIViewController
+ *
+ **************************************************************************************************/
+
+/* Explanation if no data available */
+"Explanation-No-Data" = "Leider sind noch keine Datensätze gespeichert, die anzeigt werden können";
+
+/* Explanation if only one day of data available */
+"Explanation-One-Day" = "Fälle: Neuinfektionen insgesamt\nInzidenz: Neuinfektionen der letzten 7 Tage pro 100.000 Einwohner.\n\nJeden Tag werden Datensätze gespeichert. Sobald die Daten mehrerer Tage verfügbar sind, werden die Veränderung gegenüber des vorletzten und gegenüber dem ältesten Datensatz gezeigt\n";
+
+/* Explanation if exactly two days of data are available */
+"Explanation-Two-Days" = "Fälle: Neuinfektionen insgesamt\nInzidenz: Neuinfektionen der letzten 7 Tage pro 100.000 Einwohner.\n\nAußerdem jeweils die Veränderung gegenüber des letzten Datensatzes";
+
+/* Explanation if three or more days of data are available */
+"Explanation-Three-Days" = "Fälle: Neuinfektionen insgesamt\nInzidenz: Neuinfektionen der letzten 7 Tage pro 100.000 Einwohner.\n\nAußerdem jeweils die Veränderung gegenüber des vorletzten und dem %d. Datensatz gezeigt";
+
+
+
+/**************************************************************************************************
+ *
+ * class BrowseRKIDataTableViewController
+ * func cellForRowAt:
+ *
+ **************************************************************************************************/
+
+/* Label text for cases */
+"label-cases" = "Fälle:";
+
+/* Label text for incidences */
+"label-incidences" = "Inzidenz:";
+
+
+
+
+
+
