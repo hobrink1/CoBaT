@@ -7,8 +7,7 @@
 
 import UIKit
 
-var UIBrowseRKIAreaLevel: Int = GlobalStorage.unique.RKIDataCounty
-var UIBrowseRKISelectedID: String = "7"
+
 
 
 
@@ -18,7 +17,11 @@ class MainViewController: UIViewController {
     @IBAction func DeutschlandButtonAction(_ sender: UIButton) {
         
         performSegue(withIdentifier: "CallBrowseRKIIViewController", sender: self)
-        UIBrowseRKIAreaLevel = GlobalStorage.unique.RKIDataCountry
+        GlobalUIData.unique.UIBrowserRKITitelString = "Deutschland"
+        GlobalUIData.unique.UIBrowserRKISelectedID = "0"
+        GlobalUIData.unique.UIBrowserRKIAreaLevel = GlobalStorage.unique.RKIDataCountry
+        GlobalUIData.unique.saveUIData()
+
 
     }
     
@@ -26,14 +29,21 @@ class MainViewController: UIViewController {
     @IBAction func StateButtonAction(_ sender: UIButton) {
 
         performSegue(withIdentifier: "CallBrowseRKIIViewController", sender: self)
-        UIBrowseRKIAreaLevel = GlobalStorage.unique.RKIDataState
+        GlobalUIData.unique.UIBrowserRKIAreaLevel = GlobalStorage.unique.RKIDataState
+        GlobalUIData.unique.UIBrowserRKITitelString = "Bundesländer"
+        GlobalUIData.unique.UIBrowserRKISelectedID = "0"
+        GlobalUIData.unique.saveUIData()
+
     }
    
     @IBOutlet weak var CountyButton: UIButton!
     @IBAction func CountydButtonAction(_ sender: UIButton) {
         
         performSegue(withIdentifier: "CallBrowseRKIIViewController", sender: self)
-        UIBrowseRKIAreaLevel = GlobalStorage.unique.RKIDataCounty
+        GlobalUIData.unique.UIBrowserRKIAreaLevel = GlobalStorage.unique.RKIDataCounty
+        GlobalUIData.unique.UIBrowserRKITitelString = "Rheinland-Pfalz"
+        GlobalUIData.unique.UIBrowserRKISelectedID = "7"
+        GlobalUIData.unique.saveUIData()
     }
    
     
@@ -41,6 +51,11 @@ class MainViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
+        self.title = "CoBaT"
+        
+        
+        
         
     }
 

@@ -47,11 +47,11 @@ class BrowseRKIDataTableViewController: UITableViewController {
             if numberOfDayAvailable > 0 {
                 
                 // yes at least current data are available so try to get some
-                if UIBrowseRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
-                    localDataArrayUnsorted = GlobalStorage.unique.RKIData[UIBrowseRKIAreaLevel][0].filter(
-                        { $0.stateID == UIBrowseRKISelectedID})
+                if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
+                    localDataArrayUnsorted = GlobalStorage.unique.RKIData[GlobalUIData.unique.UIBrowserRKIAreaLevel][0].filter(
+                        { $0.stateID == GlobalUIData.unique.UIBrowserRKISelectedID})
                 } else {
-                    localDataArrayUnsorted = GlobalStorage.unique.RKIDataDeltas [UIBrowseRKIAreaLevel][0]
+                    localDataArrayUnsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][0]
                 }
             }
             
@@ -59,12 +59,12 @@ class BrowseRKIDataTableViewController: UITableViewController {
             if numberOfDayAvailable > 1 {
                 
                 // yes at least data from "yesterday" are available so try to get some
-                if UIBrowseRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
+                if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
                     
-                    localDataArrayDelta1Unsorted = GlobalStorage.unique.RKIDataDeltas [UIBrowseRKIAreaLevel][1].filter(
-                        { $0.stateID == UIBrowseRKISelectedID})
+                    localDataArrayDelta1Unsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][1].filter(
+                        { $0.stateID == GlobalUIData.unique.UIBrowserRKISelectedID})
                 } else {
-                    localDataArrayDelta1Unsorted = GlobalStorage.unique.RKIDataDeltas [UIBrowseRKIAreaLevel][1]
+                    localDataArrayDelta1Unsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][1]
                 }
                 
             }
@@ -73,13 +73,13 @@ class BrowseRKIDataTableViewController: UITableViewController {
             if numberOfDayAvailable > 2 {
                 
                 // yes at least data from "yesterday" are available so try to get some
-                if UIBrowseRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
+                if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
                     
                     // yes at least data from "yesterday" are available so try to get some
-                    localDataArrayDelta7Unsorted = GlobalStorage.unique.RKIDataDeltas [UIBrowseRKIAreaLevel][numberOfDayAvailable - 1].filter(
-                        { $0.stateID == UIBrowseRKISelectedID})
+                    localDataArrayDelta7Unsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][numberOfDayAvailable - 1].filter(
+                        { $0.stateID == GlobalUIData.unique.UIBrowserRKISelectedID})
                 } else {
-                    localDataArrayDelta7Unsorted = GlobalStorage.unique.RKIDataDeltas [UIBrowseRKIAreaLevel][numberOfDayAvailable - 1]
+                    localDataArrayDelta7Unsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][numberOfDayAvailable - 1]
                 }
                 
                 
@@ -106,7 +106,7 @@ class BrowseRKIDataTableViewController: UITableViewController {
      - Returns:
      
      */
-    private func sortLocalData(source0: [GlobalStorage.RKIDataStruct],
+    public func sortLocalData(source0: [GlobalStorage.RKIDataStruct],
                                source1: [GlobalStorage.RKIDataStruct],
                                source7: [GlobalStorage.RKIDataStruct])
     {
@@ -116,7 +116,19 @@ class BrowseRKIDataTableViewController: UITableViewController {
             
             print("sortLocalData just started")
             
-            self.localDataArray = source0.sorted( by: { $0.name < $1.name } )
+            switch GlobalUIData.unique.UIBrowserRKISorting {
+            
+            case .alphabetically:
+                self.localDataArray = source0.sorted( by: { $0.name < $1.name } )
+                
+            case .incidencesAscending:
+                self.localDataArray = source0.sorted( by: { $0.cases7DaysPer100K < $1.cases7DaysPer100K } )
+
+            case .incidencesDescending:
+                self.localDataArray = source0.sorted( by: { $0.cases7DaysPer100K > $1.cases7DaysPer100K } )
+            }
+            
+            
             self.localDataArrayDelta1.removeAll()
             self.localDataArrayDelta7.removeAll()
             
@@ -402,6 +414,13 @@ class BrowseRKIDataTableViewController: UITableViewController {
         // color the two chevrons
         cell.ChevronLeft.tintColor = textColorToUse
         cell.ChevronRight.tintColor = textColorToUse
+        
+        if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCountry {
+            cell.ChevronLeft.isHidden = true
+        } else {
+            cell.ChevronLeft.isHidden = false
+        }
+        
         
         // fill the data fileds and set text color
 

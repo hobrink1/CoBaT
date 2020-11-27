@@ -18,6 +18,8 @@
  *
  * class BrowseRKIViewController
  *
+ * func 
+ *
  **************************************************************************************************/
 
 /* Explanation if no data available */
@@ -31,6 +33,15 @@
 
 /* Explanation if three or more days of data are available */
 "Explanation-Three-Days" = "Fälle: Neuinfektionen insgesamt\nInzidenz: Neuinfektionen der letzten 7 Tage pro 100.000 Einwohner.\n\nAußerdem jeweils die Veränderung gegenüber des vorletzten und dem %d. Datensatz gezeigt";
+
+/* usage line hint "< Select" if usefull */
+"Explanation-select-If-Useful" = "< Auswahl";
+
+/* usage line hint "usable for each record" */
+"Explanation-At-Each-Record" = "Pro Datensatz:";
+
+/* usage line hint "Details available" */
+"Explanation-Details" = "Details >";
 
 
 
@@ -46,7 +57,6 @@
 
 /* Label text for incidences */
 "label-incidences" = "Inzidenz:";
-
 
 
 

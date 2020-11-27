@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F207CA702571B35B0000F90B /* GlobalUIData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F207CA6F2571B35B0000F90B /* GlobalUIData.swift */; };
 		F22D009F2567B5D300C908AA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F22D009E2567B5D300C908AA /* AppDelegate.swift */; };
 		F22D00A12567B5D300C908AA /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F22D00A02567B5D300C908AA /* SceneDelegate.swift */; };
 		F22D00A32567B5D300C908AA /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F22D00A22567B5D300C908AA /* MainViewController.swift */; };
@@ -48,6 +49,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F207CA6F2571B35B0000F90B /* GlobalUIData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalUIData.swift; sourceTree = "<group>"; };
 		F22D009B2567B5D300C908AA /* CoBaT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoBaT.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F22D009E2567B5D300C908AA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F22D00A02567B5D300C908AA /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -187,6 +189,7 @@
 		F2AD305A256D00CF00FDDE4B /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				F207CA6F2571B35B0000F90B /* GlobalUIData.swift */,
 				F22D00A22567B5D300C908AA /* MainViewController.swift */,
 				F2ED109F256DB398003E2C41 /* Browse RKI Data */,
 			);
@@ -393,6 +396,7 @@
 				F2AD306C256D0AD900FDDE4B /* Global Storage.swift in Sources */,
 				F2AD3064256D043900FDDE4B /* JSON RKI Helpers.swift in Sources */,
 				F22D009F2567B5D300C908AA /* AppDelegate.swift in Sources */,
+				F207CA702571B35B0000F90B /* GlobalUIData.swift in Sources */,
 				F2ED107E256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift in Sources */,
 				F273D76C256E4D860002E15B /* CovidRating.swift in Sources */,
 				F2AD3072256D10D400FDDE4B /* RKI Data.swift in Sources */,

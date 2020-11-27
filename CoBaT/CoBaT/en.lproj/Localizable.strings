@@ -34,6 +34,17 @@
 
 
 
+/* usage line hint "< Select" if usefull */
+"Explanation-select-If-Useful" = "< Select";
+
+/* usage line hint "usable for each record" */
+"Explanation-At-Each-Record" = "At each record:";
+
+/* usage line hint "Details available" */
+"Explanation-Details" = "Details >";
+
+
+
 /**************************************************************************************************
  *
  * class BrowseRKIDataTableViewController

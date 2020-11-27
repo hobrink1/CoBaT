@@ -65,11 +65,18 @@ final class CovidRating: NSObject {
             foregroundColor = UIColor.black
             
         } else if value < 100.0 {
+            
             backgroundColor = UIColor.systemOrange
             foregroundColor = UIColor.black
             
-        } else  {
+        } else if value < 600.0 {
+            
             backgroundColor = UIColor.systemRed
+            foregroundColor = UIColor.black
+            
+        } else {
+            
+            backgroundColor = UIColor.systemPurple
             foregroundColor = UIColor.white
         }
         

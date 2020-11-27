@@ -11,7 +11,7 @@ import UIKit
 
 class BrowseRKIViewController: UIViewController {
 
-    var selectedState: String = "Rheinland-Pfalz"
+    var myEmbeddedTableViewController: BrowseRKIDataTableViewController?
     
     @IBOutlet weak var Explanation: UILabel!
     
@@ -28,11 +28,70 @@ class BrowseRKIViewController: UIViewController {
         self.dismiss(animated: true, completion: nil)
     }
     
+    @IBOutlet weak var EmbeddedContainerView: UIView!
+    
     @IBOutlet weak var SortButton: UIBarButtonItem!
     @IBAction func SortButtonAction(_ sender: UIBarButtonItem) {
+        
+        switch GlobalUIData.unique.UIBrowserRKISorting {
+        
+        case .alphabetically:
+            GlobalUIData.unique.UIBrowserRKISorting = .incidencesAscending
+            print("SortButtonAction, UIBrowserRKISorting.rawValue = \(GlobalUIData.unique.UIBrowserRKISorting.rawValue)")
+            GlobalUIData.unique.saveUIData()
+            
+        case .incidencesAscending:
+            GlobalUIData.unique.UIBrowserRKISorting = .incidencesDescending
+            print("SortButtonAction, UIBrowserRKISorting.rawValue = \(GlobalUIData.unique.UIBrowserRKISorting.rawValue)")
+            GlobalUIData.unique.saveUIData()
+
+        case .incidencesDescending:
+            GlobalUIData.unique.UIBrowserRKISorting = .alphabetically
+            print("SortButtonAction, UIBrowserRKISorting.rawValue = \(GlobalUIData.unique.UIBrowserRKISorting.rawValue)")
+            GlobalUIData.unique.saveUIData()
+        }
+        
+        self.setSortButton()
+        self.myEmbeddedTableViewController?.RefreshLocalData()
+        
     }
     
-    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     
+     
+     -----------------------------------------------------------------------------------------------
+     
+     - Parameters:
+     - :
+     
+     - Returns:
+     
+     */
+    private func setSortButton() {
+        
+        DispatchQueue.main.async(execute: {
+            switch GlobalUIData.unique.UIBrowserRKISorting {
+            
+            case .alphabetically:
+                self.SortButton.image = UIImage(systemName: "arrow.up.arrow.down")
+                
+                break
+                
+            case .incidencesAscending:
+                self.SortButton.image = UIImage(systemName: "arrow.up")
+                
+                break
+                
+            case .incidencesDescending:
+                self.SortButton.image = UIImage(systemName: "arrow.down")
+                
+                
+                break
+            }
+        })
+    }
     
     
     
@@ -41,11 +100,14 @@ class BrowseRKIViewController: UIViewController {
         
         // Do any additional setup after loading the view.
         
+        // set title and sortButton
+        self.title = GlobalUIData.unique.UIBrowserRKITitelString
+        self.setSortButton()
+
+        // show the explanation
         self.showExplanation()
-        
-        self.Usage.text = "Pro Datensatz:"
-        self.Select.text = "< Auswahl"
-        self.Details.text = "Details >"
+
+
     }
     
     
@@ -85,16 +147,38 @@ class BrowseRKIViewController: UIViewController {
             )
             
         }
+        
+        // show "< select" if usefull
+        if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCountry {
+            self.Select.text = ""
+        } else {
+            self.Select.text = NSLocalizedString("Explanation-select-If-Useful",
+                                                 comment: "usage line hint \"< Select\" if usefull")
+        }
+
+        // the rest of the usage line
+        self.Usage.text = NSLocalizedString("Explanation-At-Each-Record",
+                                            comment: "usage line hint \"usable for each record\" ")
+        
+        self.Details.text = NSLocalizedString("Explanation-Details",
+                                              comment: " usage line hint \"Details available\"")
+        
+
     }
 
-    /*
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         // Get the new view controller using segue.destination.
         // Pass the selected object to the new view controller.
+     
+        if (segue.identifier == "CallEmbeddedBrowseRKIDataTableViewController") {
+            myEmbeddedTableViewController = segue.destination as? BrowseRKIDataTableViewController
+        }
+     
     }
-    */
+    
 
 }

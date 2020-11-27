@@ -421,7 +421,7 @@ final class GlobalStorage: NSObject {
             } else {
                 
                 // check if there are differences
-                if self.RKIData[kindOf][0].hashValue == newRKIData.hashValue {
+                if self.RKIData[kindOf][0].hashValue != newRKIData.hashValue {
 
                     // yes, there are differences, so check if the day changed
                     // take the best timeStamp of new data
@@ -799,7 +799,7 @@ final class GlobalStorage: NSObject {
     /**
      -----------------------------------------------------------------------------------------------
      
-     stores the thre variables RKIData, RKIDataTimeStamps and RKIDataLastUpdated into the permanant store
+     stores the three variables RKIData, RKIDataTimeStamps and RKIDataLastUpdated into the permanant store
      
      -----------------------------------------------------------------------------------------------
      */

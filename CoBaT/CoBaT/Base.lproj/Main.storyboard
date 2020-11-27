@@ -95,7 +95,7 @@
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xqW-ia-eeX">
                                 <rect key="frame" x="0.0" y="121.5" width="414" height="686.5"/>
                                 <connections>
-                                    <segue destination="jvs-tC-ce9" kind="embed" id="ka6-Jf-C9j"/>
+                                    <segue destination="jvs-tC-ce9" kind="embed" identifier="CallEmbeddedBrowseRKIDataTableViewController" id="ka6-Jf-C9j"/>
                                 </connections>
                             </containerView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="explanation" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VeJ-vo-yhs">
@@ -103,7 +103,7 @@
                                 <constraints>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="gtn-ze-uOn"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" style="UICTFontTextStyleCaption2"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -154,12 +154,12 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Browse Records" id="akU-M1-woJ">
-                        <barButtonItem key="leftBarButtonItem" systemItem="done" id="0gi-G2-uPq">
+                        <barButtonItem key="leftBarButtonItem" image="chevron.left" catalog="system" id="0gi-G2-uPq">
                             <connections>
                                 <action selector="DoneButtonAction:" destination="AIJ-bD-iB1" id="mmb-hS-OqB"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" title="sort" id="Ein-kT-0rt">
+                        <barButtonItem key="rightBarButtonItem" title="sort" image="arrow.up.arrow.down" catalog="system" id="Ein-kT-0rt">
                             <connections>
                                 <action selector="SortButtonAction:" destination="AIJ-bD-iB1" id="9gM-ta-3QW"/>
                             </connections>
@@ -168,6 +168,7 @@
                     <connections>
                         <outlet property="Details" destination="nKo-69-zGh" id="0uj-yO-hDk"/>
                         <outlet property="DoneButton" destination="0gi-G2-uPq" id="LtP-UO-qnf"/>
+                        <outlet property="EmbeddedContainerView" destination="xqW-ia-eeX" id="lun-4h-j1P"/>
                         <outlet property="Explanation" destination="VeJ-vo-yhs" id="V2n-8F-oqV"/>
                         <outlet property="NavBarTitle" destination="akU-M1-woJ" id="a9f-aq-CPx"/>
                         <outlet property="Select" destination="f8z-Wr-D31" id="N12-cx-qS0"/>
@@ -184,7 +185,7 @@
             <objects>
                 <tableViewController storyboardIdentifier="BrowseCountyDataTableViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="jvs-tC-ce9" customClass="BrowseRKIDataTableViewController" customModule="CoBaT" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" dataMode="prototypes" style="plain" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="6gj-tE-jma">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="686.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="686"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <color key="separatorColor" systemColor="systemBackgroundColor"/>
@@ -343,6 +344,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="arrow.up.arrow.down" catalog="system" width="128" height="98"/>
         <image name="chevron.left" catalog="system" width="96" height="128"/>
         <image name="chevron.right" catalog="system" width="96" height="128"/>
         <systemColor name="systemBackgroundColor">
