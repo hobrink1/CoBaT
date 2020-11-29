@@ -81,7 +81,9 @@ final class GlobalStorage: NSObject {
         
         GlobalStorageQueue.async(flags: .barrier, execute: {
 
+            #if DEBUG_PRINT_FUNCCALLS
             print("restoreSavedRKIData just started")
+            #endif
             
             // try to read the stored county data
             if let loadedRKIData = self.permanentStore.object(
@@ -190,6 +192,7 @@ final class GlobalStorage: NSObject {
                                         // build the struct
                                         let countryDataOfDay = RKIDataStruct(
                                             stateID: "0",
+                                            myID: "",
                                             name: "Deutschland",
                                             kindOf: "Land",
                                             inhabitants: inhabitants,
@@ -235,10 +238,8 @@ final class GlobalStorage: NSObject {
                             // and force a save to secure what we have done
                             self.saveRKIData()
                             
-                            
                             // rebuild the delta values
                             self.rebuildRKIDeltas()
-
                             
                         } // Check version
                                                 
@@ -260,7 +261,12 @@ final class GlobalStorage: NSObject {
                 self.storeLastError(errorText: "CoBaT.GlobalStorage.restoreSavedRKIData: Error: could not read RKIData")
             }
             
-            print("restoreSavedRKIData done")
+            #if DEBUG_PRINT_FUNCCALLS
+            print("restoreSavedRKIData done, call")
+            #endif
+            
+            // get fresh data
+            RKIDataDownload.unique.getRKIData()
         })
     }
     
@@ -282,8 +288,6 @@ final class GlobalStorage: NSObject {
         
         // call the local methode to handle all, just tell that this are county datas
         self.refresh_RKIData(self.RKIDataState, newRKIStateData)
-        
-        
     }
   
     /**
@@ -309,8 +313,9 @@ final class GlobalStorage: NSObject {
     // MARK: - RKI data storage (permanent)
     // ---------------------------------------------------------------------------------------------
     public struct RKIDataStruct : Hashable, Encodable, Decodable {
-        public let stateID : String             // each state has a unique ID, it's a number but we use a string
-        public let name : String                // the name of the state or the county
+        public let stateID: String              // each state has a unique ID, it's a number but we use a string
+        public let myID: String?                // states and counties have a unique ID
+        public let name: String                 // the name of the state or the county
         public let kindOf: String               // what kind of state (Land, Freistaat, ...) or county (Kreis, kreisfreie Stadt)
         public let inhabitants: Int             // number of inhabitants
         public let cases: Int                   // number of cases in total
@@ -319,7 +324,8 @@ final class GlobalStorage: NSObject {
         public let cases7DaysPer100K : Double   // number of cases last 7 days per 100,000 inhabitants
         public let timeStamp : TimeInterval     // last updated at
 
-        init(stateID : String,
+        init(stateID: String,
+             myID: String,
              name: String,
              kindOf: String,
              inhabitants: Int,
@@ -330,6 +336,7 @@ final class GlobalStorage: NSObject {
              timeStamp: TimeInterval)
         {
             self.stateID = stateID
+            self.myID = myID
             self.name = name
             self.kindOf = kindOf
             self.inhabitants = inhabitants
@@ -383,15 +390,18 @@ final class GlobalStorage: NSObject {
     // the timeStamp data was last retrieved
     public var RKIDataLastRetreived: TimeInterval = 0
 
+    // ---------------------------------------------------------------------------------------------
+    // MARK: - RKI Data Handling
+    // ---------------------------------------------------------------------------------------------
     /**
      -----------------------------------------------------------------------------------------------
      
-     stores the new RKIData[], but only if the data has changed, it also initiates local notifications "Data updated" and "Data retrieved"
+     stores the new RKIData[], but only if the data has changed, it also initiates local notifications "Data retrieved"
      
      -----------------------------------------------------------------------------------------------
      
      - Parameters:
-        - newRKICountyData: array with the new data, data will replace old data if changed
+        - newRKIData: array with the new data, data will replace old data if changed
      
      - Returns: nothing
      */
@@ -410,7 +420,9 @@ final class GlobalStorage: NSObject {
             if self.RKIData[kindOf].isEmpty == true {
                 
                 // case 1: RKIData is empty, so just add the new item (addNewData())
+                #if DEBUG_PRINT_FUNCCALLS
                 print("refresh_RKIData case 1: RKIData is empty, so just add the new item (addNewData())")
+                #endif
                 
                 // take the best timeStamp
                 let oldestTimeStamp = self.RKIDataGetBestTimeStamp(newRKIData)
@@ -438,14 +450,18 @@ final class GlobalStorage: NSObject {
                     
                         // case 2: There is a difference to the existing data, but from the same day,
                         // so just an update (replaceDataOfToday())
+                        #if DEBUG_PRINT_FUNCCALLS
                         print("refresh_RKIData case 2: oldDate (\(oldDate) == newDate(\(newDate)) -> replaceData0()")
+                        #endif
 
                         self.replaceDataOfToday(kindOf, newRKIData, oldestTimeStamp)
 
                     } else {
                     
                         // case 3: new item is from a different day (addNewData())
+                        #if DEBUG_PRINT_FUNCCALLS
                         print("refresh_RKIData case 3: oldDate (\(oldDate) != newDate(\(newDate)) -> addNewData()")
+                        #endif
                         
                         self.addNewData(kindOf, newRKIData, oldestTimeStamp)
                     }
@@ -461,19 +477,24 @@ final class GlobalStorage: NSObject {
             self.RKIDataLastRetreived = CFAbsoluteTimeGetCurrent()
 
             // make it permamnent
-            self.permanentStore.set(self.RKIDataLastRetreived,
-                                    forKey: "CoBaT.RKIDataLastRetreived")
+            self.permanentStore.set(self.RKIDataLastRetreived, forKey: "CoBaT.RKIDataLastRetreived")
 
-            // TODO: TODO: local notification
+            // local notification to update UI
+            NotificationCenter.default.post(Notification(name: .CoBaT_RKIDataRetrieved))
             
+            #if DEBUG_PRINT_FUNCCALLS
+            print("refresh_RKIData just posted .CoBaT_RKIDataRetrieved")
+            #endif
         })
     }
     
     /**
      -----------------------------------------------------------------------------------------------
      
-     adds a new array item of [RKIDataStruct] at index 0, make sure there are not more than maxNumberOfDaysStored items in [[RKIDataStruct]]
-     
+     Adds a new array item of [RKIDataStruct] at index 0, make sure there are not more than maxNumberOfDaysStored items in [[RKIDataStruct]]
+
+     Has to be called inside a "GlobalStorageQueue.async(flags: .barrier, ..." closure
+
      -----------------------------------------------------------------------------------------------
      
      - Parameters:
@@ -486,9 +507,11 @@ final class GlobalStorage: NSObject {
                             _ newRKIData: [RKIDataStruct],
                             _ timeStamp: TimeInterval) {
         
-        GlobalStorageQueue.async(flags: .barrier, execute: {
+        //GlobalStorageQueue.async(flags: .barrier, execute: {
             
+            #if DEBUG_PRINT_FUNCCALLS
             print("addNewData just started")
+            #endif
             
             if self.RKIData[kindOfArea].isEmpty == true {
                 
@@ -519,23 +542,19 @@ final class GlobalStorage: NSObject {
             // make it permanant
             self.saveRKIData()
             
-
-            // just for testing
-            for item in self.RKIData[kindOfArea][0] {
-                print("addNewData, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): \(item.cases7DaysPer100K), \(Date(timeIntervalSinceReferenceDate: item.timeStamp))")
-            }
-            print("addNewData, RKIDataTimeStamps[\(kindOfArea)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOfArea][0]))")
-
-            
-           // TODO: TODO: local notification
-
-            
             // rebuild the delta values
             self.rebuildRKIDeltas()
 
+            // just for testing
+            //for item in self.RKIData[kindOfArea][0] {
+            //    print("addNewData, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): \(item.cases7DaysPer100K), \(Date(timeIntervalSinceReferenceDate: item.timeStamp))")
+            //}
+            //print("addNewData, RKIDataTimeStamps[\(kindOfArea)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOfArea][0]))")
 
+            #if DEBUG_PRINT_FUNCCALLS
             print("addNewData all good")
-        })
+            #endif
+       // })
     }
     
     
@@ -543,22 +562,25 @@ final class GlobalStorage: NSObject {
      -----------------------------------------------------------------------------------------------
      
      replace the existing item at index 0 of [[RKIDataStruct]] by new item of [RKIDataStruct]
-     
+
+     Has to be called inside a "GlobalStorageQueue.async(flags: .barrier, ..." closure
+
      -----------------------------------------------------------------------------------------------
      
      - Parameters:
         - newRKIData: new data to replace item 0
      
      - Returns: nothing
-     
      */
     private func replaceDataOfToday(_ kindOfArea: Int,
                                     _ newRKIData: [RKIDataStruct],
                                     _ timeStamp: TimeInterval) {
         
-        GlobalStorageQueue.async(flags: .barrier, execute: {
+        // GlobalStorageQueue.async(flags: .barrier, execute: {
             
+            #if DEBUG_PRINT_FUNCCALLS
             print("replaceDataOfToday just started")
+            #endif
             
             if self.RKIData[kindOfArea].isEmpty == true {
                 
@@ -580,22 +602,29 @@ final class GlobalStorage: NSObject {
             // remember the timeStamp
             self.RKIDataLastUpdated = CFAbsoluteTimeGetCurrent()
             
-            // TODO: TODO: local notification
-
-            
-            // just for testing
-            for item in self.RKIData[kindOfArea][0] {
-                print("replaceDataOfToday, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): inz: \(item.cases7DaysPer100K), cases: \(item.cases)")
-            }
-            print("replaceDataOfToday, RKIDataTimeStamps[\(kindOfArea)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOfArea][0]))")
-
             // make it permanant
             self.saveRKIData()
-            
+
             // rebuild the delta values
             self.rebuildRKIDeltas()
-        })
+            
+            // just for testing
+            //for item in self.RKIData[kindOfArea][0] {
+            //    print("replaceDataOfToday, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): inz: \(item.cases7DaysPer100K), cases: \(item.cases)")
+            //}
+            //print("replaceDataOfToday, RKIDataTimeStamps[\(kindOfArea)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOfArea][0]))")
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("replaceDataOfToday all good")
+            #endif
+       // })
     }
+    
+    
+    // ---------------------------------------------------------------------------------------------
+    // MARK: - Helper RKI Data Handling
+    // ---------------------------------------------------------------------------------------------
+
     
     /**
      -----------------------------------------------------------------------------------------------
@@ -611,7 +640,9 @@ final class GlobalStorage: NSObject {
         // To make it more robust, ALL country data for ALL days will be rebuild.
         // There is only 16 states times (max) 7 days, so there is no real problem with performance etc.
         
+        #if DEBUG_PRINT_FUNCCALLS
         print("rebuildCountryData just started")
+        #endif
 
         // clean level for country data
         self.RKIData[RKIDataCountry].removeAll()
@@ -654,6 +685,7 @@ final class GlobalStorage: NSObject {
             // build the struct
             let countryDataOfDay = RKIDataStruct(
                 stateID: "0",
+                myID: "0",
                 name: "Deutschland",
                 kindOf: "Land",
                 inhabitants: inhabitants,
@@ -682,7 +714,9 @@ final class GlobalStorage: NSObject {
      */
     private func rebuildRKIDeltas() {
         
+        #if DEBUG_PRINT_FUNCCALLS
         print("rebuildRKIDeltas just started")
+        #endif
 
         // first step, remove the old data, and make sure we have an empty array per area level
         self.RKIDataDeltas = [ [], [], [] ]
@@ -751,6 +785,7 @@ final class GlobalStorage: NSObject {
                                 
                                 newDeltaData.append(RKIDataStruct(
                                                         stateID:            areaMemberToday.stateID,
+                                                        myID:               areaMemberToday.myID ?? "" ,
                                                         name:               areaMemberToday.name,
                                                         kindOf:             areaMemberToday.kindOf,
                                                         inhabitants:        inhabitantsDelta,
@@ -788,12 +823,20 @@ final class GlobalStorage: NSObject {
                 
             } else {
                 
+                #if DEBUG_PRINT_FUNCCALLS
                 print("rebuildRKIDeltas no data available, do nothing")
+                #endif
             }
             
         } // loop over country, state, county
         
-        // local notifications
+        // local notification to update UI
+        NotificationCenter.default.post(Notification(name: .CoBaT_NewRKIDataReady))
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("rebuildRKIDeltas just posted .CoBaT_NewRKIDataReady")
+        #endif
+
     }
     
     /**
@@ -808,7 +851,9 @@ final class GlobalStorage: NSObject {
         // make sure we have consistent data
         GlobalStorageQueue.async(execute: {
             
+            #if DEBUG_PRINT_FUNCCALLS
             print("saveRKIData just started")
+            #endif
 
             // make it permamnent, by encode it to JSON and store it
             do {
@@ -823,7 +868,9 @@ final class GlobalStorage: NSObject {
                 
                 self.permanentStore.set(self.VersionOfPermanentStorage, forKey: "CoBaT.VersionOfPermanentStorage")
                 
+                #if DEBUG_PRINT_FUNCCALLS
                 print("saveRKIData done!")
+                #endif
                 
             } catch let error as NSError {
                 
@@ -840,7 +887,7 @@ final class GlobalStorage: NSObject {
      
      We take the highest value, to be sure it is a valid timeStamp. If we would have had used "min", we probably would get an entry from a missing timeStamp (which would be 0)
      
-     -----------------------------------------------------------------------------------------------
+      -----------------------------------------------------------------------------------------------
      
      - Parameters:
         - RKIData: the array to check
@@ -901,9 +948,12 @@ final class GlobalStorage: NSObject {
             // append the new error
             self.lastErrors.append(lastErrorStruct(errorText: errorText))
             
-            // TODO: TODO: local notification
-            // local notification
-            print("storeLastError: notification is still missing")
+            // local notification to update UI
+            NotificationCenter.default.post(Notification(name: .CoBat_NewErrorStored))
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("storeLastError: just posted .CoBat_NewErrorStored")
+            #endif
         })
     }
     

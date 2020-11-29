@@ -1,5 +1,5 @@
 //
-//  Get RKI Data.swift
+//  RKI Data Download.swift
 //  CoBaT
 //
 //  Created by Hartwig Hopfenzitz on 24.11.20.
@@ -13,14 +13,14 @@ import Foundation
 
 // -------------------------------------------------------------------------------------------------
 // MARK: -
-// MARK: - RKI Data
+// MARK: - RKI Data Download
 // -------------------------------------------------------------------------------------------------
-class RKIData: NSObject {
+class RKIDataDownload: NSObject {
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Singleton
     // ---------------------------------------------------------------------------------------------
-    static let unique = RKIData()
+    static let unique = RKIDataDownload()
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - RKI Data Tab
@@ -63,7 +63,9 @@ class RKIData: NSObject {
      */
     public func getRKIData() {
         
+        #if DEBUG_PRINT_FUNCCALLS
         print("getRKIData just started")
+        #endif
         
         // walk over the array with the configurations
         for singleDataSet in RKI_DataTab {
@@ -76,7 +78,10 @@ class RKIData: NSObject {
                     with: url,
                     completionHandler: { data, response, error in
                         
+                        #if DEBUG_PRINT_FUNCCALLS
                         print("getRKIData.completionHandler just started")
+                        #endif
+                        
                         // check if there are errors
                         if error == nil {
                             
@@ -114,7 +119,7 @@ class RKIData: NSObject {
                                                 
                                                 // no valid data, log message and return
                                                 GlobalStorage.unique.storeLastError(
-                                                    errorText: "CoBaT.RKIData.getRKIData: Error: URLSession.dataTask, no valid data, return")
+                                                    errorText: "CoBaT.RKIDataDownload.getRKIData: Error: URLSession.dataTask, no valid data, return")
                                                 return
                                             }
                                             
@@ -122,7 +127,7 @@ class RKIData: NSObject {
                                             
                                             // not the right mimeType, log message and return
                                             GlobalStorage.unique.storeLastError(
-                                                errorText: "CoBaT.RKIData.getRKIData: Error: URLSession.dataTask, wrong mimeType (\"\(mimeType)\" instead of \"text/plain\"), return")
+                                                errorText: "CoBaT.RKIDataDownload.getRKIData: Error: URLSession.dataTask, wrong mimeType (\"\(mimeType)\" instead of \"text/plain\"), return")
                                             return
                                         }
                                         
@@ -130,7 +135,7 @@ class RKIData: NSObject {
                                         
                                         // no valid mimeType, log message and return
                                         GlobalStorage.unique.storeLastError(
-                                            errorText: "CoBaT.RKIData.getRKIData: Error: URLSession.dataTask, no mimeType in response, return")
+                                            errorText: "CoBaT.RKIDataDownload.getRKIData: Error: URLSession.dataTask, no mimeType in response, return")
                                         return
                                     }
                                     
@@ -138,7 +143,7 @@ class RKIData: NSObject {
                                     
                                     // not a good status, log message and return
                                     GlobalStorage.unique.storeLastError(
-                                        errorText: "CoBaT.RKIData.getRKIData: Server responded with error status: \(httpResponse.statusCode), return")
+                                        errorText: "CoBaT.RKIDataDownload.getRKIData: Server responded with error status: \(httpResponse.statusCode), return")
                                     return
                                 }
                                 
@@ -146,7 +151,7 @@ class RKIData: NSObject {
                                 
                                 // no valid response, log message and return
                                 GlobalStorage.unique.storeLastError(
-                                    errorText: "CoBaT.RKIData.getRKIData: Error: URLSession.dataTask has no valid HTTP response, return")
+                                    errorText: "CoBaT.RKIDataDownload.getRKIData: Error: URLSession.dataTask has no valid HTTP response, return")
                                 return
                             }
                             
@@ -157,14 +162,14 @@ class RKIData: NSObject {
                                 
                                 // valid errorCode, call the handler and return
                                 GlobalStorage.unique.storeLastError(
-                                    errorText: "CoBaT.RKIData.getRKIData: handleServerError(), \(myError.localizedDescription)")
+                                    errorText: "CoBaT.RKIDataDownload.getRKIData: handleServerError(), \(myError.localizedDescription)")
                                 return
                                 
                             } else {
                                 
                                 // no valid error code, log message and return
                                 GlobalStorage.unique.storeLastError(
-                                    errorText: "CoBaT.RKIData.getRKIData: Error: URLSession.dataTask came back with error which is not nil, but no valid errorCode, return")
+                                    errorText: "CoBaT.RKIDataDownload.getRKIData: Error: URLSession.dataTask came back with error which is not nil, but no valid errorCode, return")
                                 return
                             }
                         }
@@ -177,7 +182,7 @@ class RKIData: NSObject {
                 
                 // no valid URL, log message and return
                 GlobalStorage.unique.storeLastError(
-                    errorText: "CoBaT.RKIData.getRKIData: Error: URLSession.dataTask came back with error which is not nil, but no valid errorCode, return")
+                    errorText: "CoBaT.RKIDataDownload.getRKIData: Error: URLSession.dataTask came back with error which is not nil, but no valid errorCode, return")
                 return
             }
         }
@@ -203,18 +208,25 @@ class RKIData: NSObject {
 
     private func handleRKIContent( _ data: Data, _ RKI_DataType: RKI_DataTypeEnum) {
         
+        #if DEBUG_PRINT_FUNCCALLS
         print("handleRKIContent just started")
+        #endif
+        
         do {
                     
             switch RKI_DataType {
             
             case .county:
                 
+                #if DEBUG_PRINT_FUNCCALLS
                 print("handleRKIContent County")
+                #endif
                 
                 let countyData = try newJSONDecoder().decode(RKI_County_JSON.self, from: data)
                 
+                #if DEBUG_PRINT_FUNCCALLS
                 print("handleRKIContent after decoding")
+                #endif
                 
                 // we will provide an array of converted values
                 var newDataArray: [GlobalStorage.RKIDataStruct] = []
@@ -242,7 +254,7 @@ class RKIData: NSObject {
                         updateDate = Date()
                         
                         GlobalStorage.unique.storeLastError(
-                            errorText: "CoBaT.RKIData.handleRKIContent.County: Error: could not get updateDate from \"\(singleItem.attributes.lastUpdate)\", use current date \"\(updateDate)\" instead"
+                            errorText: "CoBaT.RKIDataDownload.handleRKIContent.County: Error: could not get updateDate from \"\(singleItem.attributes.lastUpdate)\", use current date \"\(updateDate)\" instead"
                         )
                     }
                     
@@ -251,6 +263,7 @@ class RKIData: NSObject {
                     // append the new data
                     newDataArray.append(GlobalStorage.RKIDataStruct(
                                             stateID: singleItem.attributes.blid,
+                                            myID: "\(singleItem.attributes.objectid)",
                                             name: singleItem.attributes.gen,
                                             kindOf: singleItem.attributes.bez.rawValue,
                                             inhabitants: singleItem.attributes.ewz,
@@ -263,17 +276,22 @@ class RKIData: NSObject {
 
                 // refresh our global storage
                 GlobalStorage.unique.refresh_RKICountyData(newRKICountyData: newDataArray)
+
+                #if DEBUG_PRINT_FUNCCALLS
                 print("handleRKIContent County done")
-                
-                
+                #endif
                 
             case .state:
                 
+                #if DEBUG_PRINT_FUNCCALLS
                 print("handleRKIContent State")
+                #endif
                 
                 let stateData = try newJSONDecoder().decode(RKI_State_JSON.self, from: data)
                 
+                #if DEBUG_PRINT_FUNCCALLS
                 print("handleRKIContent after decoding")
+                #endif
 
                 // we will provide an array of converted values
                 var newDataArray: [GlobalStorage.RKIDataStruct] = []
@@ -292,6 +310,7 @@ class RKIData: NSObject {
                     // store the new data
                     newDataArray.append(GlobalStorage.RKIDataStruct(
                                             stateID: "\(singleItem.attributes.objectid1)",
+                                            myID: "\(singleItem.attributes.objectid1)",
                                             name: singleItem.attributes.lanEwgen,
                                             kindOf: singleItem.attributes.lanEwbez,
                                             inhabitants: singleItem.attributes.lanEwewz,
@@ -306,14 +325,17 @@ class RKIData: NSObject {
                 
                 // store it in global storage
                 GlobalStorage.unique.refresh_RKIStateData(newRKIStateData: newDataArray)
+                
+                #if DEBUG_PRINT_FUNCCALLS
                 print("handleRKIContent State done")
+                #endif
 
             }
             
         } catch let error as NSError {
             
             GlobalStorage.unique.storeLastError(
-                errorText: "CoBaT.RKIData.handleRKIContent: Error: JSON decoder failed: error: \"\(error.description)\", return")
+                errorText: "CoBaT.RKIDataDownload.handleRKIContent: Error: JSON decoder failed: error: \"\(error.description)\", return")
             return
         }
     }

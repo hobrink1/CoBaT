@@ -24,9 +24,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         GlobalUIData.unique.restoreSavedUIData()
         GlobalStorage.unique.restoreSavedRKIData()
         
-        // get fresh data
-        RKIData.unique.getRKIData()
-        
         
         return true
     }

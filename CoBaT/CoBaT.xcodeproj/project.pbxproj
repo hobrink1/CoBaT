@@ -24,7 +24,8 @@
 		F2AD305F256D035E00FDDE4B /* JSON RKI State.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD305E256D035E00FDDE4B /* JSON RKI State.swift */; };
 		F2AD3064256D043900FDDE4B /* JSON RKI Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD3063256D043900FDDE4B /* JSON RKI Helpers.swift */; };
 		F2AD306C256D0AD900FDDE4B /* Global Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD306B256D0AD900FDDE4B /* Global Storage.swift */; };
-		F2AD3072256D10D400FDDE4B /* RKI Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD3071256D10D400FDDE4B /* RKI Data.swift */; };
+		F2AD3072256D10D400FDDE4B /* RKI Data Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD3071256D10D400FDDE4B /* RKI Data Download.swift */; };
+		F2DE391E25728A6C0033E6B2 /* Notification Extention.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DE391D25728A6C0033E6B2 /* Notification Extention.swift */; };
 		F2ED107E256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2ED107D256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift */; };
 		F2ED108B256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2ED108A256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift */; };
 		F2ED1090256D9855003E2C41 /* BrowseRKIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2ED108F256D9855003E2C41 /* BrowseRKIViewController.swift */; };
@@ -74,7 +75,8 @@
 		F2AD305E256D035E00FDDE4B /* JSON RKI State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSON RKI State.swift"; sourceTree = "<group>"; };
 		F2AD3063256D043900FDDE4B /* JSON RKI Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSON RKI Helpers.swift"; sourceTree = "<group>"; };
 		F2AD306B256D0AD900FDDE4B /* Global Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Global Storage.swift"; sourceTree = "<group>"; };
-		F2AD3071256D10D400FDDE4B /* RKI Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RKI Data.swift"; sourceTree = "<group>"; };
+		F2AD3071256D10D400FDDE4B /* RKI Data Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RKI Data Download.swift"; sourceTree = "<group>"; };
+		F2DE391D25728A6C0033E6B2 /* Notification Extention.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification Extention.swift"; sourceTree = "<group>"; };
 		F2ED107D256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseRKIDataTableViewController.swift; sourceTree = "<group>"; };
 		F2ED1083256D76BA003E2C41 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
 		F2ED108A256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseRKIDataTableViewCell.swift; sourceTree = "<group>"; };
@@ -137,6 +139,7 @@
 				F2AD306A256D0AA500FDDE4B /* Background Service */,
 				F2AD3069256D0A7200FDDE4B /* Location Service */,
 				F2AD3068256D0A5900FDDE4B /* Global Storage */,
+				F2DE391C25728A1D0033E6B2 /* Notification Service */,
 				F2AD305A256D00CF00FDDE4B /* UI */,
 				F2AD3070256D109600FDDE4B /* User Notifications */,
 				F273D76A256E4D600002E15B /* Helpers */,
@@ -178,7 +181,7 @@
 		F2AD3054256D007D00FDDE4B /* RKI Data */ = {
 			isa = PBXGroup;
 			children = (
-				F2AD3071256D10D400FDDE4B /* RKI Data.swift */,
+				F2AD3071256D10D400FDDE4B /* RKI Data Download.swift */,
 				F2AD3055256D00B700FDDE4B /* JSON RKI County.swift */,
 				F2AD305E256D035E00FDDE4B /* JSON RKI State.swift */,
 				F2AD3063256D043900FDDE4B /* JSON RKI Helpers.swift */,
@@ -189,7 +192,6 @@
 		F2AD305A256D00CF00FDDE4B /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				F207CA6F2571B35B0000F90B /* GlobalUIData.swift */,
 				F22D00A22567B5D300C908AA /* MainViewController.swift */,
 				F2ED109F256DB398003E2C41 /* Browse RKI Data */,
 			);
@@ -200,6 +202,7 @@
 			isa = PBXGroup;
 			children = (
 				F2AD306B256D0AD900FDDE4B /* Global Storage.swift */,
+				F207CA6F2571B35B0000F90B /* GlobalUIData.swift */,
 			);
 			path = "Global Storage";
 			sourceTree = "<group>";
@@ -223,6 +226,14 @@
 			children = (
 			);
 			path = "User Notifications";
+			sourceTree = "<group>";
+		};
+		F2DE391C25728A1D0033E6B2 /* Notification Service */ = {
+			isa = PBXGroup;
+			children = (
+				F2DE391D25728A6C0033E6B2 /* Notification Extention.swift */,
+			);
+			path = "Notification Service";
 			sourceTree = "<group>";
 		};
 		F2ED109F256DB398003E2C41 /* Browse RKI Data */ = {
@@ -399,9 +410,10 @@
 				F207CA702571B35B0000F90B /* GlobalUIData.swift in Sources */,
 				F2ED107E256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift in Sources */,
 				F273D76C256E4D860002E15B /* CovidRating.swift in Sources */,
-				F2AD3072256D10D400FDDE4B /* RKI Data.swift in Sources */,
+				F2AD3072256D10D400FDDE4B /* RKI Data Download.swift in Sources */,
 				F2ED108B256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift in Sources */,
 				F2ED1098256DAFDE003E2C41 /* Formatters.swift in Sources */,
+				F2DE391E25728A6C0033E6B2 /* Notification Extention.swift in Sources */,
 				F2AD3056256D00B700FDDE4B /* JSON RKI County.swift in Sources */,
 				F22D00A12567B5D300C908AA /* SceneDelegate.swift in Sources */,
 			);
@@ -608,6 +620,7 @@
 				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = org.HoBrink.CoBaT;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG DEBUG_05sno DEBUG_20sno DEBUG_Locno DEBUG_Inzno DEBUG_PRINT_FUNCCALLS";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

@@ -11,15 +11,18 @@ import UIKit
 // MARK: -
 // MARK: - Browse County Data Table View Controller
 // -------------------------------------------------------------------------------------------------
-class BrowseRKIDataTableViewController: UITableViewController {
+class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTableViewCellPlacesDelegate {
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Local storage
     // ---------------------------------------------------------------------------------------------
 
-    // this will be set by the calling View Controller to selct the desired State
-    var StateSelected: String = "Rheinland-Pfalz"
-    
+    // the oberservers have to be released, otherwise there wil be a memory leak.
+    // this variables were set in "ViewDidApear()" and released in "ViewDidDisappear()"
+    var userDidSelectSortObserver: NSObjectProtocol?
+    var newRKIDataReadyObserver: NSObjectProtocol?
+
+
     // local copy of County Data, susetted by selected State
     var localDataArray: [GlobalStorage.RKIDataStruct] = []
     var localDataArrayDelta1: [GlobalStorage.RKIDataStruct] = []
@@ -28,10 +31,105 @@ class BrowseRKIDataTableViewController: UITableViewController {
     // the number of days available
     var numberOfDayAvailable: Int = 0
     
+    
+    // ----------------------------------------------------------------------------------
+    // MARK: - Delegate for select button
+    // ----------------------------------------------------------------------------------
+
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     selectButtonTapped(cell:
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    func selectButtonTapped(cell: BrowseRKIDataTableViewCell) {
+
+        #if DEBUG_PRINT_FUNCCALLS
+        print("selectButtonTapped just started, row: \(cell.myIndexPath.row)")
+        #endif
+        
+        // get the row
+        let row = cell.myIndexPath.row
+        
+        // which arae level we have
+        switch GlobalUIData.unique.UIBrowserRKIAreaLevel {
+        
+        case GlobalStorage.unique.RKIDataCountry:
+            
+            // Country Level: nothing to do
+            break
+            
+            
+        case GlobalStorage.unique.RKIDataState:
+            
+            // State Level: set the selected state and his ID, save both and report it
+            GlobalUIData.unique.UIBrowserRKISelectedStateName = localDataArray[row].name
+            GlobalUIData.unique.UIBrowserRKISelectedStateID = localDataArray[row].stateID
+            
+            let (countyIndex, countyID, countyName) = GlobalUIData.unique.getCountyFromStateID(
+                stateID: localDataArray[row].stateID)
+                
+            GlobalUIData.unique.UIBrowserRKISelectedCountyID = countyID
+            GlobalUIData.unique.UIBrowserRKISelectedCountyName = countyName
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("selectButtonTapped: set state \(GlobalUIData.unique.UIBrowserRKISelectedStateName), ID: \(GlobalUIData.unique.UIBrowserRKISelectedStateID), got countyIndex (\(countyIndex)), countyID (\(countyID)), countyName (\(countyName))")
+            #endif
+            
+            // save the data
+            GlobalUIData.unique.saveUIData()
+            
+            // local notification to update UI
+            NotificationCenter.default.post(Notification(name: .CoBaT_UserDidSelectState))
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("selectButtonTapped just posted .CoBaT_UserDidSelectState")
+            #endif
+
+            self.dismiss(animated: true, completion: nil)
+            
+            
+        case GlobalStorage.unique.RKIDataCounty:
+            
+            // County Level: set the selected county, save it and report
+            GlobalUIData.unique.UIBrowserRKISelectedCountyName = localDataArray[row].name
+            GlobalUIData.unique.UIBrowserRKISelectedCountyID = localDataArray[row].myID ?? ""
+            
+            GlobalUIData.unique.UIBrowserCountyIDPerStateID[GlobalUIData.unique.UIBrowserRKISelectedStateID] = GlobalUIData.unique.UIBrowserRKISelectedCountyID
+
+            #if DEBUG_PRINT_FUNCCALLS
+            print("selectButtonTapped: set county \(GlobalUIData.unique.UIBrowserRKISelectedStateName), ID: \(GlobalUIData.unique.UIBrowserRKISelectedCountyID), set UIBrowserCountyIDPerStateID[\(GlobalUIData.unique.UIBrowserRKISelectedStateID)] = \(GlobalUIData.unique.UIBrowserRKISelectedCountyID)")
+            #endif
+            
+            // save the data
+            GlobalUIData.unique.saveUIData()
+            
+            // local notification to update UI
+            NotificationCenter.default.post(Notification(name: .CoBaT_UserDidSelectCounty))
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("selectButtonTapped just posted .CoBaT_UserDidSelectCounty")
+            #endif
+        
+            self.dismiss(animated: true, completion: nil)
+            
+            
+        default:
+            break
+        }
+    }
+
+    
+    
     // ---------------------------------------------------------------------------------------------
     // MARK: - Helper
     // ---------------------------------------------------------------------------------------------
     func RefreshLocalData() {
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("RefreshLocalData just started, ID: \(GlobalUIData.unique.UIBrowserRKISelectedStateID)")
+        #endif
         
         var localDataArrayUnsorted: [GlobalStorage.RKIDataStruct] = []
         var localDataArrayDelta1Unsorted: [GlobalStorage.RKIDataStruct] = []
@@ -49,7 +147,7 @@ class BrowseRKIDataTableViewController: UITableViewController {
                 // yes at least current data are available so try to get some
                 if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
                     localDataArrayUnsorted = GlobalStorage.unique.RKIData[GlobalUIData.unique.UIBrowserRKIAreaLevel][0].filter(
-                        { $0.stateID == GlobalUIData.unique.UIBrowserRKISelectedID})
+                        { $0.stateID == GlobalUIData.unique.UIBrowserRKISelectedStateID})
                 } else {
                     localDataArrayUnsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][0]
                 }
@@ -62,7 +160,8 @@ class BrowseRKIDataTableViewController: UITableViewController {
                 if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
                     
                     localDataArrayDelta1Unsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][1].filter(
-                        { $0.stateID == GlobalUIData.unique.UIBrowserRKISelectedID})
+                        { $0.stateID == GlobalUIData.unique.UIBrowserRKISelectedStateID})
+                    
                 } else {
                     localDataArrayDelta1Unsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][1]
                 }
@@ -76,21 +175,23 @@ class BrowseRKIDataTableViewController: UITableViewController {
                 if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
                     
                     // yes at least data from "yesterday" are available so try to get some
-                    localDataArrayDelta7Unsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][numberOfDayAvailable - 1].filter(
-                        { $0.stateID == GlobalUIData.unique.UIBrowserRKISelectedID})
+                    localDataArrayDelta7Unsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][2].filter(
+                        { $0.stateID == GlobalUIData.unique.UIBrowserRKISelectedStateID})
                 } else {
-                    localDataArrayDelta7Unsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][numberOfDayAvailable - 1]
+                    localDataArrayDelta7Unsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][2]
                 }
-                
-                
             }
         })
         
         // sort the local copy
-        print("sofar")
         self.sortLocalData(source0: localDataArrayUnsorted,
                            source1: localDataArrayDelta1Unsorted,
                            source7: localDataArrayDelta7Unsorted)
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("RefreshLocalData done")
+        #endif
+
     }
     
     /**
@@ -114,7 +215,9 @@ class BrowseRKIDataTableViewController: UITableViewController {
         // we use the main thread as our working thread, so we have no problems in UI updates
         DispatchQueue.main.async {
             
+            #if DEBUG_PRINT_FUNCCALLS
             print("sortLocalData just started")
+            #endif
             
             switch GlobalUIData.unique.UIBrowserRKISorting {
             
@@ -136,17 +239,22 @@ class BrowseRKIDataTableViewController: UITableViewController {
                 
                 for item in self.localDataArray {
                     
-                    
-                    if let index1InUnsorted = source1.firstIndex(where: { $0.name == item.name } ) {
+                    // we had to combine two keys ($0.kindOf + $0.name) as "Regensburg" exist two times (Kreisfreie Stadt and Landkreis)
+                    // by this we introduced a new key "$0.myID", but we have to wait 7 days to get the data cleaned out by age
+                    // TODO: TODO: change key to $0.myID after December 5th 2020
+                    if let index1InUnsorted = source1.firstIndex(where: { ($0.kindOf + $0.name) == (item.kindOf + item.name) } ) {
                         
-                        //print("\(item.name): index1InUnsorted: \(index1InUnsorted) of \(source1.count)")
+                        //print("\(item.kindOf) \(item.name): index1InUnsorted: \(index1InUnsorted) of \(source1.count)")
+
                         self.localDataArrayDelta1.append(source1[index1InUnsorted])
+                        
                     } else {
                         
-                        //print("\(item.name): index1InUnsorted: unknown of \(source1.count), new \(self.localDataArrayDelta1.count)")
+                        //print("\(item.kindOf) \(item.name)): index1InUnsorted: unknown of \(source1.count), new \(self.localDataArrayDelta1.count)")
 
                         self.localDataArrayDelta1.append(GlobalStorage.RKIDataStruct(
                                                         stateID:            item.stateID,
+                                                        myID:               item.myID ?? "",
                                                         name:               item.name,
                                                         kindOf:             item.kindOf,
                                                         inhabitants:        0,
@@ -158,27 +266,35 @@ class BrowseRKIDataTableViewController: UITableViewController {
                     }
                     
                     if self.numberOfDayAvailable > 2 {
-                        if let index7InUnsorted = source7.firstIndex(where: { $0.name == item.name } ) {
+                        if let index7InUnsorted = source7.firstIndex(where: { ($0.kindOf + $0.name) == (item.kindOf + item.name) } ) {
                             
-                            //print("\(item.name): index7InUnsorted: \(index7InUnsorted) of \(source7.count), new \(self.localDataArrayDelta1.count)")
+                            //print("\(item.kindOf) \(item.name): index7InUnsorted: \(index7InUnsorted) of \(source7.count), new \(self.localDataArrayDelta1.count)")
+                            
                             self.localDataArrayDelta7.append(source7[index7InUnsorted])
+                            
                         } else {
-                            //print("\(item.name): index7InUnsorted: unknown of \(source7.count)")
+                            
+                            //print("\(item.kindOf) \(item.name): index7InUnsorted: unknown of \(source7.count)")
+                            
                             self.localDataArrayDelta7.append(GlobalStorage.RKIDataStruct(
-                                                            stateID:            item.stateID,
-                                                            name:               item.name,
-                                                            kindOf:             item.kindOf,
-                                                            inhabitants:        0,
-                                                            cases:              0,
-                                                            deaths:             0,
-                                                            casesPer100k:       0,
-                                                            cases7DaysPer100K:  0,
-                                                            timeStamp:          item.timeStamp))
+                                                                stateID:            item.stateID,
+                                                                myID:               item.myID ?? "",
+                                                                name:               item.name,
+                                                                kindOf:             item.kindOf,
+                                                                inhabitants:        0,
+                                                                cases:              0,
+                                                                deaths:             0,
+                                                                casesPer100k:       0,
+                                                                cases7DaysPer100K:  0,
+                                                                timeStamp:          item.timeStamp))
                         }
                     }
                 }
             }
+            
+            #if DEBUG_PRINT_FUNCCALLS
             print("sortLocalData done")
+            #endif
 
             // reload the cells
             self.tableView.reloadData()
@@ -298,16 +414,70 @@ class BrowseRKIDataTableViewController: UITableViewController {
         self.tableView.rowHeight = UITableView.automaticDimension
         self.tableView.estimatedRowHeight = 64
         
-        // we want a refresh every time the view gets alavie or came back from background
-        let notificationCenter = NotificationCenter.default
-        //        notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(appBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
-        
         // refresh the data
         self.RefreshLocalData()
     }
     
-    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     viewDidAppear()
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    override func viewDidAppear(_ animated: Bool) {
+        super .viewDidAppear(animated)
+        
+        // add observer to recognise if user selcted new sort strategy
+        userDidSelectSortObserver = NotificationCenter.default.addObserver(
+            forName: .CoBaT_UserDidSelectSort,
+            object: nil,
+            queue: nil,
+            using: { Notification in
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("BrowseRKIDataTableViewController just recieved signal .CoBaT_UserDidSelectSort, call RefreshLocalData()")
+                #endif
+                
+                self.RefreshLocalData()
+            })
+        
+        // add observer to recognise if user selcted new state
+        newRKIDataReadyObserver = NotificationCenter.default.addObserver(
+            forName: .CoBaT_NewRKIDataReady,
+            object: nil,
+            queue: nil,
+            using: { Notification in
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("BrowseRKIDataTableViewController just recieved signal .CoBaT_NewRKIDataReady, call RefreshLocalData()")
+                #endif
+                
+                self.RefreshLocalData()
+            })
+
+    }
+ 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     viewDidDisappear()
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    override func viewDidDisappear(_ animated: Bool) {
+        super .viewDidDisappear(animated)
+        
+        // remove the observer if set
+        if let observer = userDidSelectSortObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        // remove the observer if set
+        if let observer = newRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
     /**
      -----------------------------------------------------------------------------------------------
      
@@ -327,38 +497,9 @@ class BrowseRKIDataTableViewController: UITableViewController {
     //        }
     
     
-    /**
-     -----------------------------------------------------------------------------------------------
-     
-     appBecomeActive()
-     
-     -----------------------------------------------------------------------------------------------
-     */
-    @objc func appBecomeActive() {
-        
-        print("App become active")
-        
-        // refresh the data
-        self.RefreshLocalData()
-    }
+ 
     
-    
-    /**
-     -----------------------------------------------------------------------------------------------
-     
-     viewWillDisappear()
-     
-     -----------------------------------------------------------------------------------------------
-     */
-    override func viewWillDisappear(_ animated: Bool) {
-        
-        let notificationCenter = NotificationCenter.default
-        
-        //            notificationCenter.removeObserver(self, name:UIApplication.willResignActiveNotification, object: nil)
-        notificationCenter.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
-        
-        super.viewWillDisappear(animated)
-    }
+
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Table view data source
@@ -399,7 +540,11 @@ class BrowseRKIDataTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         // dequeue a cell
-        let cell = tableView.dequeueReusableCell(withIdentifier: "BrowseRKIDataTableViewCell", for: indexPath) as! BrowseRKIDataTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "BrowseRKIDataTableViewCellV2", for: indexPath) as! BrowseRKIDataTableViewCell
+        
+        // set the cell properties (index path and that we are the one to serve the selectButtonDelegate)
+        cell.myIndexPath = indexPath
+        cell.selectButtonDelegate = self
         
         // get the related data set from local storage
         let index = indexPath.row
@@ -415,14 +560,22 @@ class BrowseRKIDataTableViewController: UITableViewController {
         cell.ChevronLeft.tintColor = textColorToUse
         cell.ChevronRight.tintColor = textColorToUse
         
+        // on country level, we do not need to select an item, so hide the left chevron and disable the button
         if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCountry {
+            
+            // no chevron and no button
             cell.ChevronLeft.isHidden = true
+            cell.SelectButton.isEnabled = false
+            
         } else {
+            
+            // show the chevron and enable the button
             cell.ChevronLeft.isHidden = false
+            cell.SelectButton.isEnabled = true
         }
         
         
-        // fill the data fileds and set text color
+        // set text colors
 
         // set the text colors
         cell.Name.textColor = textColorToUse
@@ -439,9 +592,7 @@ class BrowseRKIDataTableViewController: UITableViewController {
         
         // set the fixed labels
         cell.Name.text = myData.name
-        
         cell.Cases.text = NSLocalizedString("label-cases", comment: "Label text for cases")
-        
         cell.Incidences.text = NSLocalizedString("label-incidences", comment: "Label text for incidences")
 
         // now fill the data fields according to number of available days
@@ -472,9 +623,8 @@ class BrowseRKIDataTableViewController: UITableViewController {
             
             cell.ThirdCases.text = getFormattedDeltaTextInt(number: localDataArrayDelta1[index].cases)
             
-            
-            
             cell.FirstIncidences.text = ""
+            
             cell.SecondIncidences.text = number1FractionFormatter.string(
                 from: NSNumber(value: myData.cases7DaysPer100K))
             
@@ -486,15 +636,12 @@ class BrowseRKIDataTableViewController: UITableViewController {
                     && (localDataArrayDelta1.count >= index)
                     && (localDataArrayDelta7.count >= index) {
             
-            
             cell.FirstCases.text = numberNoFractionFormatter.string(
                 from: NSNumber(value: myData.cases))
             
             cell.SecondCases.text = getFormattedDeltaTextInt(number: localDataArrayDelta1[index].cases)
             
             cell.ThirdCases.text = getFormattedDeltaTextInt(number: localDataArrayDelta7[index].cases)
-            
-            
             
             cell.FirstIncidences.text = number1FractionFormatter.string(
                 from: NSNumber(value: myData.cases7DaysPer100K))

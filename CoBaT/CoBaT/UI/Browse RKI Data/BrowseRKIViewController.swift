@@ -7,12 +7,20 @@
 
 import UIKit
 
+// -------------------------------------------------------------------------------------------------
+// MARK: -
+// MARK: - BrowseRKIViewController
+// -------------------------------------------------------------------------------------------------
 
-
+// -------------------------------------------------------------------------------------------------
+// MARK: -
+// MARK: - Class
+// -------------------------------------------------------------------------------------------------
 class BrowseRKIViewController: UIViewController {
 
-    var myEmbeddedTableViewController: BrowseRKIDataTableViewController?
-    
+    // ---------------------------------------------------------------------------------------------
+    // MARK: - UI Outlets
+    // ---------------------------------------------------------------------------------------------
     @IBOutlet weak var Explanation: UILabel!
     
     @IBOutlet weak var Usage: UILabel!
@@ -30,71 +38,56 @@ class BrowseRKIViewController: UIViewController {
     
     @IBOutlet weak var EmbeddedContainerView: UIView!
     
+    
+    
+    // ---------------------------------------------------------------------------------------------
+    // MARK: - Sort
+    // ---------------------------------------------------------------------------------------------
     @IBOutlet weak var SortButton: UIBarButtonItem!
     @IBAction func SortButtonAction(_ sender: UIBarButtonItem) {
         
+        // chec current situation and switch one step further
         switch GlobalUIData.unique.UIBrowserRKISorting {
         
         case .alphabetically:
-            GlobalUIData.unique.UIBrowserRKISorting = .incidencesAscending
-            print("SortButtonAction, UIBrowserRKISorting.rawValue = \(GlobalUIData.unique.UIBrowserRKISorting.rawValue)")
-            GlobalUIData.unique.saveUIData()
-            
-        case .incidencesAscending:
             GlobalUIData.unique.UIBrowserRKISorting = .incidencesDescending
-            print("SortButtonAction, UIBrowserRKISorting.rawValue = \(GlobalUIData.unique.UIBrowserRKISorting.rawValue)")
-            GlobalUIData.unique.saveUIData()
-
+  
         case .incidencesDescending:
+            GlobalUIData.unique.UIBrowserRKISorting = .incidencesAscending
+
+        case .incidencesAscending:
             GlobalUIData.unique.UIBrowserRKISorting = .alphabetically
-            print("SortButtonAction, UIBrowserRKISorting.rawValue = \(GlobalUIData.unique.UIBrowserRKISorting.rawValue)")
-            GlobalUIData.unique.saveUIData()
+
         }
         
+        // update UI
         self.setSortButton()
-        self.myEmbeddedTableViewController?.RefreshLocalData()
+
+        // save the date
+        GlobalUIData.unique.saveUIData()
+
+        // local notification to update UI
+        NotificationCenter.default.post(Notification(name: .CoBaT_UserDidSelectSort))
         
+        #if DEBUG_PRINT_FUNCCALLS
+        print("SortButtonAction just posted .CoBaT_UserDidSelectSort")
+        #endif
     }
     
+    
+    // ---------------------------------------------------------------------------------------------
+    // MARK: -
+    // MARK: - Life Cycle
+    // ---------------------------------------------------------------------------------------------
+
     /**
      -----------------------------------------------------------------------------------------------
      
-     
+     viewDidLoad()
      
      -----------------------------------------------------------------------------------------------
-     
-     - Parameters:
-     - :
-     
-     - Returns:
-     
      */
-    private func setSortButton() {
-        
-        DispatchQueue.main.async(execute: {
-            switch GlobalUIData.unique.UIBrowserRKISorting {
-            
-            case .alphabetically:
-                self.SortButton.image = UIImage(systemName: "arrow.up.arrow.down")
-                
-                break
-                
-            case .incidencesAscending:
-                self.SortButton.image = UIImage(systemName: "arrow.up")
-                
-                break
-                
-            case .incidencesDescending:
-                self.SortButton.image = UIImage(systemName: "arrow.down")
-                
-                
-                break
-            }
-        })
-    }
-    
-    
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -102,12 +95,60 @@ class BrowseRKIViewController: UIViewController {
         
         // set title and sortButton
         self.title = GlobalUIData.unique.UIBrowserRKITitelString
+        
         self.setSortButton()
 
         // show the explanation
         self.showExplanation()
-
-
+    }
+    
+    
+    // ---------------------------------------------------------------------------------------------
+    // MARK: - UI Helpers
+    // ---------------------------------------------------------------------------------------------
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     Displays the correct image for the sort button according to GlobalUIData.unique.UIBrowserRKISorting
+     
+     Hides the button, if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCountry
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func setSortButton() {
+        
+        // we manage UI so main thread
+        DispatchQueue.main.async(execute: {
+            
+            // check if we are on Country level
+            if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCountry {
+                
+                // yes we are on country level, so hide the button
+                self.SortButton.isEnabled = false
+                self.SortButton.title = ""
+                self.SortButton.image = nil
+                
+            } else {
+                
+                // no not country level, so do all required actions
+                self.SortButton.isEnabled = true
+                self.SortButton.title = ""
+                
+                // check the sorting strategy
+                switch GlobalUIData.unique.UIBrowserRKISorting {
+                
+                case .alphabetically:
+                    self.SortButton.image = UIImage(systemName: "arrow.up.arrow.down")
+                    
+                case .incidencesAscending:
+                    self.SortButton.image = UIImage(systemName: "arrow.up")
+                    
+                case .incidencesDescending:
+                    self.SortButton.image = UIImage(systemName: "arrow.down")
+                }
+            }
+        })
     }
     
     
@@ -162,23 +203,19 @@ class BrowseRKIViewController: UIViewController {
         
         self.Details.text = NSLocalizedString("Explanation-Details",
                                               comment: " usage line hint \"Details available\"")
-        
-
     }
 
-    
+    // ---------------------------------------------------------------------------------------------
     // MARK: - Navigation
+    // ---------------------------------------------------------------------------------------------
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-     
-        if (segue.identifier == "CallEmbeddedBrowseRKIDataTableViewController") {
-            myEmbeddedTableViewController = segue.destination as? BrowseRKIDataTableViewController
-        }
-     
-    }
-    
-
+//    // In a storyboard-based application, you will often want to do a little preparation before navigation
+//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+//        // Get the new view controller using segue.destination.
+//        // Pass the selected object to the new view controller.
+//
+//        if (segue.identifier == "CallEmbeddedBrowseRKIDataTableViewController") {
+//            myEmbeddedTableViewController = segue.destination as? BrowseRKIDataTableViewController
+//        }
+//    }
 }
