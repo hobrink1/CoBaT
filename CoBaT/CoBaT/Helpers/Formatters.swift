@@ -23,6 +23,8 @@ let shortSingleTimeFormatter = DateFormatter()
 let shortSingleTimeFormatterTZ = DateFormatter()
 let shortSingleDateTimeFormatter = DateFormatter()
 let shortSingleRelativeDateTimeFormatter = DateFormatter()
+let mediumSingleRelativeDateTimeFormatter = DateFormatter()
+let longSingleRelativeDateTimeFormatter = DateFormatter()
 let MediumSingleTimeFormatter = DateFormatter()
 let shortSingleDateTimeFormatterTZ = DateFormatter()
 let shortIntervalDateTimeFormatter = DateIntervalFormatter()
@@ -163,7 +165,18 @@ func buildAllFormatters() {
     shortSingleRelativeDateTimeFormatter.dateStyle = .short
     shortSingleRelativeDateTimeFormatter.timeStyle = .short
     shortSingleRelativeDateTimeFormatter.doesRelativeDateFormatting = true
-    shortSingleRelativeDateTimeFormatter.locale = Locale(identifier: preferredLanguage)
+    //shortSingleRelativeDateTimeFormatter.locale = Locale(identifier: preferredLanguage)
+
+    mediumSingleRelativeDateTimeFormatter.dateStyle = .medium
+    mediumSingleRelativeDateTimeFormatter.timeStyle = .short
+    mediumSingleRelativeDateTimeFormatter.doesRelativeDateFormatting = true
+    //mediumSingleRelativeDateTimeFormatter.locale = Locale(identifier: preferredLanguage)
+
+    longSingleRelativeDateTimeFormatter.dateStyle = .full
+    longSingleRelativeDateTimeFormatter.timeStyle = .short
+    longSingleRelativeDateTimeFormatter.doesRelativeDateFormatting = true
+    //longSingleRelativeDateTimeFormatter.locale = Locale(identifier: preferredLanguage)
+
 
     // use of the standard "Short Style" ... attention: the format is localized
     shortSingleDateTimeFormatterTZ.dateStyle = .short
@@ -377,6 +390,94 @@ func buildAllFormatters() {
 
     
 }
+
+
+/**
+ -----------------------------------------------------------------------------------------------
+ 
+ build a formatted string of the number with the correct sign (+, ±, -)
+ 
+ -----------------------------------------------------------------------------------------------
+ 
+ - Parameters:
+    - number: the integer number to convert into a string
+ 
+ - Returns: the string
+ 
+ */
+func getFormattedDeltaTextInt(number: Int) -> String {
+    
+    var returnString: String = ""
+    
+    if let valueString = numberNoFractionFormatter.string(from: NSNumber(value: number)) {
+        
+        if number > 0 {
+            returnString = "+"
+        } else if number == 0 {
+            returnString = "±"
+        }
+        
+        returnString += valueString
+        
+    } else {
+        
+        returnString = "---"
+    }
+    
+    return returnString
+}
+
+
+/**
+ -----------------------------------------------------------------------------------------------
+ 
+ build a formatted string of the number with the correct sign (+, ±, -)
+ 
+ -----------------------------------------------------------------------------------------------
+ 
+ - Parameters:
+    - number: the double number to convert into a string
+ 
+ - Returns: the string
+ 
+ */
+func getFormattedDeltaTextDouble(number: Double, withFraction: Bool) -> String {
+    
+    var returnString: String = ""
+    
+    if withFraction == true {
+        if let valueString = number1FractionFormatter.string(from: NSNumber(value: number)) {
+            
+            if number > 0 {
+                returnString = "+"
+            } else if number == 0 {
+                returnString = "±"
+            }
+            
+            returnString += valueString
+            
+        } else {
+            
+            returnString = "---"
+        }
+        
+    } else {
+        
+        if let valueString = numberNoFractionFormatter.string(from: NSNumber(value: number)) {
+            
+            if number > 0 {
+                returnString = "-"
+            } else if number == 0 {
+                returnString = "±"
+            }
+            
+            returnString += valueString
+        }
+    }
+    
+    return returnString
+}
+
 
 // -----------------------------------------
 // returns a formatted position in the form "xxx° xx' xx,xx" N / xx° xx' xx,xx" W"

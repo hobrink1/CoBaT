@@ -35,10 +35,7 @@ class BrowseRKIViewController: UIViewController {
     @IBAction func DoneButtonAction(_ sender: UIBarButtonItem) {
         self.dismiss(animated: true, completion: nil)
     }
-    
-    @IBOutlet weak var EmbeddedContainerView: UIView!
-    
-    
+        
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Sort

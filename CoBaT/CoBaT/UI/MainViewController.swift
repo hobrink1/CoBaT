@@ -36,22 +36,19 @@ class MainViewController: UIViewController {
     @IBOutlet weak var DeutschlandButton: UIButton!
     @IBAction func DeutschlandButtonAction(_ sender: UIButton) {
         
-        performSegue(withIdentifier: "CallBrowseRKIIViewController", sender: self)
-        GlobalUIData.unique.UIBrowserRKITitelString = "Deutschland"
-        GlobalUIData.unique.UIBrowserRKIAreaLevel = GlobalStorage.unique.RKIDataCountry
-        GlobalUIData.unique.saveUIData()
-
-
+        GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataCountry
+        GlobalUIData.unique.UIDetailsRKISelectedMyID = "0"
+        performSegue(withIdentifier: "CallDetailsRKIViewController", sender: self)
     }
     
     @IBOutlet weak var StateButton: UIButton!
     @IBAction func StateButtonAction(_ sender: UIButton) {
 
-        performSegue(withIdentifier: "CallBrowseRKIIViewController", sender: self)
         GlobalUIData.unique.UIBrowserRKITitelString = "Bundesländer"
         GlobalUIData.unique.UIBrowserRKIAreaLevel = GlobalStorage.unique.RKIDataState
         GlobalUIData.unique.saveUIData()
-
+        performSegue(withIdentifier: "CallBrowseRKIIViewController", sender: self)
+ 
     }
    
     @IBOutlet weak var SelectedState: UILabel!
@@ -59,11 +56,11 @@ class MainViewController: UIViewController {
     @IBOutlet weak var CountyButton: UIButton!
     @IBAction func CountydButtonAction(_ sender: UIButton) {
         
-        performSegue(withIdentifier: "CallBrowseRKIIViewController", sender: self)
         GlobalUIData.unique.UIBrowserRKITitelString = GlobalUIData.unique.UIBrowserRKISelectedStateName
         GlobalUIData.unique.UIBrowserRKIAreaLevel = GlobalStorage.unique.RKIDataCounty
         GlobalUIData.unique.saveUIData()
-    }
+        performSegue(withIdentifier: "CallBrowseRKIIViewController", sender: self)
+   }
    
     @IBOutlet weak var SelectedCounty: UILabel!
     

@@ -20,10 +20,18 @@ final class GlobalUIData: NSObject {
     static let unique = GlobalUIData()
     
     // ---------------------------------------------------------------------------------------------
-    // MARK: - Constants and variables
+    // MARK: - Constants and variables (NOT permanent stored)
     // ---------------------------------------------------------------------------------------------
     private let permanentStore = UserDefaults.standard
 
+    // The DetailsRKITableViewController uses this data to build local data out of the global Storage
+    public var UIDetailsRKIAreaLevel: Int = GlobalStorage.unique.RKIDataCounty
+    public var UIDetailsRKISelectedMyID: String = "9"
+
+    
+    // ---------------------------------------------------------------------------------------------
+    // MARK: - Variables (permanent stored)
+    // ---------------------------------------------------------------------------------------------
     public var UIBrowserRKIAreaLevel: Int = GlobalStorage.unique.RKIDataCounty
     
     public var UIBrowserRKITitelString: String = "Bayern"
@@ -60,7 +68,6 @@ final class GlobalUIData: NSObject {
      
      - Returns:
         - the index of the county in the data of today, the ID of the county and the name of it
-     
      */
     public func getCountyFromStateID(stateID: String) -> (countyIndex: Int, countyID: String, countyName: String) {
         

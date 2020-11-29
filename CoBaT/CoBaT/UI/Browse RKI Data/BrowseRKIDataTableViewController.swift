@@ -197,15 +197,9 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
     /**
      -----------------------------------------------------------------------------------------------
      
-     
+     sortLocalData
      
      -----------------------------------------------------------------------------------------------
-     
-     - Parameters:
-     - :
-     
-     - Returns:
-     
      */
     public func sortLocalData(source0: [GlobalStorage.RKIDataStruct],
                                source1: [GlobalStorage.RKIDataStruct],
@@ -222,13 +216,21 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             switch GlobalUIData.unique.UIBrowserRKISorting {
             
             case .alphabetically:
-                self.localDataArray = source0.sorted( by: { $0.name < $1.name } )
+                
+                // we had to combine two keys ($0.name + $0.kindOf) as "Regensburg" exist two times (Kreisfreie Stadt and Landkreis)
+                // by this we introduced a new key "$0.myID", but we have to wait 7 days to get the data cleaned out by age
+                // TODO: TODO: change key to $0.myID after December 5th 2020
+
+                self.localDataArray = source0.sorted(
+                    by: { ($0.name + $0.kindOf) < ($1.name + $0.kindOf) } )
                 
             case .incidencesAscending:
-                self.localDataArray = source0.sorted( by: { $0.cases7DaysPer100K < $1.cases7DaysPer100K } )
+                self.localDataArray = source0.sorted(
+                    by: { $0.cases7DaysPer100K < $1.cases7DaysPer100K } )
 
             case .incidencesDescending:
-                self.localDataArray = source0.sorted( by: { $0.cases7DaysPer100K > $1.cases7DaysPer100K } )
+                self.localDataArray = source0.sorted(
+                    by: { $0.cases7DaysPer100K > $1.cases7DaysPer100K } )
             }
             
             
@@ -239,10 +241,12 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
                 
                 for item in self.localDataArray {
                     
-                    // we had to combine two keys ($0.kindOf + $0.name) as "Regensburg" exist two times (Kreisfreie Stadt and Landkreis)
+                    // we had to combine two keys ($0.name + $0.kindOf) as "Regensburg" exist two times (Kreisfreie Stadt and Landkreis)
                     // by this we introduced a new key "$0.myID", but we have to wait 7 days to get the data cleaned out by age
                     // TODO: TODO: change key to $0.myID after December 5th 2020
-                    if let index1InUnsorted = source1.firstIndex(where: { ($0.kindOf + $0.name) == (item.kindOf + item.name) } ) {
+
+                    if let index1InUnsorted = source1.firstIndex(
+                        where: { ($0.name + $0.kindOf) == (item.name + item.kindOf) } ) {
                         
                         //print("\(item.kindOf) \(item.name): index1InUnsorted: \(index1InUnsorted) of \(source1.count)")
 
@@ -252,21 +256,28 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
                         
                         //print("\(item.kindOf) \(item.name)): index1InUnsorted: unknown of \(source1.count), new \(self.localDataArrayDelta1.count)")
 
-                        self.localDataArrayDelta1.append(GlobalStorage.RKIDataStruct(
-                                                        stateID:            item.stateID,
-                                                        myID:               item.myID ?? "",
-                                                        name:               item.name,
-                                                        kindOf:             item.kindOf,
-                                                        inhabitants:        0,
-                                                        cases:              0,
-                                                        deaths:             0,
-                                                        casesPer100k:       0,
-                                                        cases7DaysPer100K:  0,
-                                                        timeStamp:          item.timeStamp))
+                        self.localDataArrayDelta1.append(
+                            GlobalStorage.RKIDataStruct(
+                                stateID:            item.stateID,
+                                myID:               item.myID ?? "",
+                                name:               item.name,
+                                kindOf:             item.kindOf,
+                                inhabitants:        0,
+                                cases:              0,
+                                deaths:             0,
+                                casesPer100k:       0,
+                                cases7DaysPer100K:  0,
+                                timeStamp:          item.timeStamp))
                     }
                     
                     if self.numberOfDayAvailable > 2 {
-                        if let index7InUnsorted = source7.firstIndex(where: { ($0.kindOf + $0.name) == (item.kindOf + item.name) } ) {
+                        
+                        // we had to combine two keys ($0.name + $0.kindOf) as "Regensburg" exist two times (Kreisfreie Stadt and Landkreis)
+                        // by this we introduced a new key "$0.myID", but we have to wait 7 days to get the data cleaned out by age
+                        // TODO: TODO: change key to $0.myID after December 5th 2020
+
+                        if let index7InUnsorted = source7.firstIndex(
+                            where: { ($0.name + $0.kindOf) == (item.name + item.kindOf) } ) {
                             
                             //print("\(item.kindOf) \(item.name): index7InUnsorted: \(index7InUnsorted) of \(source7.count), new \(self.localDataArrayDelta1.count)")
                             
@@ -276,17 +287,18 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
                             
                             //print("\(item.kindOf) \(item.name): index7InUnsorted: unknown of \(source7.count)")
                             
-                            self.localDataArrayDelta7.append(GlobalStorage.RKIDataStruct(
-                                                                stateID:            item.stateID,
-                                                                myID:               item.myID ?? "",
-                                                                name:               item.name,
-                                                                kindOf:             item.kindOf,
-                                                                inhabitants:        0,
-                                                                cases:              0,
-                                                                deaths:             0,
-                                                                casesPer100k:       0,
-                                                                cases7DaysPer100K:  0,
-                                                                timeStamp:          item.timeStamp))
+                            self.localDataArrayDelta7.append(
+                                GlobalStorage.RKIDataStruct(
+                                    stateID:            item.stateID,
+                                    myID:               item.myID ?? "",
+                                    name:               item.name,
+                                    kindOf:             item.kindOf,
+                                    inhabitants:        0,
+                                    cases:              0,
+                                    deaths:             0,
+                                    casesPer100k:       0,
+                                    cases7DaysPer100K:  0,
+                                    timeStamp:          item.timeStamp))
                         }
                     }
                 }
@@ -299,97 +311,7 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             // reload the cells
             self.tableView.reloadData()
         }
-
-        
     }
-    
-    /**
-     -----------------------------------------------------------------------------------------------
-     
-     build a formatted string of the number with the correct sign (+, ±, -)
-     
-     -----------------------------------------------------------------------------------------------
-     
-     - Parameters:
-        - number: the integer number to convert into a string
-     
-     - Returns: the string
-     
-     */
-    private func getFormattedDeltaTextInt(number: Int) -> String {
-        
-        var returnString: String = ""
-        
-        if let valueString = numberNoFractionFormatter.string(from: NSNumber(value: number)) {
-            
-            if number > 0 {
-                returnString = "+"
-            } else if number == 0 {
-                returnString = "±"
-            }
-            
-            returnString += valueString
-            
-        } else {
-            
-            returnString = "---"
-        }
-        
-        return returnString
-    }
-    
-    
-    /**
-     -----------------------------------------------------------------------------------------------
-     
-     build a formatted string of the number with the correct sign (+, ±, -)
-     
-     -----------------------------------------------------------------------------------------------
-     
-     - Parameters:
-        - number: the double number to convert into a string
-     
-     - Returns: the string
-     
-     */
-    private func getFormattedDeltaTextDouble(number: Double, withFraction: Bool) -> String {
-        
-        var returnString: String = ""
-        
-        if withFraction == true {
-            if let valueString = number1FractionFormatter.string(from: NSNumber(value: number)) {
-                
-                if number > 0 {
-                    returnString = "+"
-                } else if number == 0 {
-                    returnString = "±"
-                }
-                
-                returnString += valueString
-                
-            } else {
-                
-                returnString = "---"
-            }
-            
-        } else {
-            
-            if let valueString = numberNoFractionFormatter.string(from: NSNumber(value: number)) {
-                
-                if number > 0 {
-                    returnString = "-"
-                } else if number == 0 {
-                    returnString = "±"
-                }
-                
-                returnString += valueString
-            }
-        }
-        
-        return returnString
-    }
-    
-    
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Life cycle
@@ -478,26 +400,6 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         }
     }
 
-    /**
-     -----------------------------------------------------------------------------------------------
-     
-     viewDidLoad()
-     
-     -----------------------------------------------------------------------------------------------
-     */
-    //    override func viewDidAppear(_ animated: Bool) {
-    //        super.viewDidAppear(animated)
-    //
-    //        // refresh the data
-    //        self.RefreshLocalData()
-    //    }
-    
-    //    @objc func appMovedToBackground() {
-    //           print("App moved to background!")
-    //        }
-    
-    
- 
     
 
     
@@ -540,7 +442,8 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         // dequeue a cell
-        let cell = tableView.dequeueReusableCell(withIdentifier: "BrowseRKIDataTableViewCellV2", for: indexPath) as! BrowseRKIDataTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "BrowseRKIDataTableViewCellV2",
+                                                 for: indexPath) as! BrowseRKIDataTableViewCell
         
         // set the cell properties (index path and that we are the one to serve the selectButtonDelegate)
         cell.myIndexPath = indexPath

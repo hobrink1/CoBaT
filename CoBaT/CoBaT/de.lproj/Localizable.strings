@@ -59,6 +59,15 @@
 "label-incidences" = "Inzidenz:";
 
 
+/**************************************************************************************************
+ *
+ * class DetailsRKIViewController
+ * func updateLabels())
+ *
+ **************************************************************************************************/
+
+/* Label text that we did not found valid data */
+"updateLabels-no-index" = "Keine Daten";
 
 
 
