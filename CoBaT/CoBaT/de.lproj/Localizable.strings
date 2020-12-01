@@ -56,12 +56,30 @@
 "label-cases" = "Fälle:";
 
 /* Label text for incidences */
-"label-incidences" = "Inzidenz:";
+"label-incidences" = "Fälle in 7 Tagen:";
+
+/* Label text for inhabitants */
+"label-inhabitants" = "Einwohner:";
+
+/* Label text for total */
+"label-total" = "Gesamt";
+
+/* Label text for per 100k */
+"label-per-100k" = "pro 100.000";
+
+/* Label text for deaths */
+"label-deaths" = "Tote:";
+
+/* Label text for change */
+"label-change" = "Änderung:";
+
+
+
 
 
 /**************************************************************************************************
  *
- * class DetailsRKIViewController
+ * class DetailsRKIViewController and DetailsRKITableViewController
  * func updateLabels())
  *
  **************************************************************************************************/

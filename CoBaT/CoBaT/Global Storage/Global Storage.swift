@@ -60,7 +60,7 @@ final class GlobalStorage: NSObject {
     public let RKIDataCounty: Int = 2
     
     // size of storage
-    private let maxNumberOfDaysStored: Int = 7
+    private let maxNumberOfDaysStored: Int = 15
     private let maxNumberOfErrorsStored: Int = 20
     
     // Version of permanent storage
@@ -102,7 +102,7 @@ final class GlobalStorage: NSObject {
                     // got the data, try to decode it
                     do {
                         
-                        let myRKIData = try JSONDecoder().decode([[[RKIDataStruct]]].self,
+                        var myRKIData = try JSONDecoder().decode([[[RKIDataStruct]]].self,
                                                                        from: (loadedRKIData as? Data)!)
                         
                         let myRKIDataTimeStamps = try JSONDecoder().decode([[TimeInterval]].self,
@@ -119,11 +119,61 @@ final class GlobalStorage: NSObject {
                         // check the version
                         if currentVersionOfPermanentStorage == self.VersionOfPermanentStorage {
                             
+                            // Start DataCleansing -------------------------------------------------
+                            // As we had a problem in the early development, we lost some "myID" Strings
+                            // so we restore them with the following loop.
+                            // Can be wiped out, after all data migrated (mid Dezember 2020)
+                            // TODO: TODO: Remove data cleansing
+                            
+                            var weDidChangeSomething: Bool = false
+                            
+                            for indexArea in 0 ..< myRKIData.count {
+
+                                for indexDay in 1 ..< myRKIData[indexArea].count {
+                                    
+                                    for indexMember in 0 ..< myRKIData[indexArea][indexDay].count {
+                                        
+                                        if myRKIData[indexArea][indexDay][indexMember].myID == nil {
+                                            
+                                            weDidChangeSomething = true
+                                            
+                                            let currentMember = myRKIData[indexArea][indexDay][indexMember]
+                                            let memberFromDayBefore = myRKIData[indexArea][indexDay - 1][indexMember]
+                                            
+                                            myRKIData[indexArea][indexDay][indexMember] =
+                                                RKIDataStruct(stateID: currentMember.stateID,
+                                                              myID:                 memberFromDayBefore.myID ?? "",
+                                                              name:                 currentMember.name,
+                                                              kindOf:               currentMember.kindOf,
+                                                              inhabitants:          currentMember.inhabitants,
+                                                              cases:                currentMember.cases,
+                                                              deaths:               currentMember.deaths,
+                                                              casesPer100k:         currentMember.casesPer100k,
+                                                              cases7DaysPer100K:    currentMember.cases7DaysPer100K,
+                                                              timeStamp:            currentMember.timeStamp)
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // End DataCleansing ---------------------------------------------------
+
+                            
                             // we have the current version, so restore the date
                             self.RKIData = myRKIData
                             self.RKIDataTimeStamps = myRKIDataTimeStamps
                             self.RKIDataLastUpdated = loadedRKIDataLastUpdated
                             self.RKIDataLastRetreived = loadedRKIDataLastRetreived
+
+                            // Start DataCleansing -------------------------------------------------
+                            // after the cleansing we save the new
+                            // TODO: TODO: Remove data cleansing
+
+                            if weDidChangeSomething == true {
+                                self.saveRKIData()
+                            }
+                            
+                            // End DataCleansing ---------------------------------------------------
                             
                             // rebuild the delta values
                             self.rebuildRKIDeltas()

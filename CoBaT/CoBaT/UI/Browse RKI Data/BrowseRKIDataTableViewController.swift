@@ -31,7 +31,13 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
     // the number of days available
     var numberOfDayAvailable: Int = 0
     
+    // label texts, translated
+    let casesText = NSLocalizedString("label-cases", comment: "Label text for cases")
+    let IncidencesText = NSLocalizedString("label-incidences", comment: "Label text for incidences")
     
+    // the id string of the selected item, to highlight the related cell
+    var selectedItemID: String = ""
+
     // ----------------------------------------------------------------------------------
     // MARK: - Delegate for select button
     // ----------------------------------------------------------------------------------
@@ -207,7 +213,7 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
     {
         
         // we use the main thread as our working thread, so we have no problems in UI updates
-        DispatchQueue.main.async {
+        DispatchQueue.main.async(execute: {
             
             #if DEBUG_PRINT_FUNCCALLS
             print("sortLocalData just started")
@@ -310,7 +316,52 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
 
             // reload the cells
             self.tableView.reloadData()
-        }
+            
+            // and scroll right
+            self.scrollToSelectedItem()
+            
+        })
+    }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     Scrolls to the selected item (UIBrowserRKISelectedStateID or UIBrowserRKISelectedCountyID)
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func scrollToSelectedItem() {
+        
+        // which arae level we have
+        switch GlobalUIData.unique.UIBrowserRKIAreaLevel {
+        
+        case GlobalStorage.unique.RKIDataCountry:
+            
+            // Country Level: nothing to do
+            break
+            
+            
+        case GlobalStorage.unique.RKIDataState:
+            
+            // try to find the selected state in the local data, if found scroll to it
+            if let row = self.localDataArray.firstIndex(where: { $0.myID == self.selectedItemID } ) {
+                
+                self.tableView.scrollToRow(at: IndexPath(item: row, section: 0), at: .top, animated: true)
+            }
+
+
+        case GlobalStorage.unique.RKIDataCounty:
+            
+            // try to find the selected state in the local data, if found scroll to it
+            if let row = self.localDataArray.firstIndex(where: { $0.myID == self.selectedItemID } ) {
+                
+                self.tableView.scrollToRow(at: IndexPath(item: row, section: 0), at: .top, animated: true)
+            }
+            
+        default:
+            break
+      }
+
     }
     
     // ---------------------------------------------------------------------------------------------
@@ -336,6 +387,22 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         self.tableView.rowHeight = UITableView.automaticDimension
         self.tableView.estimatedRowHeight = 64
         
+        // set the id of the selected item
+        switch GlobalUIData.unique.UIBrowserRKIAreaLevel {
+   
+        case GlobalStorage.unique.RKIDataCountry:
+            break
+            
+        case GlobalStorage.unique.RKIDataState:
+            self.selectedItemID = GlobalUIData.unique.UIBrowserRKISelectedStateID
+            
+        case GlobalStorage.unique.RKIDataCounty:
+            self.selectedItemID = GlobalUIData.unique.UIBrowserRKISelectedCountyID
+            
+        default:
+            break
+      }
+
         // refresh the data
         self.RefreshLocalData()
     }
@@ -377,6 +444,9 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
                 
                 self.RefreshLocalData()
             })
+
+        // scroll the content to the selected item
+        //self.scrollToSelectedItem()
 
     }
  
@@ -459,6 +529,13 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         // set the background of the cell
         cell.contentView.backgroundColor = backgroundColor
         
+        // set the border color, so the selected cell will be highlighted
+        if myData.myID == self.selectedItemID {
+            cell.layer.borderColor = textColorToUse.cgColor
+        } else {
+            cell.layer.borderColor = backgroundColor.cgColor
+        }
+   
         // color the two chevrons
         cell.ChevronLeft.tintColor = textColorToUse
         cell.ChevronRight.tintColor = textColorToUse
@@ -495,9 +572,9 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         
         // set the fixed labels
         cell.Name.text = myData.name
-        cell.Cases.text = NSLocalizedString("label-cases", comment: "Label text for cases")
-        cell.Incidences.text = NSLocalizedString("label-incidences", comment: "Label text for incidences")
-
+        cell.Cases.text = self.casesText
+        cell.Incidences.text = self.IncidencesText
+        
         // now fill the data fields according to number of available days
         if numberOfDayAvailable == 1 {
             
@@ -532,7 +609,7 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
                 from: NSNumber(value: myData.cases7DaysPer100K))
             
             cell.ThirdIncidences.text = getFormattedDeltaTextDouble(
-                number: localDataArrayDelta1[index].cases7DaysPer100K, withFraction: true)
+                number: localDataArrayDelta1[index].cases7DaysPer100K, fraction: 1)
             
             
         } else if (numberOfDayAvailable > 2)
@@ -550,10 +627,10 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
                 from: NSNumber(value: myData.cases7DaysPer100K))
             
             cell.SecondIncidences.text = getFormattedDeltaTextDouble(
-                number: localDataArrayDelta1[index].cases7DaysPer100K, withFraction: true)
+                number: localDataArrayDelta1[index].cases7DaysPer100K, fraction: 1)
             
             cell.ThirdIncidences.text = getFormattedDeltaTextDouble(
-                number: localDataArrayDelta7[index].cases7DaysPer100K, withFraction: true)
+                number: localDataArrayDelta7[index].cases7DaysPer100K, fraction: 1)
             
             
         } else {
@@ -591,6 +668,23 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         // we want automatic height (text size adapts to size selectuon by user, cell has to adapt)
         return UITableView.automaticDimension
     }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     didSelectRowAt:
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        // deselct, to keep enviroemt clean
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+    }
+
+    
+    
     
     /*
      // Override to support conditional editing of the table view.

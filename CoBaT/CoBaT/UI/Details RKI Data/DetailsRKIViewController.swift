@@ -29,11 +29,26 @@ class DetailsRKIViewController: UIViewController {
     // variables to hold the related strings for the Labels
     var forTitel: String = ""
     var forLabelKindOf: String = ""
+    var forLabelInhabitants: String = ""
+    var forValueInhabitants: String = ""
+    
+    
+    
+    // ---------------------------------------------------------------------------------------------
+    // MARK: - Translated texts
+    // ---------------------------------------------------------------------------------------------
+    let inhabitantsText = NSLocalizedString("label-inhabitants", comment: "Label text for inhabitants")
+
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - UI Outlets
     // ---------------------------------------------------------------------------------------------
+    
     @IBOutlet weak var labelKindOf: UILabel!
+    
+    @IBOutlet weak var labelInhabitants: UILabel!
+    @IBOutlet weak var ValueInhabitants: UILabel!
+   
     
     @IBOutlet weak var DoneButton: UIBarButtonItem!
     @IBAction func DoneButtonAction(_ sender: UIBarButtonItem) {
@@ -136,7 +151,15 @@ class DetailsRKIViewController: UIViewController {
                 
                 // we found a valid index, so store the data locally
                 forTitel = RKIDataToUse[indexRKIData].name
+                
                 forLabelKindOf = RKIDataToUse[indexRKIData].kindOf
+                
+                forValueInhabitants = numberNoFractionFormatter.string(
+                    from: NSNumber(value: RKIDataToUse[indexRKIData].inhabitants))
+                    ?? NSLocalizedString("updateLabels-no-index", comment: "Label text that we did not found valid data")
+                
+                forLabelInhabitants = NSLocalizedString("label-inhabitants",
+                                                        comment: "Label text for inhabitants")
                 
             } else {
                 
@@ -146,6 +169,8 @@ class DetailsRKIViewController: UIViewController {
                 forTitel = NSLocalizedString("updateLabels-no-index",
                                              comment: "Label text that we did not found valid data")
                 forLabelKindOf = ""
+                
+                forValueInhabitants = ""
 
             }
         })
@@ -155,6 +180,9 @@ class DetailsRKIViewController: UIViewController {
             
             self.title = self.forTitel
             self.labelKindOf.text = self.forLabelKindOf
+            
+            self.labelInhabitants.text = self.forLabelInhabitants
+            self.ValueInhabitants.text = self.forValueInhabitants
         })
     }
     

@@ -56,8 +56,34 @@
 "label-cases" = "Cases:";
 
 /* Label text for incidences */
-"label-incidences" = "Incidences:";
+"label-incidences" = "Cases in last 7 days:";
 
+/* Label text for inhabitants */
+"label-inhabitants" = "Inhabitants:";
+
+/* Label text for total */
+"label-total" = "Total";
+
+/* Label text for per 100k */
+"label-per-100k" = "per 100,000";
+
+/* Label text for deaths */
+"label-deaths" = "Deaths:";
+
+/* Label text for change */
+"label-change" = "Changes:";
+
+
+
+/**************************************************************************************************
+ *
+ * class DetailsRKIViewController and DetailsRKITableViewController
+ * func updateLabels())
+ *
+ **************************************************************************************************/
+
+/* Label text that we did not found valid data */
+"updateLabels-no-index" = "No Data";
 
 
 

@@ -22,7 +22,9 @@ let fullSingleDateFormatter = DateFormatter()
 let shortSingleTimeFormatter = DateFormatter()
 let shortSingleTimeFormatterTZ = DateFormatter()
 let shortSingleDateTimeFormatter = DateFormatter()
+let shortSingleRelativeDateFormatter = DateFormatter()
 let shortSingleRelativeDateTimeFormatter = DateFormatter()
+let mediumSingleRelativeDateFormatter = DateFormatter()
 let mediumSingleRelativeDateTimeFormatter = DateFormatter()
 let longSingleRelativeDateTimeFormatter = DateFormatter()
 let MediumSingleTimeFormatter = DateFormatter()
@@ -32,8 +34,11 @@ let shortIntervalDateFormatter = DateIntervalFormatter()
 let shortIntervalTimeFormatter = DateIntervalFormatter()
 
 // MARK: - NumberFormatter
+let neutralNumberFormatter = NumberFormatter()
+
 let numberNoFractionFormatter = NumberFormatter()
 let number1FractionFormatter = NumberFormatter()
+let number3FractionFormatter = NumberFormatter()
 
 let numberNoFractionFormatterEN = NumberFormatter()
 let numberNoFraction1DigitsFormatter = NumberFormatter()
@@ -162,11 +167,22 @@ func buildAllFormatters() {
     MediumSingleTimeFormatter.locale = Locale(identifier: preferredLanguage)
 
     
+    shortSingleRelativeDateFormatter.dateStyle = .short
+    shortSingleRelativeDateFormatter.timeStyle = .none
+    shortSingleRelativeDateFormatter.doesRelativeDateFormatting = true
+    //shortSingleRelativeDateFormatter.locale = Locale(identifier: preferredLanguage)
+    
     shortSingleRelativeDateTimeFormatter.dateStyle = .short
     shortSingleRelativeDateTimeFormatter.timeStyle = .short
     shortSingleRelativeDateTimeFormatter.doesRelativeDateFormatting = true
     //shortSingleRelativeDateTimeFormatter.locale = Locale(identifier: preferredLanguage)
 
+    mediumSingleRelativeDateFormatter.dateStyle = .medium
+    mediumSingleRelativeDateFormatter.timeStyle = .short
+    mediumSingleRelativeDateFormatter.doesRelativeDateFormatting = true
+    //mediumSingleRelativeDateFormatter.locale = Locale(identifier: preferredLanguage)
+
+    
     mediumSingleRelativeDateTimeFormatter.dateStyle = .medium
     mediumSingleRelativeDateTimeFormatter.timeStyle = .short
     mediumSingleRelativeDateTimeFormatter.doesRelativeDateFormatting = true
@@ -273,6 +289,13 @@ func buildAllFormatters() {
     shortIntervalTimeFormatter.timeStyle = .short
     shortIntervalTimeFormatter.locale = Locale(identifier: preferredLanguage)
 
+    
+    // can be changed by calling functions
+    neutralNumberFormatter.numberStyle = .decimal
+    neutralNumberFormatter.minimumFractionDigits = 0
+    neutralNumberFormatter.maximumFractionDigits = 0
+    neutralNumberFormatter.locale = Locale(identifier: preferredLanguage)
+
 
     // formatter for decimals with no fraction
     numberNoFractionFormatter.numberStyle = .decimal
@@ -284,6 +307,12 @@ func buildAllFormatters() {
     number1FractionFormatter.maximumFractionDigits = 1
     number1FractionFormatter.minimumFractionDigits = 1
     number1FractionFormatter.locale = Locale(identifier: preferredLanguage)
+    
+    // formatter for decimals with fraction of 1 digit
+    number3FractionFormatter.numberStyle = .decimal
+    number3FractionFormatter.maximumFractionDigits = 3
+    number3FractionFormatter.minimumFractionDigits = 3
+    number3FractionFormatter.locale = Locale(identifier: preferredLanguage)
 
     
     
@@ -412,16 +441,16 @@ func getFormattedDeltaTextInt(number: Int) -> String {
     if let valueString = numberNoFractionFormatter.string(from: NSNumber(value: number)) {
         
         if number > 0 {
-            returnString = "+"
+            returnString = "+ "
         } else if number == 0 {
-            returnString = "±"
+            returnString = "± "
         }
         
         returnString += valueString
         
     } else {
         
-        returnString = "---"
+        returnString = ""
     }
     
     return returnString
@@ -441,38 +470,31 @@ func getFormattedDeltaTextInt(number: Int) -> String {
  - Returns: the string
  
  */
-func getFormattedDeltaTextDouble(number: Double, withFraction: Bool) -> String {
+func getFormattedDeltaTextDouble(number: Double, fraction: Int) -> String {
     
     var returnString: String = ""
     
-    if withFraction == true {
-        if let valueString = number1FractionFormatter.string(from: NSNumber(value: number)) {
+    neutralNumberFormatter.minimumFractionDigits = fraction
+    neutralNumberFormatter.maximumFractionDigits = fraction
+    
+    let roundBorder = 0.5 / pow( 10.0, Double(fraction) )
+    
+    if let valueString = neutralNumberFormatter.string(from: NSNumber(value: number)) {
+        
+        if number > roundBorder {
             
-            if number > 0 {
-                returnString = "+"
-            } else if number == 0 {
-                returnString = "±"
-            }
+            returnString = "+ "
             
-            returnString += valueString
+        } else if abs(number) < roundBorder {
             
-        } else {
-            
-            returnString = "---"
+            returnString = "± "
         }
+        
+        returnString += valueString
         
     } else {
         
-        if let valueString = numberNoFractionFormatter.string(from: NSNumber(value: number)) {
-            
-            if number > 0 {
-                returnString = "-"
-            } else if number == 0 {
-                returnString = "±"
-            }
-            
-            returnString += valueString
-        }
+        returnString = ""
     }
     
     return returnString

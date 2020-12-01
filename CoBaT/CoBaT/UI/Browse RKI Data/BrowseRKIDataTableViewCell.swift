@@ -56,20 +56,6 @@ class BrowseRKIDataTableViewCell: UITableViewCell {
 
     // the button outlet
      @IBOutlet weak var SelectButton: UIButton!
-//     {
-//        didSet {
-//            CollapseButton.backgroundColor = .clear
-//            CollapseButton.layer.cornerRadius = 5
-//            CollapseButton.layer.borderWidth = 1
-//            CollapseButton.layer.borderColor = WaysButtonBorderColorCGColor
-            
-//            CollapseButton.layer.shadowRadius = 0.5
-//            CollapseButton.layer.shadowColor = waysButtonShadowColorCGColor
-//            CollapseButton.layer.shadowOffset = CGSize(width: 1.5, height: 1.5)
-//            CollapseButton.layer.shadowOpacity = 0.0
-//        }
-//    }
-    
     
     // the action methode which simply called the protocol methode
     @IBAction func SelectButtonAction(_ sender: UIButton) {
@@ -94,12 +80,10 @@ class BrowseRKIDataTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-    }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+        
+        // we use a rounded style
+        self.layer.cornerRadius = 5
+        self.layer.borderWidth = 1
     }
 
 }

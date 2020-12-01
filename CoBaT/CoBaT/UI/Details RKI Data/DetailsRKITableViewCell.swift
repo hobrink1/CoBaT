@@ -48,12 +48,11 @@ class DetailsRKITableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-    }
+        
+        // we use a rounded style
+        self.layer.cornerRadius = 5
+        self.layer.borderWidth = 1
 
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
 
 }

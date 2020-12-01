@@ -50,7 +50,14 @@ class MainViewController: UIViewController {
         performSegue(withIdentifier: "CallBrowseRKIIViewController", sender: self)
  
     }
-   
+    
+    
+    @IBAction func DetailsStateButton(_ sender: UIButton) {
+        GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataState
+        GlobalUIData.unique.UIDetailsRKISelectedMyID = GlobalUIData.unique.UIBrowserRKISelectedStateID
+        performSegue(withIdentifier: "CallDetailsRKIViewController", sender: self)
+    }
+    
     @IBOutlet weak var SelectedState: UILabel!
   
     @IBOutlet weak var CountyButton: UIButton!
@@ -61,6 +68,13 @@ class MainViewController: UIViewController {
         GlobalUIData.unique.saveUIData()
         performSegue(withIdentifier: "CallBrowseRKIIViewController", sender: self)
    }
+    
+    @IBAction func DetailsCountyButton(_ sender: UIButton) {
+        GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataCounty
+        GlobalUIData.unique.UIDetailsRKISelectedMyID = GlobalUIData.unique.UIBrowserRKISelectedCountyID
+        performSegue(withIdentifier: "CallDetailsRKIViewController", sender: self)
+    }
+    
    
     @IBOutlet weak var SelectedCounty: UILabel!
     
