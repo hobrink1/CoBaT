@@ -159,11 +159,8 @@
 				F22D00AC2567B5D500C908AA /* Info.plist */,
 				F22D009E2567B5D300C908AA /* AppDelegate.swift */,
 				F22D00A02567B5D300C908AA /* SceneDelegate.swift */,
-				F2AD3054256D007D00FDDE4B /* RKI Data */,
-				F2AD306A256D0AA500FDDE4B /* Background Service */,
-				F2AD3069256D0A7200FDDE4B /* Location Service */,
-				F2DE391C25728A1D0033E6B2 /* Notification Service */,
-				F2AD3068256D0A5900FDDE4B /* Global Storage */,
+				F2DB33AE2578DD7900C47972 /* Data Gathering */,
+				F2DB33B52578DDAC00C47972 /* Data Store */,
 				F2AD305A256D00CF00FDDE4B /* UI */,
 				F2AD3070256D109600FDDE4B /* User Notifications */,
 				F273D76A256E4D600002E15B /* Helpers */,
@@ -222,7 +219,6 @@
 			isa = PBXGroup;
 			children = (
 				F2ED1097256DAFDE003E2C41 /* Formatters.swift */,
-				F273D76B256E4D860002E15B /* CovidRating.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -241,10 +237,12 @@
 		F2AD305A256D00CF00FDDE4B /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				F207CA6F2571B35B0000F90B /* GlobalUIData.swift */,
 				F24D37F5257780F40036FEE3 /* Main Screen */,
 				F2ED109F256DB398003E2C41 /* Browse RKI Data */,
 				F24D37E2257397820036FEE3 /* Details RKI Data */,
 				F2DB339825778AC100C47972 /* Help Screen */,
+				F273D76B256E4D860002E15B /* CovidRating.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -253,7 +251,6 @@
 			isa = PBXGroup;
 			children = (
 				F2AD306B256D0AD900FDDE4B /* Global Storage.swift */,
-				F207CA6F2571B35B0000F90B /* GlobalUIData.swift */,
 			);
 			path = "Global Storage";
 			sourceTree = "<group>";
@@ -286,6 +283,25 @@
 				F2DB339E25778B0600C47972 /* HelpTableViewCell.swift */,
 			);
 			path = "Help Screen";
+			sourceTree = "<group>";
+		};
+		F2DB33AE2578DD7900C47972 /* Data Gathering */ = {
+			isa = PBXGroup;
+			children = (
+				F2AD3054256D007D00FDDE4B /* RKI Data */,
+				F2AD306A256D0AA500FDDE4B /* Background Service */,
+				F2AD3069256D0A7200FDDE4B /* Location Service */,
+			);
+			path = "Data Gathering";
+			sourceTree = "<group>";
+		};
+		F2DB33B52578DDAC00C47972 /* Data Store */ = {
+			isa = PBXGroup;
+			children = (
+				F2AD3068256D0A5900FDDE4B /* Global Storage */,
+				F2DE391C25728A1D0033E6B2 /* Notification Service */,
+			);
+			path = "Data Store";
 			sourceTree = "<group>";
 		};
 		F2DE391C25728A1D0033E6B2 /* Notification Service */ = {
