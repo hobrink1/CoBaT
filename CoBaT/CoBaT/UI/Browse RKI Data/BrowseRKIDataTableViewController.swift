@@ -726,7 +726,6 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         
         // deselct, to keep enviroemt clean
         tableView.deselectRow(at: indexPath, animated: true)
-        
     }
 
     

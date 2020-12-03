@@ -44,65 +44,65 @@ class CommonTabTableViewController: UITableViewController {
     
     
     let RegulationsMatrix: [[regulationsMatrixStruct]] = [
-        // 0
+        // 0: no covid
         [
             regulationsMatrixStruct(UIImage(named: "Empty")!, "no covid, no regulations"),
         ],
         
-        // 1
+        // 1: green
         [
             regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
-            regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask"),
-            regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air room "),
             regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
-            regulationsMatrixStruct(UIImage(named: "Alkohol")!,     "Alkohol"),
-            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse limitations"),
-            regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor limitations"),
-       ],
-        
-        // 2
-        [
-            regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
-            regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask"),
-            regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air room "),
-            regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
-            regulationsMatrixStruct(UIImage(named: "Alkohol")!,     "Alkohol"),
-            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse limitations"),
-            regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor limitations"),
+            regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air Room"),
+            regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask in public"),
+            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse max 100"),
+            regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor max 200"),
         ],
         
-        // 3
+        // 2: Yellow
         [
             regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
-            regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask"),
-            regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air room "),
             regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
-            regulationsMatrixStruct(UIImage(named: "Alkohol")!,     "Alkohol"),
-            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse limitations"),
-            regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor limitations"),
-
+            regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air Room"),
+            regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask in schools"),
+            regulationsMatrixStruct(UIImage(named: "Alkohol")!,     "Alkohol 11 PM"),
+            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse max 10"),
+            regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor max 200"),
         ],
         
-        // 4
+        // 3: Red
         [
             regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
-            regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask"),
-            regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air room "),
             regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
-            regulationsMatrixStruct(UIImage(named: "Alkohol")!,     "Alkohol"),
-            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse limitations"),
-            regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor limitations"),
+            regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air Room"),
+            regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask in schools"),
+            regulationsMatrixStruct(UIImage(named: "Alkohol")!,     "Alkohol 10 PM"),
+            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse max 5"),
+            regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor max 200"),
+            
         ],
         
-        // 5
+        // 4: dark red
         [
             regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
-            regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask"),
-            regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air room "),
             regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
-            regulationsMatrixStruct(UIImage(named: "Alkohol")!,     "Alkohol"),
-            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse limitations"),
-            regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor limitations"),
+            regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air Room"),
+            regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask in schools"),
+            regulationsMatrixStruct(UIImage(named: "Alkohol")!,     "Alkohol 9 PM"),
+            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse max 5"),
+            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse events max 50"),
+            regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor max 50"),
+        ],
+        
+        // 5: purple
+        [
+            regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
+            regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
+            regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air Room"),
+            regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask in schools"),
+            regulationsMatrixStruct(UIImage(named: "Alkohol")!,     "Alkohol 9 PM"),
+            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse max 5"),
+            regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor max 50"),
         ],
     ]
     
@@ -129,6 +129,9 @@ class CommonTabTableViewController: UITableViewController {
             
             // set color of table view background
             self.tableView.backgroundColor = self.backgroundColor
+            
+            // set the color of seperator between cells
+            self.tableView.separatorColor = self.textColor
 
             // reload all cells
             self.tableView.reloadData()
@@ -207,17 +210,37 @@ class CommonTabTableViewController: UITableViewController {
     // MARK: - Table view data source
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     numberOfSections())
+     
+     -----------------------------------------------------------------------------------------------
+     */
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return 1
     }
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     numberOfRowsInSection:
+     
+     -----------------------------------------------------------------------------------------------
+     */
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return RegulationsMatrix[self.grade].count
     }
 
-    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     cellForRowAt:
+     
+     -----------------------------------------------------------------------------------------------
+     */
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // dequeue a cell
         let cell = tableView.dequeueReusableCell(withIdentifier: "CommonTabTableViewCell",
@@ -233,7 +256,7 @@ class CommonTabTableViewController: UITableViewController {
         cell.CellImage.image = myData.image
         cell.CellImage.tintColor = self.textColor
         
-        cell.CellLabel.text = myData.text
+        cell.CellLabel.text = NSLocalizedString(myData.text, comment: "see localization")
         cell.CellLabel.textColor = self.textColor
         
         // Configure the cell...
@@ -241,6 +264,19 @@ class CommonTabTableViewController: UITableViewController {
         return cell
     }
     
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     didSelectRowAt:
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        // deselct, to keep enviroemt clean
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+
 
     /*
     // Override to support conditional editing of the table view.

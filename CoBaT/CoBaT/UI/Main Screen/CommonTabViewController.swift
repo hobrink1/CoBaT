@@ -30,12 +30,6 @@ class CommonTabViewController: UIViewController {
     var RKIDataRetrievedObserver: NSObjectProtocol?
     var NewRKIDataReadyObserver: NSObjectProtocol?
 
-    
-    // this data will be shown
-    var localDataName: String = ""
-    var localDataToday: GlobalStorage.RKIDataStruct!
-    var localDataDiffYesterday: GlobalStorage.RKIDataStruct!
-    var localDataYesterday: GlobalStorage.RKIDataStruct!
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - UI Outlets
@@ -216,6 +210,9 @@ class CommonTabViewController: UIViewController {
         // sync the access
         GlobalStorageQueue.async(execute: {
             
+            #if DEBUG_PRINT_FUNCCALLS
+            print("refreshOwnDataOutlets just started")
+            #endif
             
             // shortcut for the selected tab => selected area Level
             let selectedArea = GlobalUIData.unique.UITabBarCurrentlyActive
@@ -360,7 +357,7 @@ class CommonTabViewController: UIViewController {
             
             
             
-            // -----------------------------------------------------------------------------------------
+            // -------------------------------------------------------------------------------------
             // second: prepare UI
             //
             
@@ -423,7 +420,7 @@ class CommonTabViewController: UIViewController {
 
                 
                 
-                // -----------------------------------------------------------------------------------------
+                // ---------------------------------------------------------------------------------
                 // third: set the content
                 
                 // the selected name
@@ -444,8 +441,12 @@ class CommonTabViewController: UIViewController {
                     self.LabelToday.text = ""
                     self.LabelDiffYesterday.text = ""
                     
-                    self.LabelYesterday.text = NSLocalizedString("Label-Today",
-                                                                 comment: "Column label today")
+                    //self.LabelYesterday.text = NSLocalizedString("Label-Today",
+                    //                                             comment: "Column label today")
+                    
+                    let dateToUseToday = Date(timeIntervalSinceReferenceDate: localDataToday.timeStamp)
+                    let dateTextToday = shortSingleRelativeDateFormatter.string(from: dateToUseToday)
+                    self.LabelYesterday.text = dateTextToday
                     
                     self.ValueCases.text = ""
                     self.ValueDiffCasesYesterday.text = ""
@@ -460,15 +461,24 @@ class CommonTabViewController: UIViewController {
                     
                 } else {
                     
-                    self.LabelToday.text = NSLocalizedString("Label-Today",
-                                                             comment: "Column label today")
+                    //self.LabelToday.text = NSLocalizedString("Label-Today",
+                    //                                         comment: "Column label today")
                     
+                    let dateToUseToday = Date(timeIntervalSinceReferenceDate: localDataToday.timeStamp)
+                    let dateTextToday = shortSingleRelativeDateFormatter.string(from: dateToUseToday)
+                    self.LabelToday.text = dateTextToday
+                    
+
                     self.LabelDiffYesterday.text = NSLocalizedString("Label-Diff-Yesterday",
                                                                      comment: "Column label difference to yesterday")
                     
-                    self.LabelYesterday.text = NSLocalizedString("Label-Yesterday",
-                                                                 comment: "Column label yesterday")
+                    //self.LabelYesterday.text = NSLocalizedString("Label-Yesterday",
+                     //                                            comment: "Column label yesterday")
                     
+                    let dateToUseYesterday = Date(timeIntervalSinceReferenceDate: localDataYesterday.timeStamp)
+                    let dateTextYesterday = shortSingleRelativeDateFormatter.string(from: dateToUseYesterday)
+                    self.LabelYesterday.text = dateTextYesterday
+
                     
                     
                     self.ValueCases.text = numberNoFractionFormatter.string(
@@ -507,6 +517,11 @@ class CommonTabViewController: UIViewController {
                 // Finally, report we are done
                 NotificationCenter.default.post(Notification(name: .CoBaT_CommonTabBarChangedContent))
             })
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("refreshOwnDataOutlets just finished")
+            #endif
+
         }) // GlobalStorageQueue
         
     }

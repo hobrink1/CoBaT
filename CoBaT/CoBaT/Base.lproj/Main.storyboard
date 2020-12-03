@@ -1551,6 +1551,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="414.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <inset key="separatorInset" minX="10" minY="0.0" maxX="10" maxY="0.0"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="CommonTabTableViewCell" id="7JT-nd-m2o" customClass="CommonTabTableViewCell" customModule="CoBaT" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="28" width="414" height="42.5"/>

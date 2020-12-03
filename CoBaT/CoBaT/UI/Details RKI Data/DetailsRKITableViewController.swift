@@ -76,7 +76,7 @@ class DetailsRKITableViewController: UITableViewController {
     // MARK: - Translated strings
     // ---------------------------------------------------------------------------------------------
     let casesText = NSLocalizedString("label-cases", comment: "Label text for cases")
-    let incidencesText = NSLocalizedString("label-incidences", comment: "Label text for incidences")
+    let incidencesText = NSLocalizedString("label-cases-7days", comment: "Label text for cases in 7 days")
     let inhabitantsText = NSLocalizedString("label-inhabitants", comment: "Label text for inhabitants")
     let deathsText = NSLocalizedString("label-deaths", comment: "Label text for deaths")
 
@@ -460,8 +460,9 @@ class DetailsRKITableViewController: UITableViewController {
             let untilWeekday = dateFormatterLocalizedWeekdayShort.string(
                 from: Date(timeIntervalSinceReferenceDate: myData.otherDayTimeStamp))
 
-            cell.LabelDate.text = "\(changeText) \(fromDate) (\(fromWeekday)) -> \(untilDate) (\(untilWeekday))"
-            
+            //cell.LabelDate.text = "\(changeText) \(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))"
+            cell.LabelDate.text = "<\(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))>"
+
             //cell.ValueInhabitans.text = getFormattedDeltaTextInt(
             //    number: myData.rkiDataStruct.inhabitants)
             
@@ -493,6 +494,19 @@ class DetailsRKITableViewController: UITableViewController {
         return cell
     }
     
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     didSelectRowAt:
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        // deselct, to keep enviroemt clean
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+
 
     /*
     // Override to support conditional editing of the table view.

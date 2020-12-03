@@ -75,6 +75,54 @@
 "Explanation-Not-In-Bavaria" = "In Bayern würden folgende Regularien gelten:";
 
 
+
+/**************************************************************************************************
+ *
+ * class CommonTabTableViewController
+ *
+ **************************************************************************************************/
+
+/* regularies */
+"no covid, no regulations" = "Keine Fälle in den letzten 7 Tagen, keine Vorschriften vorhanden";
+
+"keep Distance" = "Immer Abstand zu anderen Personen halten";
+
+"Wash often" = "Häufiges Händewaschen wird dringend empfohlen";
+
+"Air Room" = "Es wird dringend empfohlen, den Raum häufig zu lüften";
+
+
+"wear mask in public" = "Das Tragen einer Maske ist obligatorisch, bei (einschließlich, aber nicht beschränkt auf) Nutzung öffentlicher Verkehrsmittel, beim Einkaufen, Essen und Trinken in Restaurants, Bars usw. und der Mindestabstand (1,5 m) nicht gehalten werden kann";
+
+"wear mask in crowded situations" = "Das Tragen einer Maske ist obligatorisch in stark frequentierten Räumen, in Fußgängerzonen, in öffentlichen Gebäuden, in weiterführenden Schulen während des Unterrichts, an Universitäten, für Teilnehmer an (Sport-) Veranstaltungen usw.";
+
+"wear mask in schools" = "Das Tragen einer Maske ist vorgeschrieben in stark frequentierten Räumen, in Fußgängerzonen, in öffentlichen Gebäuden, für alle Klassenstufen, an Universitäten, für Teilnehmer an (Sport-) Veranstaltungen usw.";
+
+
+"Inhouse max 100" = "Private Veranstaltungen (z. B. Hochzeiten usw.) mit maximal 100 Teilnehmern in geschlossenen Räumen";
+
+"Inhouse max 10" = "Private Feiern und Kontakte: nicht mehr als zwei Haushalte oder zehn Persone";
+
+"Inhouse max 5" = "Private Feiern und Kontakte: nicht mehr als zwei Haushalte oder fünf Personen";
+
+
+"Outdoor max 200" = "Private Veranstaltungen (z. B. Hochzeiten usw.) mit maximal 200 Teilnehmern im Freien";
+
+"Inhouse events max 50" = "Veranstaltungen (z. B. Clubtreffen, Sportveranstaltungen, kulturelle Veranstaltungen usw.) dürfen 50 Personen nicht überschreiten";
+
+"Outdoor max 50" = "Veranstaltungen (z. B. Clubtreffen, Sportveranstaltungen, kulturelle Veranstaltungen usw.) dürfen 50 Personen nicht überschreiten";
+
+
+"Alkohol 11 PM" = "Ausgangssperre und Verbot des Verkaufs sowie des Alkoholkonsums im öffentlichen Raum ab 23:00 Uhr";
+
+"Alkohol 10 PM" = "Ausgangssperre und Verbot des Verkaufs sowie des Konsums von Alkohol im öffentlichen Raum ab 22:00 Uh";
+
+"Alkohol 9 PM" = "Schließzeit für Lebensmittel-/Gastronomie-Verkaufsstellen, Verbot des Alkoholverkaufs und des Alkoholkonsums in
+bestimmte öffentliche Plätze ab 21:00";
+
+
+
+
 /**************************************************************************************************
  *
  * class HelpTableViewController
@@ -137,7 +185,7 @@
 "label-cases" = "Fälle:";
 
 /* Label text for incidences */
-"label-incidences" = "Fälle in 7 Tagen:";
+"label-incidences" = "Inzidenz";
 
 /* Label text for inhabitants */
 "label-inhabitants" = "Einwohner:";
@@ -167,6 +215,9 @@
 
 /* Label text that we did not found valid data */
 "updateLabels-no-index" = "Keine Daten";
+
+/* Label text for cases in 7 days */
+"label-cases-7days" = "Fälle letzte 7 Tage";
 
 
 

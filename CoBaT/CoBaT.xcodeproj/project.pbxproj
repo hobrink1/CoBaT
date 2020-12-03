@@ -37,7 +37,7 @@
 		F2DB33942577833700C47972 /* CommonTabTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB33932577833700C47972 /* CommonTabTableViewCell.swift */; };
 		F2DB339F25778B0600C47972 /* HelpTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB339E25778B0600C47972 /* HelpTableViewCell.swift */; };
 		F2DB33A425778B1C00C47972 /* HelpTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB33A325778B1C00C47972 /* HelpTableViewController.swift */; };
-		F2DE391E25728A6C0033E6B2 /* Notification Extention.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DE391D25728A6C0033E6B2 /* Notification Extention.swift */; };
+		F2DE391E25728A6C0033E6B2 /* Notification Name Extention.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DE391D25728A6C0033E6B2 /* Notification Name Extention.swift */; };
 		F2ED107E256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2ED107D256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift */; };
 		F2ED108B256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2ED108A256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift */; };
 		F2ED1090256D9855003E2C41 /* BrowseRKIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2ED108F256D9855003E2C41 /* BrowseRKIViewController.swift */; };
@@ -100,7 +100,7 @@
 		F2DB33932577833700C47972 /* CommonTabTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonTabTableViewCell.swift; sourceTree = "<group>"; };
 		F2DB339E25778B0600C47972 /* HelpTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpTableViewCell.swift; sourceTree = "<group>"; };
 		F2DB33A325778B1C00C47972 /* HelpTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpTableViewController.swift; sourceTree = "<group>"; };
-		F2DE391D25728A6C0033E6B2 /* Notification Extention.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification Extention.swift"; sourceTree = "<group>"; };
+		F2DE391D25728A6C0033E6B2 /* Notification Name Extention.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification Name Extention.swift"; sourceTree = "<group>"; };
 		F2ED107D256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseRKIDataTableViewController.swift; sourceTree = "<group>"; };
 		F2ED1083256D76BA003E2C41 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
 		F2ED108A256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseRKIDataTableViewCell.swift; sourceTree = "<group>"; };
@@ -291,7 +291,7 @@
 		F2DE391C25728A1D0033E6B2 /* Notification Service */ = {
 			isa = PBXGroup;
 			children = (
-				F2DE391D25728A6C0033E6B2 /* Notification Extention.swift */,
+				F2DE391D25728A6C0033E6B2 /* Notification Name Extention.swift */,
 			);
 			path = "Notification Service";
 			sourceTree = "<group>";
@@ -485,7 +485,7 @@
 				F2DB337B2577825900C47972 /* CountryTabViewController.swift in Sources */,
 				F2DB338A257782C000C47972 /* CommonTabViewController.swift in Sources */,
 				F2ED1098256DAFDE003E2C41 /* Formatters.swift in Sources */,
-				F2DE391E25728A6C0033E6B2 /* Notification Extention.swift in Sources */,
+				F2DE391E25728A6C0033E6B2 /* Notification Name Extention.swift in Sources */,
 				F2AD3056256D00B700FDDE4B /* JSON RKI County.swift in Sources */,
 				F22D00A12567B5D300C908AA /* SceneDelegate.swift in Sources */,
 			);

@@ -1,5 +1,5 @@
 //
-//  Notification Extention.swift
+//  Notification Name Extention.swift
 //  CoBaT
 //
 //  Created by Hartwig Hopfenzitz on 28.11.20.
@@ -60,7 +60,7 @@ extension Notification.Name {
     // Event: saved UI Data restored
     static let CoBaT_UIDataRestored = Notification.Name(rawValue: "CoBaT.UIDataRestored")
     
-    // Event: CommonTabBarChangedContent
+    // Event: CommonTabBar did change its content, so the embedded TableView should update as well
     static let CoBaT_CommonTabBarChangedContent = Notification.Name(rawValue: "CoBaT.CommonTabBarChangedContent")
 
 }
