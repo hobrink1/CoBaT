@@ -41,10 +41,10 @@ RKI data
  - Version 2 will have a timed trigger in Background
 
 Background service
- - will hold the frequent polling in Version 2
+ - manages the background fetch of the RKI Data, uses BGTaskScheduler, introduced with IOS 13
 
 Location service
- - will hold the location service for Version 3
+ - will hold the location service for Version 2
 
 ## Data store
 Global Storage
@@ -88,7 +88,7 @@ Help Screen
   - provides the unique decision point which incident values needs what color code and what ranking (Traffic lights)
 
 ## User Notifications
-  - will be used for Version 2 and will provide a notification service if data has changed
+  - provides a well formatted user notification if a background fetch found new data
 
 ## Helpers
   - just some predefined formatters
