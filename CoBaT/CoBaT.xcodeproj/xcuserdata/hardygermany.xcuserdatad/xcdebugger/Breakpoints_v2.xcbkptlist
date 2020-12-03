@@ -7,33 +7,65 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "DFB135FA-A87D-4A1F-8211-1036BE1E07EA"
+            uuid = "6C579CEE-9D14-4EBB-BF0B-C0806EDCCC1B"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "CoBaT/UI/Main Screen/CommonTabViewController.swift"
+            filePath = "CoBaT/User Notifications/CoBaT User Notification.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "205"
-            endingLineNumber = "205"
-            landmarkName = "refreshOwnDataOutlets()"
+            startingLineNumber = "102"
+            endingLineNumber = "102"
+            landmarkName = "sendUserNotification(type:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "64708C81-8C17-423F-A001-9CE21928165D"
+            uuid = "77572A06-4CEA-41D7-A952-11B8505808E9"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "CoBaT/UI/Main Screen/CommonTabViewController.swift"
+            filePath = "CoBaT/User Notifications/CoBaT User Notification.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "218"
-            endingLineNumber = "218"
-            landmarkName = "refreshOwnDataOutlets()"
+            startingLineNumber = "147"
+            endingLineNumber = "147"
+            landmarkName = "sendUserNotification(type:)"
             landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "77572A06-4CEA-41D7-A952-11B8505808E9 - 41d407d7507930b7"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; () in CoBaT.CoBaTUserNotification.sendUserNotification(type: CoBaT.CoBaTUserNotification.CoBaTUserNotificationMessageType) -&gt; ()"
+                  moduleName = "CoBaT"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/hardygermany/CoBaT/CoBaT/CoBaT/CoBaT/User%20Notifications/CoBaT%20User%20Notification.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "152"
+                  endingLineNumber = "152"
+                  offsetFromSymbolStart = "6780">
+               </Location>
+               <Location
+                  uuid = "77572A06-4CEA-41D7-A952-11B8505808E9 - 37f7953c281f45b"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 () -&gt; () in closure #1 () -&gt; () in CoBaT.CoBaTUserNotification.sendUserNotification(type: CoBaT.CoBaTUserNotification.CoBaTUserNotificationMessageType) -&gt; ()"
+                  moduleName = "CoBaT"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/hardygermany/CoBaT/CoBaT/CoBaT/CoBaT/User%20Notifications/CoBaT%20User%20Notification.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "67"
+                  endingLineNumber = "67"
+                  offsetFromSymbolStart = "64">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

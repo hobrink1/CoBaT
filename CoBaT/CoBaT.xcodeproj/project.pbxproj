@@ -37,6 +37,8 @@
 		F2DB33942577833700C47972 /* CommonTabTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB33932577833700C47972 /* CommonTabTableViewCell.swift */; };
 		F2DB339F25778B0600C47972 /* HelpTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB339E25778B0600C47972 /* HelpTableViewCell.swift */; };
 		F2DB33A425778B1C00C47972 /* HelpTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB33A325778B1C00C47972 /* HelpTableViewController.swift */; };
+		F2DB33BD25790CE500C47972 /* CoBaTBackgroundService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB33BC25790CE500C47972 /* CoBaTBackgroundService.swift */; };
+		F2DB33C52579251E00C47972 /* CoBaT User Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB33C42579251E00C47972 /* CoBaT User Notification.swift */; };
 		F2DE391E25728A6C0033E6B2 /* Notification Name Extention.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DE391D25728A6C0033E6B2 /* Notification Name Extention.swift */; };
 		F2ED107E256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2ED107D256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift */; };
 		F2ED108B256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2ED108A256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift */; };
@@ -100,6 +102,8 @@
 		F2DB33932577833700C47972 /* CommonTabTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonTabTableViewCell.swift; sourceTree = "<group>"; };
 		F2DB339E25778B0600C47972 /* HelpTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpTableViewCell.swift; sourceTree = "<group>"; };
 		F2DB33A325778B1C00C47972 /* HelpTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpTableViewController.swift; sourceTree = "<group>"; };
+		F2DB33BC25790CE500C47972 /* CoBaTBackgroundService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoBaTBackgroundService.swift; sourceTree = "<group>"; };
+		F2DB33C42579251E00C47972 /* CoBaT User Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoBaT User Notification.swift"; sourceTree = "<group>"; };
 		F2DE391D25728A6C0033E6B2 /* Notification Name Extention.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification Name Extention.swift"; sourceTree = "<group>"; };
 		F2ED107D256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseRKIDataTableViewController.swift; sourceTree = "<group>"; };
 		F2ED1083256D76BA003E2C41 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
@@ -265,6 +269,7 @@
 		F2AD306A256D0AA500FDDE4B /* Background Service */ = {
 			isa = PBXGroup;
 			children = (
+				F2DB33BC25790CE500C47972 /* CoBaTBackgroundService.swift */,
 			);
 			path = "Background Service";
 			sourceTree = "<group>";
@@ -272,6 +277,7 @@
 		F2AD3070256D109600FDDE4B /* User Notifications */ = {
 			isa = PBXGroup;
 			children = (
+				F2DB33C42579251E00C47972 /* CoBaT User Notification.swift */,
 			);
 			path = "User Notifications";
 			sourceTree = "<group>";
@@ -479,8 +485,10 @@
 			files = (
 				F2DB33852577828800C47972 /* CountyTabViewController.swift in Sources */,
 				F2DB33942577833700C47972 /* CommonTabTableViewCell.swift in Sources */,
+				F2DB33C52579251E00C47972 /* CoBaT User Notification.swift in Sources */,
 				F2AD305F256D035E00FDDE4B /* JSON RKI State.swift in Sources */,
 				F2ED1090256D9855003E2C41 /* BrowseRKIViewController.swift in Sources */,
+				F2DB33BD25790CE500C47972 /* CoBaTBackgroundService.swift in Sources */,
 				F2AD306C256D0AD900FDDE4B /* Global Storage.swift in Sources */,
 				F24D37E4257398110036FEE3 /* DetailsRKIViewController.swift in Sources */,
 				F2DB33712577817400C47972 /* MainViewController.swift in Sources */,

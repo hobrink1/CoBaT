@@ -218,4 +218,22 @@ specific public places form 21:00";
 
 
 
+/**************************************************************************************************
+ *
+ * class CoBaTUserNotification
+ *
+ **************************************************************************************************/
+/* new RKI Data title */
+"new-Rki-tilte" = "New RKI Data";
+
+/* RKI data difference cases for Germany */
+"Germany-new-cases" = "Germany: %@ new cases";
+
+/* RKI data cases in total for Germany */
+"Germany-total-cases" = "Germany: %@ cases";
+
+/* RKI data incidences for county */
+"County-cases7day100k" = "%@: Incidence: %@";
+
+
 
