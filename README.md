@@ -38,8 +38,7 @@ RKI data
  - reads the RKI JSON data
  - handles the decoding
  - triggered by app start and on request by user in UI
- - Version 2 will have a timed trigger in Background
-
+ 
 Background service
  - manages the background fetch of the RKI Data, uses BGTaskScheduler, introduced with IOS 13
 
