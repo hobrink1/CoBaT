@@ -214,7 +214,7 @@ class CommonTabTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return RegulationsMatrix[0].count
+        return RegulationsMatrix[self.grade].count
     }
 
     

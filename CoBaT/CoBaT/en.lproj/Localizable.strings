@@ -69,10 +69,10 @@
 
 
 /* Bavaria Explanation if you are in Bavaria */
-"Explanation-In-Bavaria" = "The following regulations must be followed in Bavaria:";
+"Explanation-In-Bavaria" = "\nThe following regulations must be followed in Bavaria:";
 
 /* Bavaria Explanation if you are NOT in Bavaria */
-"Explanation-Not-In-Bavaria" = "The following regulations would apply in Bavaria:";
+"Explanation-Not-In-Bavaria" = "\nThe following regulations would apply in Bavaria:";
 
 
 /**************************************************************************************************
