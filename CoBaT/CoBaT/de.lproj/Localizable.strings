@@ -16,6 +16,87 @@
 
 /**************************************************************************************************
  *
+ * class MainViewController
+ *
+ **************************************************************************************************/
+
+/* Label RKI Data As Of */
+"RKI-Data-As-Of" = "RKI Daten von:";
+
+/* Label RKI Data last retrieved */
+"RKI-Data-Last-Retrieved" = "RKI Daten abgerufen:";
+
+
+/* Help Button */
+"Main-Button-Help" = "Hinweise";
+
+/* Refresh Button */
+"Main-Button-Refresh" = "Daten Neu";
+
+
+/* No RKI Data available message */
+"No-RKI-Available" = "Keine RKI Daten verfügbar";
+
+/* Never retriev RKI Data message */
+"Never-retrieved-RKI-data" = "RKI Daten wurden noch nie abgerufen";
+
+
+
+/**************************************************************************************************
+ *
+ * class CommonTabViewController
+ *
+ **************************************************************************************************/
+
+/* Title of Select Button */
+"Title-Select-Button" = "Auswahl";
+
+/* Title of Details Button */
+"Title-Details-Button" = "Details";
+
+
+/* Label text for incidences per 100 k*/
+"label-incidences-100k" = "Fälle in 7 Tagen per 100.000:";
+
+/* Column label today */
+"Label-Today" = "Heute";
+
+/* Column label difference to yesterdayy */
+"Label-Diff-Yesterday" = "Diff.";
+
+/* Column label yesterday */
+"Label-Yesterday" = "Davor";
+
+
+/* Bavaria Explanation if you are in Bavaria */
+"Explanation-In-Bavaria" = "Die folgenden Regularien sind in Bayern einzuhalten:";
+
+/* Bavaria Explanation if you are NOT in Bavaria */
+"Explanation-Not-In-Bavaria" = "In Bayern würden folgende Regularien gelten:";
+
+
+/**************************************************************************************************
+ *
+ * class HelpTableViewController
+ *
+ **************************************************************************************************/
+
+/* Copyright from RKI Website */
+"RKI-Disclaimer" = "Die Daten sind die \"Fallzahlen in Deutschland\" des Robert Koch-Institut (RKI) und stehen unter der Open Data Datenlizenz Deutschland – Namensnennung – Version 2.0 zur Verfügung.\n\n Quellenvermerk: Robert Koch-Institut (RKI), dl-de/by-2-0\n\nHaftungsausschluss: \"Die Inhalte, die über die Internetseiten des Robert Koch-Instituts zur Verfügung gestellt werden, dienen ausschließlich der allgemeinen Information der Öffentlichkeit, vorrangig der Fachöffentlichkeit\"";
+
+
+
+/* List of current error messages */
+"Explanation-Error-Messages" = "Liste der aktuellen Fehlermeldungen";
+
+/* no error messages */
+"Explanation-No-Error-Messages" = "Momentan sind keine Fehlermeldungen vorhanden";
+
+
+
+
+/**************************************************************************************************
+ *
  * class BrowseRKIViewController
  *
  * func 
@@ -71,7 +152,7 @@
 "label-deaths" = "Tote:";
 
 /* Label text for change */
-"label-change" = "Änderung:";
+"label-change" = "Delta:";
 
 
 

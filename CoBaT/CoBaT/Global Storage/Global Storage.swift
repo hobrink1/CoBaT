@@ -59,6 +59,8 @@ final class GlobalStorage: NSObject {
     public let RKIDataState: Int = 1
     public let RKIDataCounty: Int = 2
     
+    public let RKIIDForBavaria: String = "9"
+    
     // size of storage
     private let maxNumberOfDaysStored: Int = 15
     private let maxNumberOfErrorsStored: Int = 20

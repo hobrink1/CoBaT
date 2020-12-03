@@ -26,6 +26,7 @@ let shortSingleRelativeDateFormatter = DateFormatter()
 let shortSingleRelativeDateTimeFormatter = DateFormatter()
 let mediumSingleRelativeDateFormatter = DateFormatter()
 let mediumSingleRelativeDateTimeFormatter = DateFormatter()
+let mediumMediumSingleRelativeDateTimeFormatter = DateFormatter()
 let longSingleRelativeDateTimeFormatter = DateFormatter()
 let MediumSingleTimeFormatter = DateFormatter()
 let shortSingleDateTimeFormatterTZ = DateFormatter()
@@ -186,6 +187,12 @@ func buildAllFormatters() {
     mediumSingleRelativeDateTimeFormatter.dateStyle = .medium
     mediumSingleRelativeDateTimeFormatter.timeStyle = .short
     mediumSingleRelativeDateTimeFormatter.doesRelativeDateFormatting = true
+    //mediumSingleRelativeDateTimeFormatter.locale = Locale(identifier: preferredLanguage)
+
+    
+    mediumMediumSingleRelativeDateTimeFormatter.dateStyle = .medium
+    mediumMediumSingleRelativeDateTimeFormatter.timeStyle = .medium
+    mediumMediumSingleRelativeDateTimeFormatter.doesRelativeDateFormatting = true
     //mediumSingleRelativeDateTimeFormatter.locale = Locale(identifier: preferredLanguage)
 
     longSingleRelativeDateTimeFormatter.dateStyle = .full
@@ -394,7 +401,7 @@ func buildAllFormatters() {
     dateFormatterLocalizedYear.setLocalizedDateFormatFromTemplate("yyyy")
     dateFormatterLocalizedMonthName.setLocalizedDateFormatFromTemplate("MMMM")
     
-    // RKI County data uses the date format "25.11.2020, 00:00 Uhr"
+    // RKI data uses the date format "25.11.2020, 00:00 Uhr", used to check if day has changed
     RKIDateFormatter.dateFormat = "dd.MM.yyyy', 'HH:mm' Uhr'"
     RKIDateFormatter.locale = Locale(identifier: "de")
     
@@ -441,9 +448,9 @@ func getFormattedDeltaTextInt(number: Int) -> String {
     if let valueString = numberNoFractionFormatter.string(from: NSNumber(value: number)) {
         
         if number > 0 {
-            returnString = "+ "
+            returnString = "+"
         } else if number == 0 {
-            returnString = "± "
+            returnString = "±"
         }
         
         returnString += valueString
@@ -483,11 +490,11 @@ func getFormattedDeltaTextDouble(number: Double, fraction: Int) -> String {
         
         if number > roundBorder {
             
-            returnString = "+ "
+            returnString = "+"
             
         } else if abs(number) < roundBorder {
             
-            returnString = "± "
+            returnString = "±"
         }
         
         returnString += valueString

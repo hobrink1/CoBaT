@@ -16,6 +16,87 @@
 
 /**************************************************************************************************
  *
+ * class MainViewController
+ *
+ **************************************************************************************************/
+
+/* Label RKI Data As Of */
+"RKI-Data-As-Of" = "RKI data as of:";
+
+/* Label RKI Data last retrieved */
+"RKI-Data-Last-Retrieved" = "RKI data retrieved";
+
+
+/* Help Button */
+"Main-Button-Help" = "About";
+
+/* Refresh Button */
+"Main-Button-Refresh" = "Refresh";
+
+
+/* No RKI Data available message */
+"No-RKI-Available" = "No RKI Data available";
+
+/* Never retriev RKI Data message */
+"Never-retrieved-RKI-data" = "Never retrieved RKI Data";
+
+
+
+/**************************************************************************************************
+ *
+ * class CommonTabViewController
+ *
+ **************************************************************************************************/
+
+/* Title of Select Button */
+"Title-Select-Button" = "Select";
+
+/* Title of Details Button */
+"Title-Details-Button" = "Details";
+
+
+/* Label text for incidences per 100 k*/
+"label-incidences-100k" = "Cases last 7 days per 100,000:";
+
+/* Column label today */
+"Label-Today" = "Today";
+
+/* Column label difference to yesterday */
+"Label-Diff-Yesterday" = "Diff.";
+
+/* Column label yesterday */
+"Label-Yesterday" = "Before";
+
+
+/* Bavaria Explanation if you are in Bavaria */
+"Explanation-In-Bavaria" = "The following regulations must be followed in Bavaria:";
+
+/* Bavaria Explanation if you are NOT in Bavaria */
+"Explanation-Not-In-Bavaria" = "The following regulations would apply in Bavaria:";
+
+
+/**************************************************************************************************
+ *
+ * class HelpTableViewController
+ *
+ **************************************************************************************************/
+
+/* Copyright from RKI Website */
+"RKI-Disclaimer" = "Die Daten sind die \"Fallzahlen in Deutschland\" des Robert Koch-Institut (RKI) und stehen unter der Open Data Datenlizenz Deutschland – Namensnennung – Version 2.0 zur Verfügung.\n\n Quellenvermerk: Robert Koch-Institut (RKI), dl-de/by-2-0\n\nHaftungsausschluss: \"Die Inhalte, die über die Internetseiten des Robert Koch-Instituts zur Verfügung gestellt werden, dienen ausschließlich der allgemeinen Information der Öffentlichkeit, vorrangig der Fachöffentlichkeit\"";
+
+
+/* List of current error messages */
+"Explanation-Error-Messages" = "List of current error messages";
+
+/* no error messages */
+"Explanation-No-Error-Messages" = "Currently no errors listed";
+
+
+
+
+
+/**************************************************************************************************
+ *
  * class BrowseRKIViewController
  *
  **************************************************************************************************/

@@ -44,44 +44,50 @@ final class CovidRating: NSObject {
      
      */
     public func getColorsForValue(_ value: Double)
-    -> (background: UIColor, forground: UIColor) {
+    -> (background: UIColor, forground: UIColor, grade: Int) {
         
         let backgroundColor: UIColor
         let foregroundColor: UIColor
+        let grade: Int
         
         if value <= 0 {
             
             backgroundColor = UIColor.systemBackground
             foregroundColor = UIColor.label
+            grade = 0
 
         } else if value < 35.0 {
             
             backgroundColor = UIColor.systemGreen
             foregroundColor = UIColor.black
-            
+            grade = 1
+
         } else if value < 50.0 {
             
             backgroundColor = UIColor.systemYellow
             foregroundColor = UIColor.black
-            
+            grade = 2
+
         } else if value < 100.0 {
             
             backgroundColor = UIColor.systemOrange
             foregroundColor = UIColor.black
-            
-            
+            grade = 3
+
         } else if value < 600.0 {
             
             backgroundColor = UIColor.systemRed
             foregroundColor = UIColor.white
-            
+            grade = 4
+
         } else {
             
             backgroundColor = UIColor.systemPurple
             foregroundColor = UIColor.white
+            grade = 5
         }
         
-        return (backgroundColor, foregroundColor)
+        return (backgroundColor, foregroundColor, grade)
         
     }
     

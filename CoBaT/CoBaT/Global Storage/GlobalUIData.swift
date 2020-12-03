@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 
 // -------------------------------------------------------------------------------------------------
@@ -27,6 +28,14 @@ final class GlobalUIData: NSObject {
     // The DetailsRKITableViewController uses this data to build local data out of the global Storage
     public var UIDetailsRKIAreaLevel: Int = GlobalStorage.unique.RKIDataCounty
     public var UIDetailsRKISelectedMyID: String = "9"
+    
+    // tabBar currently active, will be set by CountryTabViewController (0), StateTabViewController (1) or CountyTabViewController (2)
+    public var UITabBarCurrentlyActive: Int = 0
+    
+    // this UICoros will be set in CommonTabViewController for the embedded CommonTabTableViewController
+    public var UITabBarCurentTextColor: UIColor = UIColor.label
+    public var UITabBarCurentBackgroundColor: UIColor = UIColor.systemBackground
+    public var UITabBarCurentGrade: Int = 0
 
     
     // ---------------------------------------------------------------------------------------------
@@ -45,11 +54,13 @@ final class GlobalUIData: NSObject {
     // in this dictionary we store the selected County ID per State
     public var UIBrowserCountyIDPerStateID: [String : String] = ["9" : "259"]
     
-    public enum UIBrowserRKISortEnum : Int {
+    public enum UIBrowserRKISortEnum: Int {
         case alphabetically = 0, incidencesAscending = 1, incidencesDescending = 2
     }
     
-    public var UIBrowserRKISorting : UIBrowserRKISortEnum = .alphabetically
+    public var UIBrowserRKISorting: UIBrowserRKISortEnum = .alphabetically
+    
+    public var UIMainTabBarSelectedTab: Int = 0 
     
     
     // ---------------------------------------------------------------------------------------------
@@ -166,7 +177,7 @@ final class GlobalUIData: NSObject {
      */
     public func restoreSavedUIData() {
         
-        DispatchQueue.main.async(execute: {
+        GlobalStorageQueue.async(flags: .barrier, execute: {
             
             #if DEBUG_PRINT_FUNCCALLS
             print("restoreSavedUIData just started")
@@ -211,6 +222,16 @@ final class GlobalUIData: NSObject {
                 rawValue: self.permanentStore.integer(forKey: "CoBaT.UIBrowserRKISorting")) {
                 self.UIBrowserRKISorting = loadedUIBrowserRKISorting
             }
+            
+            self.UIMainTabBarSelectedTab = self.permanentStore.integer(
+                forKey: "CoBaT.UIMainTabBarSelectedTab")
+            
+            // the load of some UI elemnts is faster than this restore, so we send a post to sync it
+            NotificationCenter.default.post(Notification(name: .CoBaT_UIDataRestored))
+            #if DEBUG_PRINT_FUNCCALLS
+            print("restoreSavedUIData just posted .CoBaT_UIDataRestored")
+            #endif
+
          })
     }
     
@@ -223,26 +244,38 @@ final class GlobalUIData: NSObject {
      */
     public func saveUIData() {
         
-        // make sure we have consistent data (for Ui alsways main thread!
-        DispatchQueue.main.async(execute: {
+        // make sure we have consistent data
+        GlobalStorageQueue.async(execute: {
             
             #if DEBUG_PRINT_FUNCCALLS
             print("saveUIData just started")
             #endif
 
-            self.permanentStore.set(self.UIBrowserRKIAreaLevel, forKey: "CoBaT.UIBrowserRKIAreaLevel")
+            self.permanentStore.set(self.UIBrowserRKIAreaLevel,
+                                    forKey: "CoBaT.UIBrowserRKIAreaLevel")
             
-            self.permanentStore.set(self.UIBrowserRKITitelString, forKey: "CoBaT.UIBrowserRKITitelString")
+            self.permanentStore.set(self.UIBrowserRKITitelString,
+                                    forKey: "CoBaT.UIBrowserRKITitelString")
             
-            self.permanentStore.set(self.UIBrowserRKISelectedStateName, forKey: "CoBaT.UIBrowserRKISelectedStateName")
-            self.permanentStore.set(self.UIBrowserRKISelectedStateID, forKey: "CoBaT.UIBrowserRKISelectedStateID")
+            self.permanentStore.set(self.UIBrowserRKISelectedStateName,
+                                    forKey: "CoBaT.UIBrowserRKISelectedStateName")
+            self.permanentStore.set(self.UIBrowserRKISelectedStateID,
+                                    forKey: "CoBaT.UIBrowserRKISelectedStateID")
             
-            self.permanentStore.set(self.UIBrowserRKISelectedCountyName, forKey: "CoBaT.UIBrowserRKISelectedCountyName")
-            self.permanentStore.set(self.UIBrowserRKISelectedCountyID, forKey: "CoBaT.UIBrowserRKISelectedCountyID")
+            self.permanentStore.set(self.UIBrowserRKISelectedCountyName,
+                                    forKey: "CoBaT.UIBrowserRKISelectedCountyName")
+            self.permanentStore.set(self.UIBrowserRKISelectedCountyID,
+                                    forKey: "CoBaT.UIBrowserRKISelectedCountyID")
 
-            self.permanentStore.set(self.UIBrowserCountyIDPerStateID, forKey: "CoBaT.UIBrowserCountyIDPerStateID")
+            self.permanentStore.set(self.UIBrowserCountyIDPerStateID,
+                                    forKey: "CoBaT.UIBrowserCountyIDPerStateID")
 
-            self.permanentStore.set(self.UIBrowserRKISorting.rawValue, forKey: "CoBaT.UIBrowserRKISorting")
+            self.permanentStore.set(self.UIBrowserRKISorting.rawValue,
+                                    forKey: "CoBaT.UIBrowserRKISorting")
+            
+            self.permanentStore.set(self.UIMainTabBarSelectedTab,
+                                    forKey: "CoBaT.UIMainTabBarSelectedTab")
+            
          })
     }
 }

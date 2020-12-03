@@ -126,6 +126,51 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         }
     }
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     detailsButtonTapped(cell:
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    func detailsButtonTapped(cell: BrowseRKIDataTableViewCell) {
+
+        #if DEBUG_PRINT_FUNCCALLS
+        print("detailsButtonTapped just started, row: \(cell.myIndexPath.row)")
+        #endif
+        
+        // get the row
+        let row = cell.myIndexPath.row
+        
+        // which arae level we have
+        switch GlobalUIData.unique.UIBrowserRKIAreaLevel {
+        
+        case GlobalStorage.unique.RKIDataCountry:
+            
+            // Country Level: nothing to do
+            break
+            
+            
+        case GlobalStorage.unique.RKIDataState:
+            
+            GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataState
+            GlobalUIData.unique.UIDetailsRKISelectedMyID = localDataArray[row].stateID
+            performSegue(withIdentifier: "CallDetailsRKIViewControllerFromBrowser", sender: self)
+
+            
+        case GlobalStorage.unique.RKIDataCounty:
+            
+            GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataCounty
+            GlobalUIData.unique.UIDetailsRKISelectedMyID = localDataArray[row].myID ?? ""
+            performSegue(withIdentifier: "CallDetailsRKIViewControllerFromBrowser", sender: self)
+
+            
+        default:
+            break
+        }
+    }
+
+
     
     
     // ---------------------------------------------------------------------------------------------
@@ -518,13 +563,14 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         // set the cell properties (index path and that we are the one to serve the selectButtonDelegate)
         cell.myIndexPath = indexPath
         cell.selectButtonDelegate = self
+        cell.detailsButtonDelegate = self
         
         // get the related data set from local storage
         let index = indexPath.row
         let myData = localDataArray[index]
         
         // get color schema for 7 day average caces per 100 K people
-        let (backgroundColor, textColorToUse) = CovidRating.unique.getColorsForValue(myData.cases7DaysPer100K)
+        let (backgroundColor, textColorToUse, _) = CovidRating.unique.getColorsForValue(myData.cases7DaysPer100K)
         
         // set the background of the cell
         cell.contentView.backgroundColor = backgroundColor

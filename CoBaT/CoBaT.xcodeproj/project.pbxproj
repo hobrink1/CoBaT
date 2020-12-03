@@ -10,7 +10,6 @@
 		F207CA702571B35B0000F90B /* GlobalUIData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F207CA6F2571B35B0000F90B /* GlobalUIData.swift */; };
 		F22D009F2567B5D300C908AA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F22D009E2567B5D300C908AA /* AppDelegate.swift */; };
 		F22D00A12567B5D300C908AA /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F22D00A02567B5D300C908AA /* SceneDelegate.swift */; };
-		F22D00A32567B5D300C908AA /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F22D00A22567B5D300C908AA /* MainViewController.swift */; };
 		F22D00A62567B5D300C908AA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F22D00A42567B5D300C908AA /* Main.storyboard */; };
 		F22D00A82567B5D500C908AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F22D00A72567B5D500C908AA /* Assets.xcassets */; };
 		F22D00AB2567B5D500C908AA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F22D00A92567B5D500C908AA /* LaunchScreen.storyboard */; };
@@ -28,6 +27,16 @@
 		F2AD3064256D043900FDDE4B /* JSON RKI Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD3063256D043900FDDE4B /* JSON RKI Helpers.swift */; };
 		F2AD306C256D0AD900FDDE4B /* Global Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD306B256D0AD900FDDE4B /* Global Storage.swift */; };
 		F2AD3072256D10D400FDDE4B /* RKI Data Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD3071256D10D400FDDE4B /* RKI Data Download.swift */; };
+		F2DB33712577817400C47972 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB33702577817400C47972 /* MainViewController.swift */; };
+		F2DB3376257781CB00C47972 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB3375257781CB00C47972 /* MainTabBarController.swift */; };
+		F2DB337B2577825900C47972 /* CountryTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB337A2577825900C47972 /* CountryTabViewController.swift */; };
+		F2DB33802577827100C47972 /* StateTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB337F2577827100C47972 /* StateTabViewController.swift */; };
+		F2DB33852577828800C47972 /* CountyTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB33842577828800C47972 /* CountyTabViewController.swift */; };
+		F2DB338A257782C000C47972 /* CommonTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB3389257782C000C47972 /* CommonTabViewController.swift */; };
+		F2DB338F257782E300C47972 /* CommonTabTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB338E257782E300C47972 /* CommonTabTableViewController.swift */; };
+		F2DB33942577833700C47972 /* CommonTabTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB33932577833700C47972 /* CommonTabTableViewCell.swift */; };
+		F2DB339F25778B0600C47972 /* HelpTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB339E25778B0600C47972 /* HelpTableViewCell.swift */; };
+		F2DB33A425778B1C00C47972 /* HelpTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB33A325778B1C00C47972 /* HelpTableViewController.swift */; };
 		F2DE391E25728A6C0033E6B2 /* Notification Extention.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DE391D25728A6C0033E6B2 /* Notification Extention.swift */; };
 		F2ED107E256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2ED107D256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift */; };
 		F2ED108B256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2ED108A256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift */; };
@@ -57,7 +66,6 @@
 		F22D009B2567B5D300C908AA /* CoBaT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoBaT.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F22D009E2567B5D300C908AA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F22D00A02567B5D300C908AA /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		F22D00A22567B5D300C908AA /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		F22D00A52567B5D300C908AA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		F22D00A72567B5D500C908AA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F22D00AA2567B5D500C908AA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -82,6 +90,16 @@
 		F2AD3063256D043900FDDE4B /* JSON RKI Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSON RKI Helpers.swift"; sourceTree = "<group>"; };
 		F2AD306B256D0AD900FDDE4B /* Global Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Global Storage.swift"; sourceTree = "<group>"; };
 		F2AD3071256D10D400FDDE4B /* RKI Data Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RKI Data Download.swift"; sourceTree = "<group>"; };
+		F2DB33702577817400C47972 /* MainViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		F2DB3375257781CB00C47972 /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
+		F2DB337A2577825900C47972 /* CountryTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryTabViewController.swift; sourceTree = "<group>"; };
+		F2DB337F2577827100C47972 /* StateTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateTabViewController.swift; sourceTree = "<group>"; };
+		F2DB33842577828800C47972 /* CountyTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountyTabViewController.swift; sourceTree = "<group>"; };
+		F2DB3389257782C000C47972 /* CommonTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonTabViewController.swift; sourceTree = "<group>"; };
+		F2DB338E257782E300C47972 /* CommonTabTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonTabTableViewController.swift; sourceTree = "<group>"; };
+		F2DB33932577833700C47972 /* CommonTabTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonTabTableViewCell.swift; sourceTree = "<group>"; };
+		F2DB339E25778B0600C47972 /* HelpTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpTableViewCell.swift; sourceTree = "<group>"; };
+		F2DB33A325778B1C00C47972 /* HelpTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpTableViewController.swift; sourceTree = "<group>"; };
 		F2DE391D25728A6C0033E6B2 /* Notification Extention.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification Extention.swift"; sourceTree = "<group>"; };
 		F2ED107D256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseRKIDataTableViewController.swift; sourceTree = "<group>"; };
 		F2ED1083256D76BA003E2C41 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
@@ -185,6 +203,21 @@
 			path = "Details RKI Data";
 			sourceTree = "<group>";
 		};
+		F24D37F5257780F40036FEE3 /* Main Screen */ = {
+			isa = PBXGroup;
+			children = (
+				F2DB33702577817400C47972 /* MainViewController.swift */,
+				F2DB3375257781CB00C47972 /* MainTabBarController.swift */,
+				F2DB337A2577825900C47972 /* CountryTabViewController.swift */,
+				F2DB337F2577827100C47972 /* StateTabViewController.swift */,
+				F2DB33842577828800C47972 /* CountyTabViewController.swift */,
+				F2DB3389257782C000C47972 /* CommonTabViewController.swift */,
+				F2DB338E257782E300C47972 /* CommonTabTableViewController.swift */,
+				F2DB33932577833700C47972 /* CommonTabTableViewCell.swift */,
+			);
+			path = "Main Screen";
+			sourceTree = "<group>";
+		};
 		F273D76A256E4D600002E15B /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
@@ -208,9 +241,10 @@
 		F2AD305A256D00CF00FDDE4B /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				F22D00A22567B5D300C908AA /* MainViewController.swift */,
+				F24D37F5257780F40036FEE3 /* Main Screen */,
 				F2ED109F256DB398003E2C41 /* Browse RKI Data */,
 				F24D37E2257397820036FEE3 /* Details RKI Data */,
+				F2DB339825778AC100C47972 /* Help Screen */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -243,6 +277,15 @@
 			children = (
 			);
 			path = "User Notifications";
+			sourceTree = "<group>";
+		};
+		F2DB339825778AC100C47972 /* Help Screen */ = {
+			isa = PBXGroup;
+			children = (
+				F2DB33A325778B1C00C47972 /* HelpTableViewController.swift */,
+				F2DB339E25778B0600C47972 /* HelpTableViewCell.swift */,
+			);
+			path = "Help Screen";
 			sourceTree = "<group>";
 		};
 		F2DE391C25728A1D0033E6B2 /* Notification Service */ = {
@@ -418,20 +461,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F2DB33852577828800C47972 /* CountyTabViewController.swift in Sources */,
+				F2DB33942577833700C47972 /* CommonTabTableViewCell.swift in Sources */,
 				F2AD305F256D035E00FDDE4B /* JSON RKI State.swift in Sources */,
 				F2ED1090256D9855003E2C41 /* BrowseRKIViewController.swift in Sources */,
-				F22D00A32567B5D300C908AA /* MainViewController.swift in Sources */,
 				F2AD306C256D0AD900FDDE4B /* Global Storage.swift in Sources */,
 				F24D37E4257398110036FEE3 /* DetailsRKIViewController.swift in Sources */,
+				F2DB33712577817400C47972 /* MainViewController.swift in Sources */,
 				F24D37E9257398380036FEE3 /* DetailsRKITableViewController.swift in Sources */,
+				F2DB339F25778B0600C47972 /* HelpTableViewCell.swift in Sources */,
 				F2AD3064256D043900FDDE4B /* JSON RKI Helpers.swift in Sources */,
 				F22D009F2567B5D300C908AA /* AppDelegate.swift in Sources */,
+				F2DB33802577827100C47972 /* StateTabViewController.swift in Sources */,
 				F207CA702571B35B0000F90B /* GlobalUIData.swift in Sources */,
 				F2ED107E256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift in Sources */,
+				F2DB338F257782E300C47972 /* CommonTabTableViewController.swift in Sources */,
 				F273D76C256E4D860002E15B /* CovidRating.swift in Sources */,
 				F24D37EE257398620036FEE3 /* DetailsRKITableViewCell.swift in Sources */,
+				F2DB33A425778B1C00C47972 /* HelpTableViewController.swift in Sources */,
 				F2AD3072256D10D400FDDE4B /* RKI Data Download.swift in Sources */,
+				F2DB3376257781CB00C47972 /* MainTabBarController.swift in Sources */,
 				F2ED108B256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift in Sources */,
+				F2DB337B2577825900C47972 /* CountryTabViewController.swift in Sources */,
+				F2DB338A257782C000C47972 /* CommonTabViewController.swift in Sources */,
 				F2ED1098256DAFDE003E2C41 /* Formatters.swift in Sources */,
 				F2DE391E25728A6C0033E6B2 /* Notification Extention.swift in Sources */,
 				F2AD3056256D00B700FDDE4B /* JSON RKI County.swift in Sources */,

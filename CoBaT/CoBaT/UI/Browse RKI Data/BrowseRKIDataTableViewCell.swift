@@ -15,6 +15,9 @@ protocol BrowseRKIDataTableViewCellPlacesDelegate {
     
     // the function to detect the button tap
     func selectButtonTapped(cell: BrowseRKIDataTableViewCell)
+    
+    // the function to detect the button tap
+    func detailsButtonTapped(cell: BrowseRKIDataTableViewCell)
 }
 
 // ----------------------------------------------------------------------------------
@@ -73,17 +76,49 @@ class BrowseRKIDataTableViewCell: UITableViewCell {
         }
     }
 
+    
+    // ------------------------------------------------------------------------------
+    // MARK: - details Button
+    // ------------------------------------------------------------------------------
+    // var for the delegate, which will be set in "cellForRowAt:"
+    var detailsButtonDelegate: BrowseRKIDataTableViewCellPlacesDelegate?
 
+    // the button outlet
+    @IBOutlet weak var DetailsButton: UIButton!
+    
+    // the action methode which simply called the protocol methode
+    @IBAction func DetailsButtonAction(_ sender: UIButton) {
+        
+        // check if the delegte is valid
+       if let delegate = detailsButtonDelegate {
+           
+           // yes, valid delegate, so call the function
+           delegate.detailsButtonTapped(cell: self)
+           
+       } else {
+           
+           GlobalStorage.unique.storeLastError(
+               errorText: "BrowseRKIDataTableViewCell(Row:\(self.myIndexPath.row).detailsButtonAction() Error: delegate = detailsButtonDelegate was nil")
+       }
+    }
+    
+    
     // ------------------------------------------------------------------------------
     // MARK: - Life cycle
     // ------------------------------------------------------------------------------
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     awakeFromNib()
+     
+     -----------------------------------------------------------------------------------------------
+     */
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
         
-        // we use a rounded style
+        // we use a rounded cornder style
         self.layer.cornerRadius = 5
         self.layer.borderWidth = 1
     }
-
 }

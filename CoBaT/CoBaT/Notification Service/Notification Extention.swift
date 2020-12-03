@@ -57,5 +57,10 @@ extension Notification.Name {
     // Event: User selected a county
     static let CoBaT_UserDidSelectCounty = Notification.Name(rawValue: "CoBaT.UserDidSelectCounty")
     
+    // Event: saved UI Data restored
+    static let CoBaT_UIDataRestored = Notification.Name(rawValue: "CoBaT.UIDataRestored")
+    
+    // Event: CommonTabBarChangedContent
+    static let CoBaT_CommonTabBarChangedContent = Notification.Name(rawValue: "CoBaT.CommonTabBarChangedContent")
 
 }

@@ -44,15 +44,19 @@ class DetailsRKITableViewCell: UITableViewCell {
     // ------------------------------------------------------------------------------
     // MARK: - Life cycle
     // ------------------------------------------------------------------------------
-
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     awakeFromNib()
+     
+     -----------------------------------------------------------------------------------------------
+     */
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
         
-        // we use a rounded style
+        // we use a rounded cornder style
         self.layer.cornerRadius = 5
         self.layer.borderWidth = 1
-
     }
-
 }

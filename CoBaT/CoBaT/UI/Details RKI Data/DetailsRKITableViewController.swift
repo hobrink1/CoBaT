@@ -146,7 +146,7 @@ class DetailsRKITableViewController: UITableViewController {
             
             let sortKey = "\(indexString)\(cellType.rawValue)"
             
-            let (backgroundColor, textColor) = CovidRating.unique.getColorsForValue(item.cases7DaysPer100K)
+            let (backgroundColor, textColor, _) = CovidRating.unique.getColorsForValue(item.cases7DaysPer100K)
             
             localDataBuiling.append(showDetailStruct(
                                         rkiDataStruct: item,
