@@ -172,7 +172,7 @@ final class GlobalStorage: NSObject {
                             // TODO: TODO: Remove data cleansing
 
                             if weDidChangeSomething == true {
-                                self.saveRKIData()
+                                self.saveRKIData(kindOf: 0)
                             }
                             
                             // End DataCleansing ---------------------------------------------------
@@ -288,7 +288,7 @@ final class GlobalStorage: NSObject {
                             self.RKIDataLastRetreived = loadedRKIDataLastRetreived
 
                             // and force a save to secure what we have done
-                            self.saveRKIData()
+                            self.saveRKIData(kindOf: 0)
                             
                             // rebuild the delta values
                             self.rebuildRKIDeltas()
@@ -521,7 +521,19 @@ final class GlobalStorage: NSObject {
                 } else {
                     
                     // case 4: data are the same, so ignore it
+                    #if DEBUG_PRINT_FUNCCALLS
                     print ("refresh_RKIData case 4: data sets are equal, so do not update")
+                    #endif
+                    
+                    // check if we have to inform the background service
+                    if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                        
+                        CoBaTBackgroundService.unique.newRKIDataArraived(kindOf: kindOf)
+                        
+                        #if DEBUG_PRINT_FUNCCALLS
+                        print("refresh_RKIData just called CoBaTBackgroundService.unique.newRKIDataArraived(kindOf: \(kindOf))")
+                        #endif
+                    }
                 }
             }
             
@@ -560,53 +572,54 @@ final class GlobalStorage: NSObject {
                             _ timeStamp: TimeInterval) {
         
         //GlobalStorageQueue.async(flags: .barrier, execute: {
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("addNewData just started")
+        #endif
+        
+        if self.RKIData[kindOfArea].isEmpty == true {
             
-            #if DEBUG_PRINT_FUNCCALLS
-            print("addNewData just started")
-            #endif
+            self.RKIData[kindOfArea].append(newRKIData)
+            self.RKIDataTimeStamps[kindOfArea].append(timeStamp)
             
-            if self.RKIData[kindOfArea].isEmpty == true {
-                
-                self.RKIData[kindOfArea].append(newRKIData)
-                self.RKIDataTimeStamps[kindOfArea].append(timeStamp)
-
-           } else {
-                
+        } else {
+            
             while self.RKIData[kindOfArea].count > self.maxNumberOfDaysStored {
-                    
-                    self.RKIData[kindOfArea].removeLast()
-                    self.RKIDataTimeStamps[kindOfArea].removeLast()
-                }
                 
-                self.RKIData[kindOfArea].insert(newRKIData, at: 0)
-                self.RKIDataTimeStamps[kindOfArea].insert(timeStamp, at: 0)
+                self.RKIData[kindOfArea].removeLast()
+                self.RKIDataTimeStamps[kindOfArea].removeLast()
             }
             
-            // check if state data were chenged
-            if kindOfArea == self.RKIDataState {
-                // yes state data changed, so rebuild country data
-                self.rebuildCountryData()
-            }
-            
-            // remember the timeStamp
-            self.RKIDataLastUpdated = CFAbsoluteTimeGetCurrent()
-            
-            // make it permanant
-            self.saveRKIData()
-            
-            // rebuild the delta values
-            self.rebuildRKIDeltas()
-
-            // just for testing
-            //for item in self.RKIData[kindOfArea][0] {
-            //    print("addNewData, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): \(item.cases7DaysPer100K), \(Date(timeIntervalSinceReferenceDate: item.timeStamp))")
-            //}
-            //print("addNewData, RKIDataTimeStamps[\(kindOfArea)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOfArea][0]))")
-
-            #if DEBUG_PRINT_FUNCCALLS
-            print("addNewData all good")
-            #endif
-       // })
+            self.RKIData[kindOfArea].insert(newRKIData, at: 0)
+            self.RKIDataTimeStamps[kindOfArea].insert(timeStamp, at: 0)
+        }
+        
+        // check if state data were chenged
+        if kindOfArea == self.RKIDataState {
+            // yes state data changed, so rebuild country data
+            self.rebuildCountryData()
+        }
+        
+        // remember the timeStamp
+        self.RKIDataLastUpdated = CFAbsoluteTimeGetCurrent()
+        
+        // make it permanant
+        self.saveRKIData(kindOf: kindOfArea)
+        
+        // rebuild the delta values
+        self.rebuildRKIDeltas()
+        
+        // just for testing
+        //for item in self.RKIData[kindOfArea][0] {
+        //    print("addNewData, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): \(item.cases7DaysPer100K), \(Date(timeIntervalSinceReferenceDate: item.timeStamp))")
+        //}
+        //print("addNewData, RKIDataTimeStamps[\(kindOfArea)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOfArea][0]))")
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("addNewData all good")
+        #endif
+        
+        // })
     }
     
     
@@ -655,7 +668,7 @@ final class GlobalStorage: NSObject {
             self.RKIDataLastUpdated = CFAbsoluteTimeGetCurrent()
             
             // make it permanant
-            self.saveRKIData()
+        self.saveRKIData(kindOf: kindOfArea)
 
             // rebuild the delta values
             self.rebuildRKIDeltas()
@@ -665,7 +678,7 @@ final class GlobalStorage: NSObject {
             //    print("replaceDataOfToday, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): inz: \(item.cases7DaysPer100K), cases: \(item.cases)")
             //}
             //print("replaceDataOfToday, RKIDataTimeStamps[\(kindOfArea)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOfArea][0]))")
-            
+  
             #if DEBUG_PRINT_FUNCCALLS
             print("replaceDataOfToday all good")
             #endif
@@ -885,6 +898,9 @@ final class GlobalStorage: NSObject {
         // local notification to update UI
         NotificationCenter.default.post(Notification(name: .CoBaT_NewRKIDataReady))
         
+        CoBaTUserNotification.unique.sendUserNotification(type: .newRKIData)
+        
+        
         #if DEBUG_PRINT_FUNCCALLS
         print("rebuildRKIDeltas just posted .CoBaT_NewRKIDataReady")
         #endif
@@ -898,7 +914,7 @@ final class GlobalStorage: NSObject {
      
      -----------------------------------------------------------------------------------------------
      */
-    private func saveRKIData() {
+    private func saveRKIData(kindOf: Int) {
         
         // make sure we have consistent data
         GlobalStorageQueue.async(execute: {
@@ -906,7 +922,7 @@ final class GlobalStorage: NSObject {
             #if DEBUG_PRINT_FUNCCALLS
             print("saveRKIData just started")
             #endif
-
+            
             // make it permamnent, by encode it to JSON and store it
             do {
                 // try to encode the county data and the timeStamps
@@ -929,6 +945,17 @@ final class GlobalStorage: NSObject {
                 // encode did fail, log the message
                 self.storeLastError(errorText: "CoBaT.GlobalStorage.saveRKIData: Error: JSON encoder could not encode RKIData: error: \"\(error.description)\"")
             }
+            
+            // check if we have to inform the background service
+            if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                
+                CoBaTBackgroundService.unique.newRKIDataArraived(kindOf: kindOf)
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("addNewData just called CoBaTBackgroundService.unique.newRKIDataArraived(kindOf: \(kindOf))")
+                #endif
+            }
+            
         })
     }
 

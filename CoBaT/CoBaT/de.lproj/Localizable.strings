@@ -204,8 +204,6 @@ bestimmte öffentliche Plätze ab 21:00";
 
 
 
-
-
 /**************************************************************************************************
  *
  * class DetailsRKIViewController and DetailsRKITableViewController
@@ -220,4 +218,21 @@ bestimmte öffentliche Plätze ab 21:00";
 "label-cases-7days" = "Fälle letzte 7 Tage";
 
 
+/**************************************************************************************************
+ *
+ * class CoBaTUserNotification
+ *
+ **************************************************************************************************/
+
+/* new RKI Data title */
+"new-Rki-tilte" = "Neue RKI Daten";
+
+/* RKI data difference cases for Germany */
+"Germany-new-cases" = "Deutschland: %@ neue Fälle";
+
+/* RKI data cases in total for Germany */
+"Germany-total-cases" = "Deutschland: %@ Fälle";
+
+/* RKI data incidences for county */
+"County-cases7day100k" = "%@: Inzidenz: %@";
 

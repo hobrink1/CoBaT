@@ -130,7 +130,10 @@ class DetailsRKITableViewController: UITableViewController {
             
             let item = localRKIDataLoaded[index]
             
-            let deaths100k = Double(item.deaths) / 100_000.0
+            let deaths100k = Double(item.deaths)
+                           / Double(item.inhabitants)
+                           * 100_000.0
+            
             let cases7Days = item.cases7DaysPer100K
                            * Double(item.inhabitants)
                            / 100_000.0
@@ -425,19 +428,19 @@ class DetailsRKITableViewController: UITableViewController {
             cell.CasesTotal.text = numberNoFractionFormatter.string(
                 from: NSNumber(value: myData.rkiDataStruct.cases))
             
-            cell.Cases100k.text = numberNoFractionFormatter.string(
+            cell.Cases100k.text = number1FractionFormatter.string(
                 from: NSNumber(value: myData.rkiDataStruct.casesPer100k))
             
             cell.DeathsTotal.text = numberNoFractionFormatter.string(
                 from: NSNumber(value: myData.rkiDataStruct.deaths))
             
-            cell.Deaths100k.text = number3FractionFormatter.string(
+            cell.Deaths100k.text = number1FractionFormatter.string(
                 from: NSNumber(value: myData.deaths100k))
             
             cell.IncidencesTotal.text = numberNoFractionFormatter.string(
                 from: NSNumber(value: myData.cases7Days))
             
-            cell.Incidences100k.text = numberNoFractionFormatter.string(
+            cell.Incidences100k.text = number1FractionFormatter.string(
                 from: NSNumber(value: myData.rkiDataStruct.cases7DaysPer100K))
             
         } else {
@@ -478,7 +481,7 @@ class DetailsRKITableViewController: UITableViewController {
             
             cell.Deaths100k.text = getFormattedDeltaTextDouble(
                 number:  myData.deaths100k,
-                fraction: 3)
+                fraction: 1)
             
             cell.IncidencesTotal.text = getFormattedDeltaTextDouble(
                 number:  myData.cases7Days,
@@ -486,7 +489,7 @@ class DetailsRKITableViewController: UITableViewController {
             
             cell.Incidences100k.text = getFormattedDeltaTextDouble(
                 number:  myData.rkiDataStruct.cases7DaysPer100K,
-                fraction: 0)
+                fraction: 1)
 
         }
 

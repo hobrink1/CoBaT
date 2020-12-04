@@ -492,7 +492,7 @@ func getFormattedDeltaTextDouble(number: Double, fraction: Int) -> String {
             
             returnString = "+"
             
-        } else if abs(number) < roundBorder {
+        } else if (number >= 0) && (number < roundBorder) {
             
             returnString = "±"
         }
