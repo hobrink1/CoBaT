@@ -63,7 +63,7 @@ final class GlobalStorage: NSObject {
     
     // size of storage
     private let maxNumberOfDaysStored: Int = 15
-    private let maxNumberOfErrorsStored: Int = 20
+    private let maxNumberOfErrorsStored: Int = 50
     
     // Version of permanent storage
     private let VersionOfPermanentStorage: Int = 2
@@ -178,7 +178,7 @@ final class GlobalStorage: NSObject {
                             // End DataCleansing ---------------------------------------------------
                             
                             // rebuild the delta values
-                            self.rebuildRKIDeltas()
+                            self.rebuildRKIDeltas(newData: false)
 
                         } else {
                             
@@ -291,7 +291,7 @@ final class GlobalStorage: NSObject {
                             self.saveRKIData(kindOf: 0)
                             
                             // rebuild the delta values
-                            self.rebuildRKIDeltas()
+                            self.rebuildRKIDeltas(newData: false)
                             
                         } // Check version
                                                 
@@ -607,7 +607,7 @@ final class GlobalStorage: NSObject {
         self.saveRKIData(kindOf: kindOfArea)
         
         // rebuild the delta values
-        self.rebuildRKIDeltas()
+        self.rebuildRKIDeltas(newData: true)
         
         // just for testing
         //for item in self.RKIData[kindOfArea][0] {
@@ -671,7 +671,7 @@ final class GlobalStorage: NSObject {
         self.saveRKIData(kindOf: kindOfArea)
 
             // rebuild the delta values
-            self.rebuildRKIDeltas()
+        self.rebuildRKIDeltas(newData: true)
             
             // just for testing
             //for item in self.RKIData[kindOfArea][0] {
@@ -777,7 +777,7 @@ final class GlobalStorage: NSObject {
      
      -----------------------------------------------------------------------------------------------
      */
-    private func rebuildRKIDeltas() {
+    private func rebuildRKIDeltas(newData: Bool) {
         
         #if DEBUG_PRINT_FUNCCALLS
         print("rebuildRKIDeltas just started")
@@ -785,6 +785,9 @@ final class GlobalStorage: NSObject {
 
         // first step, remove the old data, and make sure we have an empty array per area level
         self.RKIDataDeltas = [ [], [], [] ]
+        
+        // we only send user notification, if there is new data and no error occure in this function
+        var worthToSendUserNotification: Bool = newData
         
         // loop over level 0 (country, state, county)
         for areaIndex in 0 ..< self.RKIData.count {
@@ -880,6 +883,8 @@ final class GlobalStorage: NSObject {
                             // encode did fail, log the message
                             self.storeLastError(errorText: "CoBaT.GlobalStorage.rebuildRKIDeltas: Error: we have an inconsitency in yesterday data of RKIData[\(areaIndex)], no deltas for yesterday and 7 days stored")
                             
+                            worthToSendUserNotification = false
+                            
                         } // noErrors
                         
                     } // loop over days
@@ -891,6 +896,8 @@ final class GlobalStorage: NSObject {
                 #if DEBUG_PRINT_FUNCCALLS
                 print("rebuildRKIDeltas no data available, do nothing")
                 #endif
+                
+                worthToSendUserNotification = false
             }
             
         } // loop over country, state, county
@@ -898,8 +905,11 @@ final class GlobalStorage: NSObject {
         // local notification to update UI
         NotificationCenter.default.post(Notification(name: .CoBaT_NewRKIDataReady))
         
-        CoBaTUserNotification.unique.sendUserNotification(type: .newRKIData)
-        
+        // check if we really should inform the user
+        if worthToSendUserNotification == true {
+
+            CoBaTUserNotification.unique.sendUserNotification(type: .newRKIData)
+        }
         
         #if DEBUG_PRINT_FUNCCALLS
         print("rebuildRKIDeltas just posted .CoBaT_NewRKIDataReady")

@@ -66,7 +66,8 @@ class CoBaTBackgroundService: NSObject {
         RKIStateDataOK = false
         
         #if DEBUG_PRINT_FUNCCALLS
-        print("startRKIBackgroundFetch: will call restoreSavedRKIData()")
+        GlobalStorage.unique.storeLastError(
+            errorText:"startRKIBackgroundFetch: will call restoreSavedRKIData()")
         #endif
 
         // restore the current data store and call RKI
@@ -111,7 +112,8 @@ class CoBaTBackgroundService: NSObject {
             
             // yes both parts are done, so close the task
             #if DEBUG_PRINT_FUNCCALLS
-            print("newRKIDataArraived: RKIStateDataOK == true) && (RKICountyDataOK == true), close background task")
+            GlobalStorage.unique.storeLastError(
+                errorText:"newRKIDataArraived: RKIStateDataOK == true) && (RKICountyDataOK == true), close background task")
             #endif
          
             // with this flag GlobalStorage knows it have to use this class

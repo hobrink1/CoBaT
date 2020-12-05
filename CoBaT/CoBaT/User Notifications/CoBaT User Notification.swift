@@ -53,11 +53,12 @@ class CoBaTUserNotification: NSObject {
     public func sendUserNotification(type: CoBaTUserNotificationMessageType) {
         
         // first check if we are in background
-        if weAreInBackground == true {
+        if weAreInBackground == false {
 
             // no , not in background, so the user sees the news right in front of him, no need to message
             #if DEBUG_PRINT_FUNCCALLS
-            print("sendUserNotification: called, but weAreInBackground == true, do nothing and return")
+            GlobalStorage.unique.storeLastError(
+                errorText:"sendUserNotification: called, but weAreInBackground == false, do nothing and return")
             #endif
 
             return
@@ -151,7 +152,8 @@ class CoBaTUserNotification: NSObject {
                         // we got an index, so we do have the same text still to send
                         // just report and return
                         #if DEBUG_PRINT_FUNCCALLS
-                        print("sendUserNotification: text \"\(textToSend)\" already in message queue, do not send")
+                        GlobalStorage.unique.storeLastError(
+                            errorText: "sendUserNotification: text \"\(textToSend)\" already in message queue, do not send")
                         #endif
                         
                     } else {
@@ -245,7 +247,8 @@ class CoBaTUserNotification: NSObject {
                 //content.sound = UNNotificationSound.default
                 
                 #if DEBUG_PRINT_FUNCCALLS
-                 print("grantedHandler: Will send message \"\(content.title)\", \"\(content.body)\"")
+                GlobalStorage.unique.storeLastError(
+                    errorText:"grantedHandler: Will send message \"\(content.title)\", \"\(content.body)\"")
                 #endif
                 
                 // show this notification 5 seconds from now to have chance of bundle some messages
