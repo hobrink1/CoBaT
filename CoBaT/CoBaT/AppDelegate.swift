@@ -9,6 +9,9 @@ import UIKit
 import Foundation
 import BackgroundTasks
 
+let VersionLabel: String = "CoBaT V1.1.1"
+
+
 // simple variable to detect if we are in background or not
 // this avoids to call UIApplication.shared.applicationState, as this always have to be called on main thread
 var weAreInBackground: Bool = true

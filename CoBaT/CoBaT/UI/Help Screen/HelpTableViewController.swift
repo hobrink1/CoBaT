@@ -25,7 +25,7 @@ class HelpTableViewController: UITableViewController {
     // ---------------------------------------------------------------------------------------------
 
     enum localDataEnum {
-        case singleString, doubleString, errorMessage
+        case singleString, doubleString, errorMessage, version
     }
     struct localDataStruct {
         let localDataType: localDataEnum
@@ -43,8 +43,10 @@ class HelpTableViewController: UITableViewController {
     // .singleString and .doubleString will always translated
     // .errorMessage will never translated
     let AboutTexts: [localDataStruct] = [
-        localDataStruct(dataType: .singleString, label1: "RKI-Disclaimer", label2: ""),
         
+        localDataStruct(dataType: .version, label1: "", label2: ""),
+        localDataStruct(dataType: .singleString, label1: "RKI-Disclaimer", label2: ""),
+
     ]
 
     var localData: [localDataStruct] = []
@@ -67,6 +69,17 @@ class HelpTableViewController: UITableViewController {
         for item in AboutTexts {
             
             switch item.localDataType {
+            
+            case .version:
+                
+                // just the version string
+                // append a new record
+                localDataBuild.append(localDataStruct(
+                                        dataType: item.localDataType,
+                                        label1: VersionLabel,
+                                        label2: ""))
+
+                
             
             case .singleString:
                 
