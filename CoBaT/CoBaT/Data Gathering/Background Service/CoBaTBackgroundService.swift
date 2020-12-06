@@ -65,14 +65,27 @@ class CoBaTBackgroundService: NSObject {
         RKICountyDataOK = false
         RKIStateDataOK = false
         
-        #if DEBUG_PRINT_FUNCCALLS
-        GlobalStorage.unique.storeLastError(
-            errorText:"startRKIBackgroundFetch: will call restoreSavedRKIData()")
-        #endif
+        // check if we already restored the saved data. We need them to determin if the recieved data are new ones
+        if GlobalStorage.unique.savedRKIDataRestored == true {
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            GlobalStorage.unique.storeLastError(
+                errorText:"startRKIBackgroundFetch: will call getRKIData()")
+            #endif
 
-        // restore the current data store and call RKI
-        GlobalStorage.unique.restoreSavedRKIData()
+            // get fresh data
+            RKIDataDownload.unique.getRKIData()
 
+        } else {
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            GlobalStorage.unique.storeLastError(
+                errorText:"startRKIBackgroundFetch: will call restoreSavedRKIData()")
+            #endif
+            
+            // restore the saved data store and call RKI
+            GlobalStorage.unique.restoreSavedRKIData()
+        }
     }
     
     /**
@@ -91,7 +104,7 @@ class CoBaTBackgroundService: NSObject {
      
      */
     // the func to call when new data arrived
-    public func newRKIDataArraived(kindOf: Int) {
+    public func newRKIDataArrived(kindOf: Int) {
         
         // handle what kind of data we got
         switch kindOf {
@@ -113,7 +126,7 @@ class CoBaTBackgroundService: NSObject {
             // yes both parts are done, so close the task
             #if DEBUG_PRINT_FUNCCALLS
             GlobalStorage.unique.storeLastError(
-                errorText:"newRKIDataArraived: RKIStateDataOK == true) && (RKICountyDataOK == true), close background task")
+                errorText:"newRKIDataArrived: RKIStateDataOK == true) && (RKICountyDataOK == true), close background task")
             #endif
          
             // with this flag GlobalStorage knows it have to use this class

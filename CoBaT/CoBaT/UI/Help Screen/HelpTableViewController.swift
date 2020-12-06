@@ -133,7 +133,7 @@ class HelpTableViewController: UITableViewController {
 
                 // resort the erros so that newest is on top
                 let sortedErrors = GlobalStorage.unique.lastErrors.sorted(
-                    by: { $0.errorTimeStamp < $1.errorTimeStamp } )
+                    by: { $0.errorTimeStamp > $1.errorTimeStamp } )
                 
                 // walk over the sorted erros and list them
                 for item in sortedErrors {

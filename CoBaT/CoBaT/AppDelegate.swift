@@ -193,7 +193,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let request = BGAppRefreshTaskRequest(identifier: "org.hobrink.CoBat.refreshRKIBackground")
         
         // Fetch no earlier than 10 minutes from now
-        request.earliestBeginDate = Date(timeIntervalSinceNow: 10 * 60)
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60)
         
         do {
             try BGTaskScheduler.shared.submit(request)

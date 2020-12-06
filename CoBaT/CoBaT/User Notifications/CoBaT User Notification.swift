@@ -76,8 +76,9 @@ class CoBaTUserNotification: NSObject {
         }
         
         // reset the flags
-        
-        
+        GlobalStorage.unique.didRecieveCountyData = false
+        GlobalStorage.unique.didRecieveStateData = false
+
         // prepare to build the text
         var textToSend: String = ""
 

@@ -67,12 +67,16 @@ final class GlobalStorage: NSObject {
     
     // Version of permanent storage
     private let VersionOfPermanentStorage: Int = 2
+
     
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - RKI Data API
     // ---------------------------------------------------------------------------------------------
     
+    // flag if we already have restored the data, if so, no need to do it again. This is used in background fetch
+    // see startRKIBackgroundFetch()
+    public var savedRKIDataRestored: Bool = false
     /**
      -----------------------------------------------------------------------------------------------
      
@@ -314,8 +318,11 @@ final class GlobalStorage: NSObject {
                 self.storeLastError(errorText: "CoBaT.GlobalStorage.restoreSavedRKIData: Error: could not read RKIData")
             }
             
+            // set the flag, that we have done, what to do
+            self.savedRKIDataRestored = true
+            
             #if DEBUG_PRINT_FUNCCALLS
-            print("restoreSavedRKIData done, call")
+            print("restoreSavedRKIData done, call getRKIData()")
             #endif
             
             // get fresh data
@@ -542,10 +549,10 @@ final class GlobalStorage: NSObject {
                     // check if we have to inform the background service
                     if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
                         
-                        CoBaTBackgroundService.unique.newRKIDataArraived(kindOf: kindOf)
+                        CoBaTBackgroundService.unique.newRKIDataArrived(kindOf: kindOf)
                         
                         #if DEBUG_PRINT_FUNCCALLS
-                        print("refresh_RKIData just called CoBaTBackgroundService.unique.newRKIDataArraived(kindOf: \(kindOf))")
+                        print("refresh_RKIData just called CoBaTBackgroundService.unique.newRKIDataArrived(kindOf: \(kindOf))")
                         #endif
                     }
                 }
@@ -973,10 +980,10 @@ final class GlobalStorage: NSObject {
             // check if we have to inform the background service
             if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
                 
-                CoBaTBackgroundService.unique.newRKIDataArraived(kindOf: kindOf)
+                CoBaTBackgroundService.unique.newRKIDataArrived(kindOf: kindOf)
                 
                 #if DEBUG_PRINT_FUNCCALLS
-                print("addNewData just called CoBaTBackgroundService.unique.newRKIDataArraived(kindOf: \(kindOf))")
+                print("addNewData just called CoBaTBackgroundService.unique.newRKIDataArrived(kindOf: \(kindOf))")
                 #endif
             }
             

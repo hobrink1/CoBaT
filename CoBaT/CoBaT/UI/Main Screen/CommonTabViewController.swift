@@ -362,7 +362,7 @@ class CommonTabViewController: UIViewController {
             //
             
             // get the colors
-            let (backgroundColor, textColor, grade) = CovidRating.unique.getColorsForValue(localDataToday.cases7DaysPer100K)
+            let (backgroundColor, textColor, textColorLower, grade) = CovidRating.unique.getColorsForValue(localDataToday.cases7DaysPer100K)
             
             // save the colors for embedded CommonTabTableViewController
             GlobalUIData.unique.UITabBarCurentTextColor = textColor
@@ -378,19 +378,19 @@ class CommonTabViewController: UIViewController {
                 self.LabelSelectedName.textColor = textColor
                 
                 self.LabelToday.textColor = textColor
-                self.LabelDiffYesterday.textColor = textColor
+                self.LabelDiffYesterday.textColor = textColorLower
                 self.LabelYesterday.textColor = textColor
                 
                 self.LabelCases.textColor = textColor
                 
                 self.ValueCases.textColor = textColor
-                self.ValueDiffCasesYesterday.textColor = textColor
+                self.ValueDiffCasesYesterday.textColor = textColorLower
                 self.ValueCasesYesterday.textColor = textColor
                 
                 self.LabelCases7Days.textColor = textColor
                 
                 self.ValueCases7Days.textColor = textColor
-                self.ValueDiffCasesYesterday7Days.textColor = textColor
+                self.ValueDiffCasesYesterday7Days.textColor = textColorLower
                 self.ValueCasesYesterday7Days.textColor = textColor
                 
                 self.LabelRegulations.textColor = textColor

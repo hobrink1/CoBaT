@@ -570,7 +570,7 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         let myData = localDataArray[index]
         
         // get color schema for 7 day average caces per 100 K people
-        let (backgroundColor, textColorToUse, _) = CovidRating.unique.getColorsForValue(myData.cases7DaysPer100K)
+        let (backgroundColor, textColorToUse, _, _) = CovidRating.unique.getColorsForValue(myData.cases7DaysPer100K)
         
         // set the background of the cell
         cell.contentView.backgroundColor = backgroundColor
@@ -677,7 +677,6 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             
             cell.ThirdIncidences.text = getFormattedDeltaTextDouble(
                 number: localDataArrayDelta7[index].cases7DaysPer100K, fraction: 1)
-            
             
         } else {
             

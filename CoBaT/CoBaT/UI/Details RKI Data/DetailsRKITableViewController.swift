@@ -43,6 +43,7 @@ class DetailsRKITableViewController: UITableViewController {
         
         let backgroundColor: UIColor
         let textColor: UIColor
+        let textColorLower: UIColor
         
         init(rkiDataStruct: GlobalStorage.RKIDataStruct,
              deaths100k: Double,
@@ -51,7 +52,8 @@ class DetailsRKITableViewController: UITableViewController {
              sortKey: String,
              otherDayTimeStamp: TimeInterval,
              backgroundColor: UIColor,
-             textColor: UIColor)
+             textColor: UIColor,
+             textColorLower: UIColor)
         {
             
             self.rkiDataStruct      = rkiDataStruct
@@ -62,6 +64,7 @@ class DetailsRKITableViewController: UITableViewController {
             self.otherDayTimeStamp  = otherDayTimeStamp
             self.backgroundColor    = backgroundColor
             self.textColor          = textColor
+            self.textColorLower     = textColorLower
         }
     }
 
@@ -149,7 +152,7 @@ class DetailsRKITableViewController: UITableViewController {
             
             let sortKey = "\(indexString)\(cellType.rawValue)"
             
-            let (backgroundColor, textColor, _) = CovidRating.unique.getColorsForValue(item.cases7DaysPer100K)
+            let (backgroundColor, textColor, textColorLower, _) = CovidRating.unique.getColorsForValue(item.cases7DaysPer100K)
             
             localDataBuiling.append(showDetailStruct(
                                         rkiDataStruct: item,
@@ -159,7 +162,8 @@ class DetailsRKITableViewController: UITableViewController {
                                         sortKey: sortKey,
                                         otherDayTimeStamp: 0,
                                         backgroundColor: backgroundColor,
-                                        textColor: textColor))
+                                        textColor: textColor,
+                                        textColorLower: textColorLower))
  
         }
         
@@ -205,6 +209,7 @@ class DetailsRKITableViewController: UITableViewController {
             
             let sortKey = "\(indexString)\(cellType.rawValue)"
             
+            
             localDataBuiling.append(showDetailStruct(
                                         rkiDataStruct: myRKIDataStruct,
                                         deaths100k: diffDeaths100k,
@@ -213,7 +218,8 @@ class DetailsRKITableViewController: UITableViewController {
                                         sortKey: sortKey,
                                         otherDayTimeStamp: itemNextDay.rkiDataStruct.timeStamp,
                                         backgroundColor: itemCurrent.backgroundColor,
-                                        textColor: itemCurrent.textColor))
+                                        textColor: itemCurrent.textColorLower,
+                                        textColorLower: itemCurrent.textColorLower))
         }
         
         
