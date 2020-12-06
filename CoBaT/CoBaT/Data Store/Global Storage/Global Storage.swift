@@ -67,6 +67,7 @@ final class GlobalStorage: NSObject {
     
     // Version of permanent storage
     private let VersionOfPermanentStorage: Int = 2
+    
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - RKI Data API
@@ -323,7 +324,18 @@ final class GlobalStorage: NSObject {
     }
     
     
-    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     // flags to show what kind of data we recieved
+     // this flags will be used from CoBaT to determin if it is worth to notify the user.
+     // The flags will be resetted by the send routine
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    public var didRecieveStateData: Bool = false
+    public var didRecieveCountyData: Bool = false
+
     /**
      -----------------------------------------------------------------------------------------------
      
@@ -338,7 +350,8 @@ final class GlobalStorage: NSObject {
      */
     public func refresh_RKIStateData(newRKIStateData: [RKIDataStruct]) {
         
-        // call the local methode to handle all, just tell that this are county datas
+        // call the local methode to handle all, just tell that this are state datas
+        self.didRecieveStateData = true
         self.refresh_RKIData(self.RKIDataState, newRKIStateData)
     }
   
@@ -357,6 +370,7 @@ final class GlobalStorage: NSObject {
     public func refresh_RKICountyData(newRKICountyData: [RKIDataStruct]) {
         
         // call the local methode to handle all, just tell that this are county datas
+        self.didRecieveCountyData = true
         self.refresh_RKIData(self.RKIDataCounty, newRKICountyData)
     }
     

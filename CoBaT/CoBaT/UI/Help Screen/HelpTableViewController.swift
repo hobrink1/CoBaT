@@ -131,8 +131,12 @@ class HelpTableViewController: UITableViewController {
                                         label1: label1Text,
                                         label2: ""))
 
+                // resort the erros so that newest is on top
+                let sortedErrors = GlobalStorage.unique.lastErrors.sorted(
+                    by: { $0.errorTimeStamp < $1.errorTimeStamp } )
                 
-                for item in GlobalStorage.unique.lastErrors {
+                // walk over the sorted erros and list them
+                for item in sortedErrors {
                     
                     let myDate: Date = Date(timeIntervalSinceReferenceDate: item.errorTimeStamp)
                     let timeStampString: String = mediumMediumSingleRelativeDateTimeFormatter.string(
@@ -143,6 +147,7 @@ class HelpTableViewController: UITableViewController {
                                             label1: timeStampString,
                                             label2: item.errorText))
                 }
+                
             } else {
                 
                 // translate the label text

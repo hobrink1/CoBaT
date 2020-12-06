@@ -64,6 +64,20 @@ class CoBaTUserNotification: NSObject {
             return
         }
             
+        // check if we have stae AND county data
+        if (GlobalStorage.unique.didRecieveCountyData == false)
+            || (GlobalStorage.unique.didRecieveStateData == false) {
+
+            // no, one of them is missing, so report and return
+            #if DEBUG_PRINT_FUNCCALLS
+            GlobalStorage.unique.storeLastError(
+                errorText:"sendUserNotification: called, but but didRecieveCountyData (\(GlobalStorage.unique.didRecieveCountyData)) or didRecieveStateData (\(GlobalStorage.unique.didRecieveStateData)) still false, so return")
+            #endif
+        }
+        
+        // reset the flags
+        
+        
         // prepare to build the text
         var textToSend: String = ""
 
