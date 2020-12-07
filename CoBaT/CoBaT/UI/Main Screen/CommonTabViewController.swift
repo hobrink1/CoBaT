@@ -602,17 +602,19 @@ class CommonTabViewController: UIViewController {
             })
         
         
-//        // add observer to recognise a new retrieved status
-//        RKIDataRetrievedObserver = NotificationCenter.default.addObserver(
-//            forName: .CoBaT_RKIDataRetrieved,
-//            object: nil,
-//            queue: OperationQueue.main,
-//            using: { Notification in
-//
-//                #if DEBUG_PRINT_FUNCCALLS
-//                print("CommonTabViewController just recieved signal .CoBaT_RKIDataRetrieved")
-//                #endif
-//            })
+        // add observer to recognise a new retrieved status
+        RKIDataRetrievedObserver = NotificationCenter.default.addObserver(
+            forName: .CoBaT_RKIDataRetrieved,
+            object: nil,
+            queue: OperationQueue.main,
+            using: { Notification in
+
+                #if DEBUG_PRINT_FUNCCALLS
+                print("CommonTabViewController just recieved signal .CoBaT_RKIDataRetrieved")
+                #endif
+                
+                self.refreshOwnDataOutlets()
+            })
         
         // add observer to recognise if new data are available
         NewRKIDataReadyObserver = NotificationCenter.default.addObserver(
