@@ -68,7 +68,19 @@ final class GlobalStorage: NSObject {
     // Version of permanent storage
     private let VersionOfPermanentStorage: Int = 2
 
-    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     // flags to show what kind of data we recieved
+     // this flags will be used from CoBaT to determin if it is worth to notify the user.
+     // The flags will be manages by rebuildRKIDeltas
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private var didRecieveStateData: Bool = false
+    private var didRecieveCountyData: Bool = false
+
+
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - RKI Data API
@@ -183,7 +195,8 @@ final class GlobalStorage: NSObject {
                             // End DataCleansing ---------------------------------------------------
                             
                             // rebuild the delta values
-                            self.rebuildRKIDeltas(newData: false)
+                            // but to not set the flags
+                            self.rebuildRKIDeltas(kindOf: -1, newData: false)
 
                         } else {
                             
@@ -293,10 +306,10 @@ final class GlobalStorage: NSObject {
                             self.RKIDataLastRetreived = loadedRKIDataLastRetreived
 
                             // and force a save to secure what we have done
-                            self.saveRKIData(kindOf: 0)
+                            self.saveRKIData(kindOf: -1)
                             
                             // rebuild the delta values
-                            self.rebuildRKIDeltas(newData: false)
+                            self.rebuildRKIDeltas(kindOf: -1, newData: false)
                             
                         } // Check version
                                                 
@@ -334,18 +347,6 @@ final class GlobalStorage: NSObject {
     /**
      -----------------------------------------------------------------------------------------------
      
-     // flags to show what kind of data we recieved
-     // this flags will be used from CoBaT to determin if it is worth to notify the user.
-     // The flags will be resetted by the send routine
-     
-     -----------------------------------------------------------------------------------------------
-     */
-    public var didRecieveStateData: Bool = false
-    public var didRecieveCountyData: Bool = false
-
-    /**
-     -----------------------------------------------------------------------------------------------
-     
      stores the new RKIData[], but only if the data has changed, it also initiates local notifications "Data updated" and "Data retrieved"
      
      -----------------------------------------------------------------------------------------------
@@ -358,7 +359,6 @@ final class GlobalStorage: NSObject {
     public func refresh_RKIStateData(newRKIStateData: [RKIDataStruct]) {
         
         // call the local methode to handle all, just tell that this are state datas
-        self.didRecieveStateData = true
         self.refresh_RKIData(self.RKIDataState, newRKIStateData)
     }
   
@@ -377,7 +377,6 @@ final class GlobalStorage: NSObject {
     public func refresh_RKICountyData(newRKICountyData: [RKIDataStruct]) {
         
         // call the local methode to handle all, just tell that this are county datas
-        self.didRecieveCountyData = true
         self.refresh_RKIData(self.RKIDataCounty, newRKICountyData)
     }
     
@@ -628,7 +627,7 @@ final class GlobalStorage: NSObject {
         self.saveRKIData(kindOf: kindOfArea)
         
         // rebuild the delta values
-        self.rebuildRKIDeltas(newData: true)
+        self.rebuildRKIDeltas(kindOf: kindOfArea, newData: true)
         
         // just for testing
         //for item in self.RKIData[kindOfArea][0] {
@@ -692,7 +691,7 @@ final class GlobalStorage: NSObject {
         self.saveRKIData(kindOf: kindOfArea)
 
             // rebuild the delta values
-        self.rebuildRKIDeltas(newData: true)
+        self.rebuildRKIDeltas(kindOf: kindOfArea, newData: true)
             
             // just for testing
             //for item in self.RKIData[kindOfArea][0] {
@@ -798,7 +797,7 @@ final class GlobalStorage: NSObject {
      
      -----------------------------------------------------------------------------------------------
      */
-    private func rebuildRKIDeltas(newData: Bool) {
+    private func rebuildRKIDeltas(kindOf: Int, newData: Bool) {
         
         #if DEBUG_PRINT_FUNCCALLS
         print("rebuildRKIDeltas just started")
@@ -923,13 +922,36 @@ final class GlobalStorage: NSObject {
             
         } // loop over country, state, county
         
+        
         // local notification to update UI
         NotificationCenter.default.post(Notification(name: .CoBaT_NewRKIDataReady))
         
-        // check if we really should inform the user
-        if worthToSendUserNotification == true {
+        
+        // check if we really should inform the user (there must be both data parts delivered, and no errors at all)
+        
+        // check which kind of data we recieved and set the right flag
+        if kindOf == self.RKIDataState {
+            self.didRecieveStateData = true
+        } else if kindOf == self.RKIDataCounty {
+            self.didRecieveCountyData = true
+        }
+        
+        // now make the decision ...
+        if (worthToSendUserNotification == true)
+            && (self.didRecieveStateData == true)
+            && (self.didRecieveCountyData == true) {
 
+            // OK, we will send it...
+            // reset the flags, and send the notification
+            self.didRecieveStateData = false
+            self.didRecieveCountyData = false
+            
             CoBaTUserNotification.unique.sendUserNotification(type: .newRKIData)
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            self.storeLastError(errorText:"rebuildRKIDeltas just called sendUserNotification(type: .newRKIData)")
+            #endif
+
         }
         
         #if DEBUG_PRINT_FUNCCALLS
