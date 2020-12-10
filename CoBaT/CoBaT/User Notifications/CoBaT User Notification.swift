@@ -92,6 +92,7 @@ class CoBaTUserNotification: NSObject {
         
         // to sync data access get the date we need in the global data queue
         GlobalStorageQueue.async(execute: {
+            
             numberOfDays = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCountry].count
             
             if numberOfDays > 0 {

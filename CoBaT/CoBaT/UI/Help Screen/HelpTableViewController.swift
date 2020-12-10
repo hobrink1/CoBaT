@@ -78,9 +78,9 @@ class HelpTableViewController: UITableViewController {
                                         dataType: item.localDataType,
                                         label1: VersionLabel,
                                         label2: ""))
-
                 
-            
+                
+                
             case .singleString:
                 
                 // translate the label text
@@ -91,7 +91,7 @@ class HelpTableViewController: UITableViewController {
                                         dataType: item.localDataType,
                                         label1: label1Text,
                                         label2: ""))
- 
+                
                 
             case .doubleString:
                 
@@ -104,16 +104,16 @@ class HelpTableViewController: UITableViewController {
                                         dataType: item.localDataType,
                                         label1: label1Text,
                                         label2: label2Text))
- 
-
+                
+                
             case .errorMessage:
                 
                 // append a new record
                 localDataBuild.append(item)
-
+                
             }
         }
-
+        
         
         GlobalStorageQueue.sync(execute: {
             
@@ -121,7 +121,7 @@ class HelpTableViewController: UITableViewController {
                 
                 // translate the label text
                 let label1Text = NSLocalizedString("Explanation-Error-Messages",
-                    comment: "List of current error messages")
+                                                   comment: "List of current error messages")
                 
                 
                 
@@ -130,7 +130,7 @@ class HelpTableViewController: UITableViewController {
                                         dataType: .singleString,
                                         label1: label1Text,
                                         label2: ""))
-
+                
                 // resort the erros so that newest is on top
                 let sortedErrors = GlobalStorage.unique.lastErrors.sorted(
                     by: { $0.errorTimeStamp > $1.errorTimeStamp } )
@@ -152,7 +152,7 @@ class HelpTableViewController: UITableViewController {
                 
                 // translate the label text
                 let label1Text = NSLocalizedString("Explanation-No-Error-Messages",
-                    comment: "no error messages")
+                                                   comment: "no error messages")
                 
                 // append a new record
                 localDataBuild.append(localDataStruct(
@@ -160,13 +160,14 @@ class HelpTableViewController: UITableViewController {
                                         label1: label1Text,
                                         label2: ""))
             }
-        })
-        
-        DispatchQueue.main.async(execute: {
             
-            self.localData = localDataBuild
             
-            self.tableView.reloadData()
+            DispatchQueue.main.async(execute: {
+                
+                self.localData = localDataBuild
+                
+                self.tableView.reloadData()
+            })
         })
     }
 

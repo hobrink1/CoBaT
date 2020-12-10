@@ -486,7 +486,7 @@ final class GlobalStorage: NSObject {
         // case 3: new item is from a different day (addNewData())
         // case 4: data are the same, so ignore it
         
-        GlobalStorageQueue.async(execute: {
+        GlobalStorageQueue.async(flags: .barrier, execute: {
             
             // check if this is the very first entry
             if self.RKIData[kindOf].isEmpty == true {
