@@ -147,7 +147,11 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         
         case GlobalStorage.unique.RKIDataCountry:
             
-            // Country Level: nothing to do
+            // Country Level: just the colors
+            // set the colors according to the current cell
+            GlobalUIData.unique.UIDetailsRKITextColor = cell.Cases.textColor
+            GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
+                ?? UIColor.systemBackground
             break
             
             
@@ -155,6 +159,12 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             
             GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataState
             GlobalUIData.unique.UIDetailsRKISelectedMyID = localDataArray[row].stateID
+            
+            // set the colors according to the current cell
+            GlobalUIData.unique.UIDetailsRKITextColor = cell.Cases.textColor
+            GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
+                ?? UIColor.systemBackground
+
             performSegue(withIdentifier: "CallDetailsRKIViewControllerFromBrowser", sender: self)
 
             
@@ -162,6 +172,12 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             
             GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataCounty
             GlobalUIData.unique.UIDetailsRKISelectedMyID = localDataArray[row].myID ?? ""
+            
+            // set the colors according to the current cell
+            GlobalUIData.unique.UIDetailsRKITextColor = cell.Cases.textColor
+            GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
+                ?? UIColor.systemBackground
+            
             performSegue(withIdentifier: "CallDetailsRKIViewControllerFromBrowser", sender: self)
 
             

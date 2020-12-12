@@ -9,7 +9,7 @@ import UIKit
 
 // -------------------------------------------------------------------------------------------------
 // MARK: -
-// MARK: - Browse County Data Table View Controller
+// MARK: - Details RKI Table View Controller
 // -------------------------------------------------------------------------------------------------
 
 class DetailsRKITableViewController: UITableViewController {
@@ -22,14 +22,23 @@ class DetailsRKITableViewController: UITableViewController {
     // this variables were set in "ViewDidApear()" and released in "ViewDidDisappear()"
     
     var newRKIDataReadyObserver: NSObjectProtocol?
+    var commonTabBarChangedContentObserver: NSObjectProtocol?
+
+    // color codes for the first row
+    var myBackgroundColor = UIColor.systemBackground
+    var myTextColor = UIColor.label
     
+    // the variables to fill the "kindOf" and "Inhabitants" labels
+    var myKindOfString : String = ""
+    var myInhabitantsValueString: String = ""
+    var myInhabitantsLabelString: String = ""
     
-    
+    // we have three different kind of detail cells, this is the enum for them
     enum showDeltaCellTypeEnum: Int {
         case current = 0, dayDiff = 1, weekDiff = 2
     }
     
-    
+    // we use this struct to precalculate all data
     struct showDetailStruct {
         
         let rkiDataStruct: GlobalStorage.RKIDataStruct
@@ -104,8 +113,13 @@ class DetailsRKITableViewController: UITableViewController {
 
         // get the related data from the global storage in sync
         GlobalStorageQueue.sync(execute: {
+
+            // set the colors for the inhabitants cell
+            self.myBackgroundColor = GlobalUIData.unique.UIDetailsRKIBackgroundColor
+            self.myTextColor = GlobalUIData.unique.UIDetailsRKITextColor
+
             
-             
+            // go over the data
             for dayIndex in 0 ..< GlobalStorage.unique.RKIData[selectedAreaLevel].count {
                 
                 // shortcut
@@ -127,7 +141,15 @@ class DetailsRKITableViewController: UITableViewController {
         
         // Build the data to show
         
-        
+        // inhabitants
+        if localRKIDataLoaded.isEmpty == false {
+            
+            let item = localRKIDataLoaded.first!
+            self.myKindOfString = item.kindOf
+            self.myInhabitantsValueString = numberNoFractionFormatter.string(from: NSNumber(value: item.inhabitants)) ?? ""
+            self.myInhabitantsLabelString = self.inhabitantsText
+
+        }
         
         for index in 0 ..< localRKIDataLoaded.count {
             
@@ -305,6 +327,21 @@ class DetailsRKITableViewController: UITableViewController {
                 
                 self.refreshLocalData()
             })
+        
+        // add observer to recognise if user selcted other tab
+        commonTabBarChangedContentObserver = NotificationCenter.default.addObserver(
+            forName: .CoBaT_CommonTabBarChangedContent,
+            object: nil,
+            queue: nil,
+            using: { Notification in
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("DetailsRKITableViewController just recieved signal .CoBaT_CommonTabBarChangedContent, call RefreshLocalData()")
+                #endif
+                
+                self.refreshLocalData()
+            })
+
     }
  
     /**
@@ -319,6 +356,11 @@ class DetailsRKITableViewController: UITableViewController {
         
         // remove the observer if set
         if let observer = newRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = commonTabBarChangedContentObserver {
             NotificationCenter.default.removeObserver(observer)
         }
         
@@ -349,8 +391,9 @@ class DetailsRKITableViewController: UITableViewController {
      
      -----------------------------------------------------------------------------------------------
      */    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return self.showDetailData.count
+
+        // we have the arry and one special row for the inhabitants
+        return self.showDetailData.count + 1
     }
 
     /**
@@ -362,145 +405,181 @@ class DetailsRKITableViewController: UITableViewController {
      */
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        // dequeue a cell
-        let cell = tableView.dequeueReusableCell(withIdentifier: "DetailsRKITableViewCellV2",
-                                                 for: indexPath) as! DetailsRKITableViewCell
-        
-        
+         
         // get the related data set from local storage
         let index = indexPath.row
-        let myData = showDetailData[index]
         
-        // get color schema for 7 day average caces per 100 K people
-        let backgroundColor = myData.backgroundColor
-        let textColorToUse = myData.textColor
+        switch index {
         
-        // set the background of the cell
-        cell.contentView.backgroundColor = backgroundColor
-       
-        
-        // set the text colors
-        cell.LabelDate.textColor = textColorToUse
+        case 0:
+            
+            // dequeue a cell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DetailsInhabitantsTableViewCell",
+                                                     for: indexPath) as! DetailsInhabitantsTableViewCell
+            
+            // save the colors for embedded CommonTabTableViewController
+            let textColor = self.myTextColor
+            let backgroundColor = self.myBackgroundColor
+  
+            // set the background of the cell
+            cell.contentView.backgroundColor = backgroundColor
+            
+            // set the text colors
+            cell.ValueKindOf.textColor = textColor
+            cell.ValueInhabitants.textColor = textColor
+            cell.LabelInhabitants.textColor = textColor
+            
+            // set the content
+            cell.ValueKindOf.text = self.myKindOfString
+            cell.ValueInhabitants.text = self.myInhabitantsValueString
+            cell.LabelInhabitants.text = self.myInhabitantsLabelString
 
-        //cell.LabelInhabitans.textColor = textColorToUse
-        //cell.ValueInhabitans.textColor = textColorToUse
+            // return the cell
+            return cell
+            
+            
+            
+        default:
+            
+            // we have a cell with the usual content (details)
+            let myData = showDetailData[index - 1]
+            
+            // dequeue a cell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DetailsRKITableViewCellV2",
+                                                     for: indexPath) as! DetailsRKITableViewCell
+            
 
-        cell.LabelTotal.textColor = textColorToUse
-        cell.LabelPer100k.textColor = textColorToUse
-
-        cell.LabelCases.textColor = textColorToUse
-        cell.CasesTotal.textColor = textColorToUse
-        cell.Cases100k.textColor = textColorToUse
-
-        cell.LabelDeaths.textColor = textColorToUse
-        cell.DeathsTotal.textColor = textColorToUse
-        cell.Deaths100k.textColor = textColorToUse
-
-        cell.LabelIncidences.textColor = textColorToUse
-        cell.IncidencesTotal.textColor = textColorToUse
-        cell.Incidences100k.textColor = textColorToUse
-        
-        // set the fixed texts (labels etc.)
-        cell.LabelCases.text = casesText
-        cell.LabelDeaths.text = deathsText
-        cell.LabelIncidences.text = incidencesText
-        
-        cell.LabelTotal.text = totalText
-        cell.LabelPer100k.text = per100kText
-        
-        // Check which cell type it is and set border color and values accordingly
-        if myData.cellType == .current {
+            // get color schema for 7 day average caces per 100 K people
+            let backgroundColor = myData.backgroundColor
+            let textColorToUse = myData.textColor
             
-            // It is an actual day
-            cell.layer.borderColor = textColorToUse.cgColor
+            // set the background of the cell
+            cell.contentView.backgroundColor = backgroundColor
             
-            cell.LabelDate.font = UIFont.preferredFont(forTextStyle: .body)
             
-            // set the values
-            let shortDate = shortSingleRelativeDateFormatter.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+            // set the text colors
+            cell.LabelDate.textColor = textColorToUse
             
-            let shortTime = shortSingleTimeFormatter.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+            //cell.LabelInhabitans.textColor = textColorToUse
+            //cell.ValueInhabitans.textColor = textColorToUse
             
-            let weekday = dateFormatterLocalizedWeekdayShort.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+            cell.LabelTotal.textColor = textColorToUse
+            cell.LabelPer100k.textColor = textColorToUse
             
-            cell.LabelDate.text = "\(shortDate) (\(weekday)), \(shortTime)"
+            cell.LabelCases.textColor = textColorToUse
+            cell.CasesTotal.textColor = textColorToUse
+            cell.Cases100k.textColor = textColorToUse
             
-            //cell.ValueInhabitans.text = numberNoFractionFormatter.string(
-            //    from: NSNumber(value: myData.rkiDataStruct.inhabitants))
+            cell.LabelDeaths.textColor = textColorToUse
+            cell.DeathsTotal.textColor = textColorToUse
+            cell.Deaths100k.textColor = textColorToUse
             
-            cell.CasesTotal.text = numberNoFractionFormatter.string(
-                from: NSNumber(value: myData.rkiDataStruct.cases))
+            cell.LabelIncidences.textColor = textColorToUse
+            cell.IncidencesTotal.textColor = textColorToUse
+            cell.Incidences100k.textColor = textColorToUse
             
-            cell.Cases100k.text = number1FractionFormatter.string(
-                from: NSNumber(value: myData.rkiDataStruct.casesPer100k))
+            // set the fixed texts (labels etc.)
+            cell.LabelCases.text = casesText
+            cell.LabelDeaths.text = deathsText
+            cell.LabelIncidences.text = incidencesText
             
-            cell.DeathsTotal.text = numberNoFractionFormatter.string(
-                from: NSNumber(value: myData.rkiDataStruct.deaths))
+            cell.LabelTotal.text = totalText
+            cell.LabelPer100k.text = per100kText
             
-            cell.Deaths100k.text = number1FractionFormatter.string(
-                from: NSNumber(value: myData.deaths100k))
+            // Check which cell type it is and set border color and values accordingly
+            if myData.cellType == .current {
+                
+                // It is an actual day
+                cell.layer.borderColor = textColorToUse.cgColor
+                
+                cell.LabelDate.font = UIFont.preferredFont(forTextStyle: .body)
+                
+                // set the values
+                let shortDate = shortSingleRelativeDateFormatter.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+                
+                let shortTime = shortSingleTimeFormatter.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+                
+                let weekday = dateFormatterLocalizedWeekdayShort.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+                
+                cell.LabelDate.text = "\(shortDate) (\(weekday)), \(shortTime)"
+                
+                //cell.ValueInhabitans.text = numberNoFractionFormatter.string(
+                //    from: NSNumber(value: myData.rkiDataStruct.inhabitants))
+                
+                cell.CasesTotal.text = numberNoFractionFormatter.string(
+                    from: NSNumber(value: myData.rkiDataStruct.cases))
+                
+                cell.Cases100k.text = number1FractionFormatter.string(
+                    from: NSNumber(value: myData.rkiDataStruct.casesPer100k))
+                
+                cell.DeathsTotal.text = numberNoFractionFormatter.string(
+                    from: NSNumber(value: myData.rkiDataStruct.deaths))
+                
+                cell.Deaths100k.text = number1FractionFormatter.string(
+                    from: NSNumber(value: myData.deaths100k))
+                
+                cell.IncidencesTotal.text = numberNoFractionFormatter.string(
+                    from: NSNumber(value: myData.cases7Days))
+                
+                cell.Incidences100k.text = number1FractionFormatter.string(
+                    from: NSNumber(value: myData.rkiDataStruct.cases7DaysPer100K))
+                
+            } else {
+                
+                // it is a cell with differences
+                cell.layer.borderColor = backgroundColor.cgColor
+                
+                cell.LabelDate.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                
+                // set the values
+                let fromDate = shortSingleRelativeDateFormatter.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+                
+                let fromWeekday = dateFormatterLocalizedWeekdayShort.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+                
+                let untilDate = shortSingleRelativeDateFormatter.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.otherDayTimeStamp))
+                
+                let untilWeekday = dateFormatterLocalizedWeekdayShort.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.otherDayTimeStamp))
+                
+                //cell.LabelDate.text = "\(changeText) \(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))"
+                cell.LabelDate.text = "<\(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))>"
+                
+                //cell.ValueInhabitans.text = getFormattedDeltaTextInt(
+                //    number: myData.rkiDataStruct.inhabitants)
+                
+                cell.CasesTotal.text = getFormattedDeltaTextInt(
+                    number:  myData.rkiDataStruct.cases)
+                
+                cell.Cases100k.text = getFormattedDeltaTextDouble(
+                    number: myData.rkiDataStruct.casesPer100k,
+                    fraction: 1)
+                
+                cell.DeathsTotal.text = getFormattedDeltaTextInt(
+                    number:  myData.rkiDataStruct.deaths)
+                
+                cell.Deaths100k.text = getFormattedDeltaTextDouble(
+                    number:  myData.deaths100k,
+                    fraction: 1)
+                
+                cell.IncidencesTotal.text = getFormattedDeltaTextDouble(
+                    number:  myData.cases7Days,
+                    fraction: 0)
+                
+                cell.Incidences100k.text = getFormattedDeltaTextDouble(
+                    number:  myData.rkiDataStruct.cases7DaysPer100K,
+                    fraction: 1)
+                
+            }
             
-            cell.IncidencesTotal.text = numberNoFractionFormatter.string(
-                from: NSNumber(value: myData.cases7Days))
-            
-            cell.Incidences100k.text = number1FractionFormatter.string(
-                from: NSNumber(value: myData.rkiDataStruct.cases7DaysPer100K))
-            
-        } else {
-            
-            // it is a cell with differences
-            cell.layer.borderColor = backgroundColor.cgColor
-            
-            cell.LabelDate.font = UIFont.preferredFont(forTextStyle: .subheadline)
-            
-            // set the values
-            let fromDate = shortSingleRelativeDateFormatter.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
-           
-            let fromWeekday = dateFormatterLocalizedWeekdayShort.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
-
-            let untilDate = shortSingleRelativeDateFormatter.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.otherDayTimeStamp))
-
-            let untilWeekday = dateFormatterLocalizedWeekdayShort.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.otherDayTimeStamp))
-
-            //cell.LabelDate.text = "\(changeText) \(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))"
-            cell.LabelDate.text = "<\(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))>"
-
-            //cell.ValueInhabitans.text = getFormattedDeltaTextInt(
-            //    number: myData.rkiDataStruct.inhabitants)
-            
-            cell.CasesTotal.text = getFormattedDeltaTextInt(
-                number:  myData.rkiDataStruct.cases)
-            
-            cell.Cases100k.text = getFormattedDeltaTextDouble(
-                number: myData.rkiDataStruct.casesPer100k,
-                fraction: 1)
-            
-            cell.DeathsTotal.text = getFormattedDeltaTextInt(
-                number:  myData.rkiDataStruct.deaths)
-            
-            cell.Deaths100k.text = getFormattedDeltaTextDouble(
-                number:  myData.deaths100k,
-                fraction: 1)
-            
-            cell.IncidencesTotal.text = getFormattedDeltaTextDouble(
-                number:  myData.cases7Days,
-                fraction: 0)
-            
-            cell.Incidences100k.text = getFormattedDeltaTextDouble(
-                number:  myData.rkiDataStruct.cases7DaysPer100K,
-                fraction: 1)
+            return cell
 
         }
-
- 
-        return cell
     }
     
     /**

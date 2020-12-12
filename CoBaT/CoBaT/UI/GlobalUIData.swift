@@ -37,7 +37,11 @@ final class GlobalUIData: NSObject {
     public var UITabBarCurentBackgroundColor: UIColor = UIColor.systemBackground
     public var UITabBarCurentGrade: Int = 0
 
-    
+    // this colors have to be set for the DetailsRKITableViewController. it will use this to color the
+    // cells which are not related to day details
+    public var UIDetailsRKITextColor: UIColor = UIColor.label
+    public var UIDetailsRKIBackgroundColor: UIColor = UIColor.systemBackground
+
     // ---------------------------------------------------------------------------------------------
     // MARK: - Variables (permanent stored)
     // ---------------------------------------------------------------------------------------------

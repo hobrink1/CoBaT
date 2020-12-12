@@ -187,7 +187,7 @@ specific public places form 21:00";
 "label-incidences" = "Incidence:";
 
 /* Label text for inhabitants */
-"label-inhabitants" = "Inhabitants:";
+"label-inhabitants" = "Inhabitants";
 
 /* Label text for total */
 "label-total" = "Total";

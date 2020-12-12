@@ -185,10 +185,10 @@ bestimmte öffentliche Plätze ab 21:00";
 "label-cases" = "Fälle:";
 
 /* Label text for incidences */
-"label-incidences" = "Inzidenz";
+"label-incidences" = "Inzidenz:";
 
 /* Label text for inhabitants */
-"label-inhabitants" = "Einwohner:";
+"label-inhabitants" = "Einwohner";
 
 /* Label text for total */
 "label-total" = "Gesamt";

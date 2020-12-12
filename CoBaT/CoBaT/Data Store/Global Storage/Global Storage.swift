@@ -337,10 +337,10 @@ final class GlobalStorage: NSObject {
             #if DEBUG_PRINT_FUNCCALLS
             print("restoreSavedRKIData done, call getRKIData()")
             #endif
-            
+        })
             // get fresh data
             RKIDataDownload.unique.getRKIData()
-        })
+        //})
     }
     
     

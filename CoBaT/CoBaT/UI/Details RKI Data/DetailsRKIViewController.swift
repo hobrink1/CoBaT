@@ -44,10 +44,10 @@ class DetailsRKIViewController: UIViewController {
     // MARK: - UI Outlets
     // ---------------------------------------------------------------------------------------------
     
-    @IBOutlet weak var labelKindOf: UILabel!
-    
-    @IBOutlet weak var labelInhabitants: UILabel!
-    @IBOutlet weak var ValueInhabitants: UILabel!
+//    @IBOutlet weak var labelKindOf: UILabel!
+//
+//    @IBOutlet weak var labelInhabitants: UILabel!
+//    @IBOutlet weak var ValueInhabitants: UILabel!
    
     
     @IBOutlet weak var DoneButton: UIBarButtonItem!
@@ -96,11 +96,11 @@ class DetailsRKIViewController: UIViewController {
             object: nil,
             queue: nil,
             using: { Notification in
-                
+
                 #if DEBUG_PRINT_FUNCCALLS
                 print("DetailsRKIViewController just recieved signal .CoBaT_NewRKIDataReady, call updateLabels()")
                 #endif
-                
+
                 self.updateLabels()
             })
         
@@ -135,61 +135,61 @@ class DetailsRKIViewController: UIViewController {
      -----------------------------------------------------------------------------------------------
      */
     private func updateLabels() {
-        
+
         // create shortcuts
         let selectedAreaLevel = GlobalUIData.unique.UIDetailsRKIAreaLevel
         let selectedMyID = GlobalUIData.unique.UIDetailsRKISelectedMyID
-        
+
         // get the related data from the global storage in sync
         GlobalStorageQueue.sync(execute: {
-            
+
             // shortcut
             let RKIDataToUse = GlobalStorage.unique.RKIData[selectedAreaLevel][0]
-            
+
             // try to find the index of the requested ID
             if let indexRKIData = RKIDataToUse.firstIndex(where: { $0.myID == selectedMyID } ) {
-                
+
                 // we found a valid index, so store the data locally
                 forTitel = RKIDataToUse[indexRKIData].name
-                
-                forLabelKindOf = RKIDataToUse[indexRKIData].kindOf
-                
-                forValueInhabitants = numberNoFractionFormatter.string(
-                    from: NSNumber(value: RKIDataToUse[indexRKIData].inhabitants))
-                    ?? NSLocalizedString("updateLabels-no-index", comment: "Label text that we did not found valid data")
-                
-                forLabelInhabitants = NSLocalizedString("label-inhabitants",
-                                                        comment: "Label text for inhabitants")
-                
+
+//                forLabelKindOf = RKIDataToUse[indexRKIData].kindOf
+//
+//                forValueInhabitants = numberNoFractionFormatter.string(
+//                    from: NSNumber(value: RKIDataToUse[indexRKIData].inhabitants))
+//                    ?? NSLocalizedString("updateLabels-no-index", comment: "Label text that we did not found valid data")
+//
+//                forLabelInhabitants = NSLocalizedString("label-inhabitants",
+//                                                        comment: "Label text for inhabitants")
+
             } else {
-                
+
                 // we did not found a valid index, report and use default values
                 GlobalStorage.unique.storeLastError(errorText: "DetailsRKIViewController.updateLabels: Error: did not found valid index for ID \"\(selectedMyID)/” of area level \"\(selectedAreaLevel)\", use default texts")
 
                 forTitel = NSLocalizedString("updateLabels-no-index",
                                              comment: "Label text that we did not found valid data")
-                forLabelKindOf = ""
-                
-                forValueInhabitants = ""
+//                forLabelKindOf = ""
+//
+//                forValueInhabitants = ""
 
             }
         })
-        
+
         // set the label text on main thread
         DispatchQueue.main.async(execute: {
-            
+
             self.title = self.forTitel
-            self.labelKindOf.text = self.forLabelKindOf
-            
-            self.labelInhabitants.text = self.forLabelInhabitants
-            self.ValueInhabitants.text = self.forValueInhabitants
+//            self.labelKindOf.text = self.forLabelKindOf
+//
+//            self.labelInhabitants.text = self.forLabelInhabitants
+//            self.ValueInhabitants.text = self.forValueInhabitants
         })
     }
     
-    // ---------------------------------------------------------------------------------------------
-    // MARK: - Navigation
-    // ---------------------------------------------------------------------------------------------
-    
+//     ---------------------------------------------------------------------------------------------
+//     MARK: - Navigation
+//     ---------------------------------------------------------------------------------------------
+//
 //        // In a storyboard-based application, you will often want to do a little preparation before navigation
 //        override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 //            // Get the new view controller using segue.destination.

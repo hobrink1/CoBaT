@@ -20,6 +20,7 @@
 		F24D37E4257398110036FEE3 /* DetailsRKIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F24D37E3257398110036FEE3 /* DetailsRKIViewController.swift */; };
 		F24D37E9257398380036FEE3 /* DetailsRKITableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F24D37E8257398380036FEE3 /* DetailsRKITableViewController.swift */; };
 		F24D37EE257398620036FEE3 /* DetailsRKITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F24D37ED257398620036FEE3 /* DetailsRKITableViewCell.swift */; };
+		F253DC182584303400E4855D /* DetailsInhabitantsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F253DC172584303400E4855D /* DetailsInhabitantsTableViewCell.swift */; };
 		F273D76C256E4D860002E15B /* CovidRating.swift in Sources */ = {isa = PBXBuildFile; fileRef = F273D76B256E4D860002E15B /* CovidRating.swift */; };
 		F273D78D25713B5A0002E15B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F273D78F25713B5A0002E15B /* Localizable.strings */; };
 		F2AD3056256D00B700FDDE4B /* JSON RKI County.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD3055256D00B700FDDE4B /* JSON RKI County.swift */; };
@@ -84,6 +85,7 @@
 		F24D37E3257398110036FEE3 /* DetailsRKIViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRKIViewController.swift; sourceTree = "<group>"; };
 		F24D37E8257398380036FEE3 /* DetailsRKITableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRKITableViewController.swift; sourceTree = "<group>"; };
 		F24D37ED257398620036FEE3 /* DetailsRKITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRKITableViewCell.swift; sourceTree = "<group>"; };
+		F253DC172584303400E4855D /* DetailsInhabitantsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsInhabitantsTableViewCell.swift; sourceTree = "<group>"; };
 		F273D76B256E4D860002E15B /* CovidRating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CovidRating.swift; sourceTree = "<group>"; };
 		F273D78E25713B5A0002E15B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F273D79325713B670002E15B /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -200,6 +202,7 @@
 				F24D37E3257398110036FEE3 /* DetailsRKIViewController.swift */,
 				F24D37E8257398380036FEE3 /* DetailsRKITableViewController.swift */,
 				F24D37ED257398620036FEE3 /* DetailsRKITableViewCell.swift */,
+				F253DC172584303400E4855D /* DetailsInhabitantsTableViewCell.swift */,
 			);
 			path = "Details RKI Data";
 			sourceTree = "<group>";
@@ -511,6 +514,7 @@
 				F2ED1098256DAFDE003E2C41 /* Formatters.swift in Sources */,
 				F2DE391E25728A6C0033E6B2 /* Notification Name Extention.swift in Sources */,
 				F2AD3056256D00B700FDDE4B /* JSON RKI County.swift in Sources */,
+				F253DC182584303400E4855D /* DetailsInhabitantsTableViewCell.swift in Sources */,
 				F22D00A12567B5D300C908AA /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
