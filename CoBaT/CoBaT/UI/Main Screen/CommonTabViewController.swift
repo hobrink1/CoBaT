@@ -51,7 +51,7 @@ class CommonTabViewControllerV2: UIViewController {
     @IBAction func SelectButtonAction(_ sender: UIButton) {
         
         // sync the access
-        GlobalStorageQueue.async(execute: {
+        GlobalStorageQueue.async(flags: .barrier, execute: {
             
             switch GlobalUIData.unique.UITabBarCurrentlyActive {
             
@@ -147,18 +147,21 @@ class CommonTabViewControllerV2: UIViewController {
             switch selectedArea {
             
             case GlobalStorage.unique.RKIDataCountry:
+                
                 myIDToLookFor = "0"
                 GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataCountry
                 GlobalUIData.unique.UIDetailsRKISelectedMyID = "0"
 
                 
             case  GlobalStorage.unique.RKIDataState:
+                
                 myIDToLookFor = GlobalUIData.unique.UIBrowserRKISelectedStateID
                 GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataState
                 GlobalUIData.unique.UIDetailsRKISelectedMyID = GlobalUIData.unique.UIBrowserRKISelectedStateID
 
                 
             case  GlobalStorage.unique.RKIDataCounty:
+                
                 myIDToLookFor = GlobalUIData.unique.UIBrowserRKISelectedCountyID
                 GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataCounty
                 GlobalUIData.unique.UIDetailsRKISelectedMyID = GlobalUIData.unique.UIBrowserRKISelectedCountyID
@@ -513,7 +516,7 @@ class CommonTabViewController: UIViewController {
     @IBAction func SelectButtonAction(_ sender: UIButton) {
         
         // sync the access
-        GlobalStorageQueue.async(execute: {
+        GlobalStorageQueue.async(flags: .barrier,execute: {
             
             switch GlobalUIData.unique.UITabBarCurrentlyActive {
             
@@ -563,7 +566,7 @@ class CommonTabViewController: UIViewController {
     @IBAction func DetailsButtonAction(_ sender: UIButton) {
         
         // sync the access
-        GlobalStorageQueue.async(execute: {
+        GlobalStorageQueue.async(flags: .barrier, execute: {
             
             switch GlobalUIData.unique.UITabBarCurrentlyActive {
             
@@ -652,7 +655,7 @@ class CommonTabViewController: UIViewController {
         var numberOfDaysAvailable = 0
         
         // sync the access
-        GlobalStorageQueue.async(execute: {
+        GlobalStorageQueue.async(flags: .barrier, execute: {
             
             #if DEBUG_PRINT_FUNCCALLS
             print("refreshOwnDataOutlets just started")

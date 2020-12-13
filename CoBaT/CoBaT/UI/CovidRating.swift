@@ -79,18 +79,25 @@ final class CovidRating: NSObject {
             forgroundLowerColor = UIColor(red: 62/255, green: 62/255, blue: 62/255, alpha: 1.0)
             grade = 3
 
-        } else if value < 600.0 {
+        } else if value < 200.0 {
             
-            backgroundColor = UIColor.systemRed
+            backgroundColor = UIColor(red: 255/255, green: 0/255, blue: 0/255, alpha: 1.0)
             foregroundColor = UIColor.white
             forgroundLowerColor = UIColor(red: 223/255, green: 222/255, blue: 229/255, alpha: 1.0)
             grade = 4
 
-        } else {
+        } else if value < 400.0 {
+            
+            backgroundColor = UIColor(red: 153/255, green: 0/255, blue: 0/255, alpha: 1.0)
+            foregroundColor = UIColor.white
+            forgroundLowerColor = UIColor(red: 223/255, green: 222/255, blue: 229/255, alpha: 1.0)
+            grade = 4
+
+       } else {
             
             backgroundColor = UIColor.systemPurple
             foregroundColor = UIColor.white
-            forgroundLowerColor = UIColor.label
+            forgroundLowerColor = UIColor(red: 223/255, green: 222/255, blue: 229/255, alpha: 1.0)
             grade = 5
         }
         

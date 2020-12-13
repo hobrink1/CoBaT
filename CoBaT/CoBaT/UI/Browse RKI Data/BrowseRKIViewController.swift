@@ -115,36 +115,46 @@ class BrowseRKIViewController: UIViewController {
      */
     private func setSortButton() {
         
-        // we manage UI so main thread
-        DispatchQueue.main.async(execute: {
+        var thisIsCountryLevel: Bool = false
+        
+        GlobalStorageQueue.async(execute: {
             
             // check if we are on Country level
             if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCountry {
-                
-                // yes we are on country level, so hide the button
-                self.SortButton.isEnabled = false
-                self.SortButton.title = ""
-                self.SortButton.image = nil
-                
-            } else {
-                
-                // no not country level, so do all required actions
-                self.SortButton.isEnabled = true
-                self.SortButton.title = ""
-                
-                // check the sorting strategy
-                switch GlobalUIData.unique.UIBrowserRKISorting {
-                
-                case .alphabetically:
-                    self.SortButton.image = UIImage(systemName: "arrow.up.arrow.down")
-                    
-                case .incidencesAscending:
-                    self.SortButton.image = UIImage(systemName: "arrow.up")
-                    
-                case .incidencesDescending:
-                    self.SortButton.image = UIImage(systemName: "arrow.down")
-                }
+                thisIsCountryLevel = true
             }
+            
+            // we manage UI so main thread
+            DispatchQueue.main.async(execute: {
+                
+                // check if we are on Country level
+                if thisIsCountryLevel == true {
+                    
+                    // yes we are on country level, so hide the button
+                    self.SortButton.isEnabled = false
+                    self.SortButton.title = ""
+                    self.SortButton.image = nil
+                    
+                } else {
+                    
+                    // no not country level, so do all required actions
+                    self.SortButton.isEnabled = true
+                    self.SortButton.title = ""
+                    
+                    // check the sorting strategy
+                    switch GlobalUIData.unique.UIBrowserRKISorting {
+                    
+                    case .alphabetically:
+                        self.SortButton.image = UIImage(systemName: "arrow.up.arrow.down")
+                        
+                    case .incidencesAscending:
+                        self.SortButton.image = UIImage(systemName: "arrow.up")
+                        
+                    case .incidencesDescending:
+                        self.SortButton.image = UIImage(systemName: "arrow.down")
+                    }
+                }
+            })
         })
     }
     
@@ -158,48 +168,70 @@ class BrowseRKIViewController: UIViewController {
      */
     func showExplanation() {
         
-        let numberOfDataRecords: Int = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty].count
-        
-        if numberOfDataRecords == 0 {
-            
-            self.Explanation.text = NSLocalizedString("Explanation-No-Data",
-                                                      comment: "Explanation if no data available")
-            
-        } else if numberOfDataRecords == 1 {
-            
-            self.Explanation.text = NSLocalizedString("Explanation-One-Day",
-                                                      comment: "Explanation if only one day of data available")
-            
-        } else if numberOfDataRecords == 2 {
-            
-            self.Explanation.text = NSLocalizedString("Explanation-Two-Days",
-                                                      comment: "Explanation if exactly two days of data are available")
-            
-        } else {
+        var explanationString: String = ""
+        var selectString: String = ""
+        var usageString: String = ""
+        var detailsString: String = ""
 
-            self.Explanation.text = String.localizedStringWithFormat(
+        
+        GlobalStorageQueue.async(execute: {
+            
+            let numberOfDataRecords: Int = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty].count
+            
+            if numberOfDataRecords == 0 {
                 
-                NSLocalizedString("Explanation-Three-Days",
-                                  comment: "Explanation if three or more days of data are available"),
-                numberOfDataRecords
-            )
-            
-        }
-        
-        // show "< select" if usefull
-        if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCountry {
-            self.Select.text = ""
-        } else {
-            self.Select.text = NSLocalizedString("Explanation-select-If-Useful",
-                                                 comment: "usage line hint \"< Select\" if usefull")
-        }
+                explanationString = NSLocalizedString("Explanation-No-Data",
+                                                      comment: "Explanation if no data available")
+                
+            } else if numberOfDataRecords == 1 {
+                
+                let timeIntervalOfToday = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty][0][0].timeStamp
+                let dateOfToday = Date(timeIntervalSinceReferenceDate: timeIntervalOfToday)
+                let stringOfToday = shortSingleRelativeDateFormatter.string(from: dateOfToday)
+                let formatString = NSLocalizedString("Explanation-One-Day",
+                                                     comment: "Explanation if only one day of data available")
+                explanationString = String(format: formatString, stringOfToday)
 
-        // the rest of the usage line
-        self.Usage.text = NSLocalizedString("Explanation-At-Each-Record",
+                
+            } else {
+
+                let timeIntervalOfToday = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty][0][0].timeStamp
+                let dateOfToday = Date(timeIntervalSinceReferenceDate: timeIntervalOfToday)
+                let stringOfToday = shortSingleRelativeDateFormatter.string(from: dateOfToday)
+                
+                let timeIntervalOfYesterday = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty][1][0].timeStamp
+                let dateOfYesterday = Date(timeIntervalSinceReferenceDate: timeIntervalOfYesterday)
+                let stringOfYesterday = shortSingleRelativeDateFormatter.string(from: dateOfYesterday)
+
+                let formatString = NSLocalizedString("Explanation-Two-Days",
+                                                     comment: "Explanation that we have more days available")
+                explanationString = String(format: formatString, stringOfToday, stringOfYesterday)
+                
+            }
+            
+            // show "< select" if usefull
+            if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCountry {
+                selectString = ""
+            } else {
+                selectString = NSLocalizedString("Explanation-select-If-Useful",
+                                                 comment: "usage line hint \"< Select\" if usefull")
+            }
+            
+            // the rest of the usage line
+            usageString = NSLocalizedString("Explanation-At-Each-Record",
                                             comment: "usage line hint \"usable for each record\" ")
-        
-        self.Details.text = NSLocalizedString("Explanation-Details",
+            
+            detailsString = NSLocalizedString("Explanation-Details",
                                               comment: " usage line hint \"Details available\"")
+            
+            DispatchQueue.main.async(execute: {
+                self.Explanation.text = explanationString
+                self.Select.text      = selectString
+                self.Usage.text       = usageString
+                self.Details.text     = detailsString
+            })
+        })
+        
     }
 
     // ---------------------------------------------------------------------------------------------

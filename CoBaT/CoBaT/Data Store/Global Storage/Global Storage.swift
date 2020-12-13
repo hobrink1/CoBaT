@@ -970,7 +970,7 @@ final class GlobalStorage: NSObject {
     private func saveRKIData(kindOf: Int) {
         
         // make sure we have consistent data
-        GlobalStorageQueue.async(execute: {
+        //GlobalStorageQueue.async(execute: {
             
             #if DEBUG_PRINT_FUNCCALLS
             print("saveRKIData just started")
@@ -1009,7 +1009,7 @@ final class GlobalStorage: NSObject {
                 #endif
             }
             
-        })
+       // })
     }
 
     /**

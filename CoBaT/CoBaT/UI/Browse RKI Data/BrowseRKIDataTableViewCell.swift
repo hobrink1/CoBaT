@@ -34,6 +34,7 @@ class BrowseRKIDataTableViewCell: UITableViewCell {
     // MARK: - IBOutlets
     // ------------------------------------------------------------------------------
     @IBOutlet weak var Name: UILabel!
+    @IBOutlet weak var KindOf: UILabel!
     
     @IBOutlet weak var Cases: UILabel!
     @IBOutlet weak var FirstCases: UILabel!

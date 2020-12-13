@@ -94,7 +94,7 @@ class DetailsRKIViewController: UIViewController {
         newRKIDataReadyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_NewRKIDataReady,
             object: nil,
-            queue: nil,
+            queue: OperationQueue.main,
             using: { Notification in
 
                 #if DEBUG_PRINT_FUNCCALLS
@@ -136,12 +136,12 @@ class DetailsRKIViewController: UIViewController {
      */
     private func updateLabels() {
 
-        // create shortcuts
-        let selectedAreaLevel = GlobalUIData.unique.UIDetailsRKIAreaLevel
-        let selectedMyID = GlobalUIData.unique.UIDetailsRKISelectedMyID
-
         // get the related data from the global storage in sync
-        GlobalStorageQueue.sync(execute: {
+        GlobalStorageQueue.async(execute: {
+
+            // create shortcuts
+            let selectedAreaLevel = GlobalUIData.unique.UIDetailsRKIAreaLevel
+            let selectedMyID = GlobalUIData.unique.UIDetailsRKISelectedMyID
 
             // shortcut
             let RKIDataToUse = GlobalStorage.unique.RKIData[selectedAreaLevel][0]
@@ -150,7 +150,7 @@ class DetailsRKIViewController: UIViewController {
             if let indexRKIData = RKIDataToUse.firstIndex(where: { $0.myID == selectedMyID } ) {
 
                 // we found a valid index, so store the data locally
-                forTitel = RKIDataToUse[indexRKIData].name
+                self.forTitel = RKIDataToUse[indexRKIData].name
 
 //                forLabelKindOf = RKIDataToUse[indexRKIData].kindOf
 //
@@ -166,14 +166,14 @@ class DetailsRKIViewController: UIViewController {
                 // we did not found a valid index, report and use default values
                 GlobalStorage.unique.storeLastError(errorText: "DetailsRKIViewController.updateLabels: Error: did not found valid index for ID \"\(selectedMyID)/” of area level \"\(selectedAreaLevel)\", use default texts")
 
-                forTitel = NSLocalizedString("updateLabels-no-index",
+                self.forTitel = NSLocalizedString("updateLabels-no-index",
                                              comment: "Label text that we did not found valid data")
 //                forLabelKindOf = ""
 //
 //                forValueInhabitants = ""
 
             }
-        })
+        //})
 
         // set the label text on main thread
         DispatchQueue.main.async(execute: {
@@ -184,6 +184,7 @@ class DetailsRKIViewController: UIViewController {
 //            self.labelInhabitants.text = self.forLabelInhabitants
 //            self.ValueInhabitants.text = self.forValueInhabitants
         })
+    })
     }
     
 //     ---------------------------------------------------------------------------------------------

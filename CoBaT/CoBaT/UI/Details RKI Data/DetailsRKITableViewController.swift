@@ -110,14 +110,14 @@ class DetailsRKITableViewController: UITableViewController {
         var localRKIDataLoaded : [GlobalStorage.RKIDataStruct] = []
         
         var localDataBuiling:[showDetailStruct] = []
-
+        
         // get the related data from the global storage in sync
-        GlobalStorageQueue.sync(execute: {
-
+        GlobalStorageQueue.async(execute: {
+            
             // set the colors for the inhabitants cell
             self.myBackgroundColor = GlobalUIData.unique.UIDetailsRKIBackgroundColor
             self.myTextColor = GlobalUIData.unique.UIDetailsRKITextColor
-
+            
             
             // go over the data
             for dayIndex in 0 ..< GlobalStorage.unique.RKIData[selectedAreaLevel].count {
@@ -137,130 +137,131 @@ class DetailsRKITableViewController: UITableViewController {
                     GlobalStorage.unique.storeLastError(errorText: "DetailsRKITableViewController.refreshLocalData: Error: RKIData: did not found valid record for day \(dayIndex) of ID \"\(selectedMyID)/” of area level \"\(selectedAreaLevel)\", ignore record")
                 }
             }
-        })
-        
-        // Build the data to show
-        
-        // inhabitants
-        if localRKIDataLoaded.isEmpty == false {
             
-            let item = localRKIDataLoaded.first!
-            self.myKindOfString = item.kindOf
-            self.myInhabitantsValueString = numberNoFractionFormatter.string(from: NSNumber(value: item.inhabitants)) ?? ""
-            self.myInhabitantsLabelString = self.inhabitantsText
-
-        }
-        
-        for index in 0 ..< localRKIDataLoaded.count {
+            // Build the data to show
             
-            let item = localRKIDataLoaded[index]
-            
-            let deaths100k = Double(item.deaths)
-                           / Double(item.inhabitants)
-                           * 100_000.0
-            
-            let cases7Days = item.cases7DaysPer100K
-                           * Double(item.inhabitants)
-                           / 100_000.0
-            
-            let indexString: String
-            if let temp = numberNoFraction3DigitsFormatter.string(from: NSNumber(value: index)) {
-                indexString = temp
-            } else {
-                indexString = "   "
+            // inhabitants
+            if localRKIDataLoaded.isEmpty == false {
+                
+                let item = localRKIDataLoaded.first!
+                self.myKindOfString = item.kindOf
+                self.myInhabitantsValueString = numberNoFractionFormatter.string(from: NSNumber(value: item.inhabitants)) ?? ""
+                self.myInhabitantsLabelString = self.inhabitantsText
+                
             }
             
-            let cellType: showDeltaCellTypeEnum = .current
-            
-            let sortKey = "\(indexString)\(cellType.rawValue)"
-            
-            let (backgroundColor, textColor, textColorLower, _) = CovidRating.unique.getColorsForValue(item.cases7DaysPer100K)
-            
-            localDataBuiling.append(showDetailStruct(
-                                        rkiDataStruct: item,
-                                        deaths100k: deaths100k,
-                                        cases7Days: cases7Days,
-                                        cellType: cellType,
-                                        sortKey: sortKey,
-                                        otherDayTimeStamp: 0,
-                                        backgroundColor: backgroundColor,
-                                        textColor: textColor,
-                                        textColorLower: textColorLower))
- 
-        }
-        
-        let upperBorderFreezed = localDataBuiling.count - 1
-        
-        for index in 0 ..< upperBorderFreezed {
-            
-            let itemCurrent = localDataBuiling[index]
-            let itemNextDay = localDataBuiling[index + 1]
-            
-            
-            let diffInhabitants    = itemCurrent.rkiDataStruct.inhabitants       - itemNextDay.rkiDataStruct.inhabitants
-            let diffCases          = itemCurrent.rkiDataStruct.cases             - itemNextDay.rkiDataStruct.cases
-            let diffCases100k      = itemCurrent.rkiDataStruct.casesPer100k      - itemNextDay.rkiDataStruct.casesPer100k
-            let diffDeaths         = itemCurrent.rkiDataStruct.deaths            - itemNextDay.rkiDataStruct.deaths
-            let diffCases7Days100k = itemCurrent.rkiDataStruct.cases7DaysPer100K - itemNextDay.rkiDataStruct.cases7DaysPer100K
-            
-            let myRKIDataStruct = GlobalStorage.RKIDataStruct(
-                stateID:            itemCurrent.rkiDataStruct.stateID,
-                myID:               itemCurrent.rkiDataStruct.myID ?? "",
-                name:               itemCurrent.rkiDataStruct.name,
-                kindOf:             itemCurrent.rkiDataStruct.kindOf,
-                inhabitants:        diffInhabitants,
-                cases:              diffCases,
-                deaths:             diffDeaths,
-                casesPer100k:       diffCases100k,
-                cases7DaysPer100K:  diffCases7Days100k,
-                timeStamp:          itemCurrent.rkiDataStruct.timeStamp)
-            
-            
-            let diffDeaths100k     = itemCurrent.deaths100k - itemNextDay.deaths100k
-            let diffCases7Days     = itemCurrent.cases7Days - itemNextDay.cases7Days
-            
-            
-            let indexString: String
-            if let temp = numberNoFraction3DigitsFormatter.string(from: NSNumber(value: index)) {
-                indexString = temp
-            } else {
-                indexString = "   "
+            for index in 0 ..< localRKIDataLoaded.count {
+                
+                let item = localRKIDataLoaded[index]
+                
+                let deaths100k = Double(item.deaths)
+                    / Double(item.inhabitants)
+                    * 100_000.0
+                
+                let cases7Days = item.cases7DaysPer100K
+                    * Double(item.inhabitants)
+                    / 100_000.0
+                
+                let indexString: String
+                if let temp = numberNoFraction3DigitsFormatter.string(from: NSNumber(value: index)) {
+                    indexString = temp
+                } else {
+                    indexString = "   "
+                }
+                
+                let cellType: showDeltaCellTypeEnum = .current
+                
+                let sortKey = "\(indexString)\(cellType.rawValue)"
+                
+                let (backgroundColor, textColor, textColorLower, _) = CovidRating.unique.getColorsForValue(item.cases7DaysPer100K)
+                
+                localDataBuiling.append(showDetailStruct(
+                                            rkiDataStruct: item,
+                                            deaths100k: deaths100k,
+                                            cases7Days: cases7Days,
+                                            cellType: cellType,
+                                            sortKey: sortKey,
+                                            otherDayTimeStamp: 0,
+                                            backgroundColor: backgroundColor,
+                                            textColor: textColor,
+                                            textColorLower: textColorLower))
+                
             }
             
-            let cellType: showDeltaCellTypeEnum = .dayDiff
+            let upperBorderFreezed = localDataBuiling.count - 1
             
-            let sortKey = "\(indexString)\(cellType.rawValue)"
+            for index in 0 ..< upperBorderFreezed {
+                
+                let itemCurrent = localDataBuiling[index]
+                let itemNextDay = localDataBuiling[index + 1]
+                
+                
+                let diffInhabitants    = itemCurrent.rkiDataStruct.inhabitants       - itemNextDay.rkiDataStruct.inhabitants
+                let diffCases          = itemCurrent.rkiDataStruct.cases             - itemNextDay.rkiDataStruct.cases
+                let diffCases100k      = itemCurrent.rkiDataStruct.casesPer100k      - itemNextDay.rkiDataStruct.casesPer100k
+                let diffDeaths         = itemCurrent.rkiDataStruct.deaths            - itemNextDay.rkiDataStruct.deaths
+                let diffCases7Days100k = itemCurrent.rkiDataStruct.cases7DaysPer100K - itemNextDay.rkiDataStruct.cases7DaysPer100K
+                
+                let myRKIDataStruct = GlobalStorage.RKIDataStruct(
+                    stateID:            itemCurrent.rkiDataStruct.stateID,
+                    myID:               itemCurrent.rkiDataStruct.myID ?? "",
+                    name:               itemCurrent.rkiDataStruct.name,
+                    kindOf:             itemCurrent.rkiDataStruct.kindOf,
+                    inhabitants:        diffInhabitants,
+                    cases:              diffCases,
+                    deaths:             diffDeaths,
+                    casesPer100k:       diffCases100k,
+                    cases7DaysPer100K:  diffCases7Days100k,
+                    timeStamp:          itemCurrent.rkiDataStruct.timeStamp)
+                
+                
+                let diffDeaths100k     = itemCurrent.deaths100k - itemNextDay.deaths100k
+                let diffCases7Days     = itemCurrent.cases7Days - itemNextDay.cases7Days
+                
+                
+                let indexString: String
+                if let temp = numberNoFraction3DigitsFormatter.string(from: NSNumber(value: index)) {
+                    indexString = temp
+                } else {
+                    indexString = "   "
+                }
+                
+                let cellType: showDeltaCellTypeEnum = .dayDiff
+                
+                let sortKey = "\(indexString)\(cellType.rawValue)"
+                
+                
+                localDataBuiling.append(showDetailStruct(
+                                            rkiDataStruct: myRKIDataStruct,
+                                            deaths100k: diffDeaths100k,
+                                            cases7Days: diffCases7Days,
+                                            cellType: cellType,
+                                            sortKey: sortKey,
+                                            otherDayTimeStamp: itemNextDay.rkiDataStruct.timeStamp,
+                                            backgroundColor: itemCurrent.backgroundColor,
+                                            textColor: itemCurrent.textColorLower,
+                                            textColorLower: itemCurrent.textColorLower))
+            }
             
             
-            localDataBuiling.append(showDetailStruct(
-                                        rkiDataStruct: myRKIDataStruct,
-                                        deaths100k: diffDeaths100k,
-                                        cases7Days: diffCases7Days,
-                                        cellType: cellType,
-                                        sortKey: sortKey,
-                                        otherDayTimeStamp: itemNextDay.rkiDataStruct.timeStamp,
-                                        backgroundColor: itemCurrent.backgroundColor,
-                                        textColor: itemCurrent.textColorLower,
-                                        textColorLower: itemCurrent.textColorLower))
-        }
-        
-        
-        localDataBuiling.sort(by: { $0.sortKey < $1.sortKey } )
-
-        
-        
-        // set the label text on main thread
-        DispatchQueue.main.async(execute: {
+            localDataBuiling.sort(by: { $0.sortKey < $1.sortKey } )
             
-            self.showDetailData = localDataBuiling
             
-            #if DEBUG_PRINT_FUNCCALLS
-            print("DetailsRKITableViewController.refreshLocalData done")
-            #endif
             
-            // reload the cells
-            self.tableView.reloadData()
+            // set the label text on main thread
+            DispatchQueue.main.async(execute: {
+                
+                self.showDetailData = localDataBuiling
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("DetailsRKITableViewController.refreshLocalData done")
+                #endif
+                
+                // reload the cells
+                self.tableView.reloadData()
+            })
         })
+        
     }
     
     
@@ -318,7 +319,7 @@ class DetailsRKITableViewController: UITableViewController {
         newRKIDataReadyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_NewRKIDataReady,
             object: nil,
-            queue: nil,
+            queue: OperationQueue.main,
             using: { Notification in
                 
                 #if DEBUG_PRINT_FUNCCALLS
@@ -332,7 +333,7 @@ class DetailsRKITableViewController: UITableViewController {
         commonTabBarChangedContentObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_CommonTabBarChangedContent,
             object: nil,
-            queue: nil,
+            queue: OperationQueue.main,
             using: { Notification in
                 
                 #if DEBUG_PRINT_FUNCCALLS

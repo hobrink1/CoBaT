@@ -192,6 +192,14 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
     // ---------------------------------------------------------------------------------------------
     // MARK: - Helper
     // ---------------------------------------------------------------------------------------------
+
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     RefreshLocalData()
+     
+     -----------------------------------------------------------------------------------------------
+     */
     func RefreshLocalData() {
         
         #if DEBUG_PRINT_FUNCCALLS
@@ -203,13 +211,13 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         var localDataArrayDelta7Unsorted: [GlobalStorage.RKIDataStruct] = []
         
         // read the current content of the global storage
-        GlobalStorageQueue.sync(execute: {
+        GlobalStorageQueue.async(flags: .barrier, execute: {
             
-            numberOfDayAvailable = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty].count
+            self.numberOfDayAvailable = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty].count
             // get the global storage, filtered to the current selected state
             
             // check if we have current data
-            if numberOfDayAvailable > 0 {
+            if self.numberOfDayAvailable > 0 {
                 
                 // yes at least current data are available so try to get some
                 if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
@@ -221,7 +229,7 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             }
             
             // check if we have data from yesterday
-            if numberOfDayAvailable > 1 {
+            if self.numberOfDayAvailable > 1 {
                 
                 // yes at least data from "yesterday" are available so try to get some
                 if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
@@ -236,7 +244,7 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             }
             
             // check if we have data from several days
-            if numberOfDayAvailable > 2 {
+            if self.numberOfDayAvailable > 2 {
                 
                 // yes at least data from "yesterday" are available so try to get some
                 if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
@@ -248,17 +256,18 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
                     localDataArrayDelta7Unsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][2]
                 }
             }
+            
+            
+            // sort the local copy
+            self.sortLocalData(source0: localDataArrayUnsorted,
+                               source1: localDataArrayDelta1Unsorted,
+                               source7: localDataArrayDelta7Unsorted)
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("RefreshLocalData done")
+            #endif
         })
         
-        // sort the local copy
-        self.sortLocalData(source0: localDataArrayUnsorted,
-                           source1: localDataArrayDelta1Unsorted,
-                           source7: localDataArrayDelta7Unsorted)
-        
-        #if DEBUG_PRINT_FUNCCALLS
-        print("RefreshLocalData done")
-        #endif
-
     }
     
     /**
@@ -380,7 +389,6 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             
             // and scroll right
             self.scrollToSelectedItem()
-            
         })
     }
     
@@ -482,7 +490,7 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         userDidSelectSortObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UserDidSelectSort,
             object: nil,
-            queue: nil,
+            queue: OperationQueue.main,
             using: { Notification in
                 
                 #if DEBUG_PRINT_FUNCCALLS
@@ -496,7 +504,7 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         newRKIDataReadyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_NewRKIDataReady,
             object: nil,
-            queue: nil,
+            queue: OperationQueue.main,
             using: { Notification in
                 
                 #if DEBUG_PRINT_FUNCCALLS
@@ -621,19 +629,22 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
 
         // set the text colors
         cell.Name.textColor = textColorToUse
+        cell.KindOf.textColor = textColorToUse
         
         cell.Cases.textColor = textColorToUse
         cell.FirstCases.textColor = textColorToUse
         cell.SecondCases.textColor = textColorToUse
-        cell.ThirdCases.textColor = textColorToUse
+        //cell.ThirdCases.textColor = textColorToUse
         
         cell.Incidences.textColor = textColorToUse
         cell.FirstIncidences.textColor = textColorToUse
         cell.SecondIncidences.textColor = textColorToUse
-        cell.ThirdIncidences.textColor = textColorToUse
+        //cell.ThirdIncidences.textColor = textColorToUse
         
         // set the fixed labels
         cell.Name.text = myData.name
+        cell.KindOf.text = myData.kindOf
+        
         cell.Cases.text = self.casesText
         cell.Incidences.text = self.IncidencesText
         
@@ -641,49 +652,31 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
         if numberOfDayAvailable == 1 {
             
             cell.FirstCases.text = ""
-            cell.SecondCases.text = ""
-            
-            cell.ThirdCases.text = numberNoFractionFormatter.string(
-                from: NSNumber(value: myData.cases))
-            
-            
-            cell.FirstIncidences.text = ""
-            cell.SecondIncidences.text = ""
-            
-            cell.ThirdIncidences.text = number1FractionFormatter.string(
-                from: NSNumber(value: myData.cases7DaysPer100K))
-
-            
-        } else if (numberOfDayAvailable == 2)
-                    && (localDataArrayDelta1.count >= index) {
-            
-            
-            cell.FirstCases.text = ""
+            //cell.SecondCases.text = ""
             
             cell.SecondCases.text = numberNoFractionFormatter.string(
                 from: NSNumber(value: myData.cases))
             
-            cell.ThirdCases.text = getFormattedDeltaTextInt(number: localDataArrayDelta1[index].cases)
             
             cell.FirstIncidences.text = ""
+            //cell.SecondIncidences.text = ""
             
             cell.SecondIncidences.text = number1FractionFormatter.string(
                 from: NSNumber(value: myData.cases7DaysPer100K))
+
             
-            cell.ThirdIncidences.text = getFormattedDeltaTextDouble(
-                number: localDataArrayDelta1[index].cases7DaysPer100K, fraction: 1)
+        } else if (numberOfDayAvailable >= 2)
+                    && (localDataArrayDelta1.count >= index) {
             
             
-        } else if (numberOfDayAvailable > 2)
-                    && (localDataArrayDelta1.count >= index)
-                    && (localDataArrayDelta7.count >= index) {
+            //cell.FirstCases.text = ""
             
             cell.FirstCases.text = numberNoFractionFormatter.string(
                 from: NSNumber(value: myData.cases))
             
             cell.SecondCases.text = getFormattedDeltaTextInt(number: localDataArrayDelta1[index].cases)
             
-            cell.ThirdCases.text = getFormattedDeltaTextInt(number: localDataArrayDelta7[index].cases)
+            //cell.FirstIncidences.text = ""
             
             cell.FirstIncidences.text = number1FractionFormatter.string(
                 from: NSNumber(value: myData.cases7DaysPer100K))
@@ -691,23 +684,41 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             cell.SecondIncidences.text = getFormattedDeltaTextDouble(
                 number: localDataArrayDelta1[index].cases7DaysPer100K, fraction: 1)
             
-            cell.ThirdIncidences.text = getFormattedDeltaTextDouble(
-                number: localDataArrayDelta7[index].cases7DaysPer100K, fraction: 1)
+            
+//        } else if (numberOfDayAvailable > 2)
+//                    && (localDataArrayDelta1.count >= index)
+//                    && (localDataArrayDelta7.count >= index) {
+//
+//            cell.FirstCases.text = numberNoFractionFormatter.string(
+//                from: NSNumber(value: myData.cases))
+//
+//            cell.SecondCases.text = getFormattedDeltaTextInt(number: localDataArrayDelta1[index].cases)
+//
+//            cell.ThirdCases.text = getFormattedDeltaTextInt(number: localDataArrayDelta7[index].cases)
+//
+//            cell.FirstIncidences.text = number1FractionFormatter.string(
+//                from: NSNumber(value: myData.cases7DaysPer100K))
+//
+//            cell.SecondIncidences.text = getFormattedDeltaTextDouble(
+//                number: localDataArrayDelta1[index].cases7DaysPer100K, fraction: 1)
+//
+//            cell.ThirdIncidences.text = getFormattedDeltaTextDouble(
+//                number: localDataArrayDelta7[index].cases7DaysPer100K, fraction: 1)
             
         } else {
             
             // something went wrtong, so just show the current numbers
             cell.FirstCases.text = ""
-            cell.SecondCases.text = ""
+            //cell.SecondCases.text = ""
             
-            cell.ThirdCases.text = numberNoFractionFormatter.string(
+            cell.SecondCases.text = numberNoFractionFormatter.string(
                 from: NSNumber(value: myData.cases))
             
             
             cell.FirstIncidences.text = ""
-            cell.SecondIncidences.text = ""
+            //cell.SecondIncidences.text = ""
             
-            cell.ThirdIncidences.text = number1FractionFormatter.string(
+            cell.SecondIncidences.text = number1FractionFormatter.string(
                 from: NSNumber(value: myData.cases7DaysPer100K))
             
         }
