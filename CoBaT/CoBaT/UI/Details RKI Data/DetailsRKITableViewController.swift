@@ -285,6 +285,11 @@ class DetailsRKITableViewController: UITableViewController {
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
         
+        // we want the cell height self adjust to user selected text size
+        self.tableView.rowHeight = UITableView.automaticDimension
+        self.tableView.estimatedRowHeight = 64
+
+        
         // set the id of the selected item
         switch GlobalUIData.unique.UIBrowserRKIAreaLevel {
    
@@ -394,9 +399,25 @@ class DetailsRKITableViewController: UITableViewController {
      */    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 
         // we have the arry and one special row for the inhabitants
-        return self.showDetailData.count + 1
+        return self.showDetailData.count + 2
     }
 
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        switch indexPath.row {
+        
+        case 1:
+            
+            return GlobalUIData.unique.RKIGraphTopMargine
+                + GlobalUIData.unique.RKIGraphNeededHeight
+                + GlobalUIData.unique.RKIGraphBottomMargine
+        
+        default:
+            
+            return UITableView.automaticDimension
+            
+        }
+    }
     /**
      -----------------------------------------------------------------------------------------------
      
@@ -413,7 +434,7 @@ class DetailsRKITableViewController: UITableViewController {
         switch index {
         
         case 0:
-            
+            // line with kind of elment and the inhabitants
             // dequeue a cell
             let cell = tableView.dequeueReusableCell(withIdentifier: "DetailsInhabitantsTableViewCell",
                                                      for: indexPath) as! DetailsInhabitantsTableViewCell
@@ -439,11 +460,33 @@ class DetailsRKITableViewController: UITableViewController {
             return cell
             
             
+        case 1:
+            
+            // three graphs to show development
+            // dequeue a cell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DetailsRKIGraphTableViewCell",
+                                                     for: indexPath) as! DetailsRKIGraphTableViewCell
+            
+            // save the colors for embedded CommonTabTableViewController
+            //let textColor = self.myTextColor
+            let backgroundColor = self.myBackgroundColor
+  
+            // set the background of the cell
+            cell.contentView.backgroundColor = backgroundColor
+
+            // get the graphs
+            cell.LeftImage.image = DetailsRKIGraphic.unique.GraphLeft
+            cell.MiddleImage.image = DetailsRKIGraphic.unique.GraphMiddle
+            cell.RightImage.image = DetailsRKIGraphic.unique.GraphRight
+
+            return cell
+            
             
         default:
+            // the usual details content
             
             // we have a cell with the usual content (details)
-            let myData = showDetailData[index - 1]
+            let myData = showDetailData[index - 2]
             
             // dequeue a cell
             let cell = tableView.dequeueReusableCell(withIdentifier: "DetailsRKITableViewCellV2",

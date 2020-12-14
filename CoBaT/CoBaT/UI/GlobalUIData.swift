@@ -41,6 +41,21 @@ final class GlobalUIData: NSObject {
     // cells which are not related to day details
     public var UIDetailsRKITextColor: UIColor = UIColor.label
     public var UIDetailsRKIBackgroundColor: UIColor = UIColor.systemBackground
+    
+    
+    // there are three small graphs on top of the DetailsRKITableView
+    // The size of that graphs will be depending on the screen width of the device
+    // thius are the constants which are used in differtent functions
+    
+    let UIScreenWidth: CGFloat         = UIScreen.main.bounds.width
+    let RKIGraphSideMargins: CGFloat   = 10.0
+    let RKIGraphTopMargine: CGFloat    = 0.0
+    let RKIGraphBottomMargine: CGFloat = 5.0
+    let RKIGraphNeededWidth  =  round((UIScreen.main.bounds.width - (10.0 * 2)) * 0.32)
+    let RKIGraphNeededHeight = round(
+                                round((UIScreen.main.bounds.width - (10.0 * 2)) * 0.32)
+                                    / 5 * 4)
+
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Variables (permanent stored)

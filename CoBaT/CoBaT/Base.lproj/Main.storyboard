@@ -370,11 +370,11 @@
             <objects>
                 <viewController storyboardIdentifier="DetailsRKIViewController" title="DetailsRKIViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="ktK-4E-dPM" customClass="DetailsRKIViewController" customModule="CoBaT" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="xaS-Wd-fnJ">
-                        <rect key="frame" x="0.0" y="0.0" width="454" height="324.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="454" height="373.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uSO-NH-1aN">
-                                <rect key="frame" x="0.0" y="88" width="454" height="202.5"/>
+                                <rect key="frame" x="0.0" y="88" width="454" height="251.5"/>
                                 <connections>
                                     <segue destination="hEB-3F-heZ" kind="embed" identifier="CallEmbeddedDetailsRKITableViewController" id="dQQ-6k-Pd1"/>
                                 </connections>
@@ -409,7 +409,7 @@
             <objects>
                 <tableViewController storyboardIdentifier="DetailsRKITableViewController" title="DetailsRKITableViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="hEB-3F-heZ" customClass="DetailsRKITableViewController" customModule="CoBaT" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="fTC-hY-WaW">
-                        <rect key="frame" x="0.0" y="0.0" width="454" height="402"/>
+                        <rect key="frame" x="0.0" y="0.0" width="454" height="251.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <prototypes>
@@ -764,6 +764,14 @@
                                     <outlet property="ValueKindOf" destination="C5I-HU-xfy" id="eyU-0X-n3s"/>
                                 </connections>
                             </tableViewCell>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="DetailsRKIGraphTableViewCell" id="jnE-Xt-XqP" customClass="DetailsRKIGraphTableViewCell" customModule="CoBaT" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="340" width="454" height="43.5"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="jnE-Xt-XqP" id="HlI-5U-bil">
+                                    <rect key="frame" x="0.0" y="0.0" width="454" height="43.5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
                         </prototypes>
                         <connections>
                             <outlet property="dataSource" destination="hEB-3F-heZ" id="DnJ-Qn-Oyx"/>
@@ -773,18 +781,18 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="NbA-nB-xuw" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2682.608695652174" y="1291.7410714285713"/>
+            <point key="canvasLocation" x="2682.608695652174" y="1291.40625"/>
         </scene>
         <!--Browse Records-->
         <scene sceneID="CgV-aH-DDD">
             <objects>
                 <viewController storyboardIdentifier="BrowseCountyViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="AIJ-bD-iB1" customClass="BrowseRKIViewController" customModule="CoBaT" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" opaque="NO" contentMode="scaleToFill" id="hGZ-EL-XYm">
-                        <rect key="frame" x="0.0" y="0.0" width="454" height="480"/>
+                        <rect key="frame" x="0.0" y="0.0" width="454" height="529"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xqW-ia-eeX">
-                                <rect key="frame" x="0.0" y="121.5" width="454" height="324.5"/>
+                                <rect key="frame" x="0.0" y="121.5" width="454" height="373.5"/>
                                 <connections>
                                     <segue destination="jvs-tC-ce9" kind="embed" identifier="CallEmbeddedBrowseRKIDataTableViewController" id="ka6-Jf-C9j"/>
                                 </connections>
@@ -875,7 +883,7 @@
             <objects>
                 <tableViewController storyboardIdentifier="BrowseCountyDataTableViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="jvs-tC-ce9" customClass="BrowseRKIDataTableViewController" customModule="CoBaT" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" dataMode="prototypes" style="plain" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="6gj-tE-jma">
-                        <rect key="frame" x="0.0" y="0.0" width="454" height="324.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="454" height="373.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <color key="separatorColor" name="AccentColor"/>
@@ -1632,7 +1640,7 @@
             <objects>
                 <viewController storyboardIdentifier="CommonTabViewControllerV2" useStoryboardIdentifierAsRestorationIdentifier="YES" id="zqZ-iS-eEM" customClass="CommonTabViewControllerV2" customModule="CoBaT" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jlh-4V-UdA">
-                        <rect key="frame" x="0.0" y="0.0" width="454" height="534"/>
+                        <rect key="frame" x="0.0" y="0.0" width="454" height="583"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Name" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qdZ-bW-2SF">
@@ -1658,7 +1666,7 @@
                                 </connections>
                             </button>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oti-0k-EHo">
-                                <rect key="frame" x="0.0" y="98" width="454" height="402"/>
+                                <rect key="frame" x="0.0" y="98" width="454" height="451"/>
                                 <connections>
                                     <segue destination="hEB-3F-heZ" kind="embed" identifier="CallDetailsRKIViewControllerFromCommonTabViewControllerV2" id="pjM-I2-Vp0"/>
                                 </connections>
@@ -1692,8 +1700,8 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="12J-Vv-ugo"/>
-        <segue reference="pjM-I2-Vp0"/>
+        <segue reference="3FV-fl-hFC"/>
+        <segue reference="dQQ-6k-Pd1"/>
         <segue reference="pdc-O0-RzG"/>
         <segue reference="Fed-KD-gM1"/>
     </inferredMetricsTieBreakers>

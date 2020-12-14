@@ -335,8 +335,11 @@ final class GlobalStorage: NSObject {
             self.savedRKIDataRestored = true
             
             #if DEBUG_PRINT_FUNCCALLS
-            print("restoreSavedRKIData done, call getRKIData()")
+            print("restoreSavedRKIData done, call getRKIData() and startGraphicSystem()")
             #endif
+            
+            // start the production of the three graphs on the details table view
+            DetailsRKIGraphic.unique.startGraphicSystem()
         })
             // get fresh data
             RKIDataDownload.unique.getRKIData()
