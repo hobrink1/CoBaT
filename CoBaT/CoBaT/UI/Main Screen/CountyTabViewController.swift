@@ -17,7 +17,7 @@ import UIKit
 // MARK: -
 // MARK: - Class
 // -------------------------------------------------------------------------------------------------
-class CountyTabViewController: UIViewController {
+final class CountyTabViewController: UIViewController {
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Life cycle

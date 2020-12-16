@@ -10,7 +10,7 @@ import UIKit
 // ----------------------------------------------------------------------------------
 // MARK: - Class
 // ----------------------------------------------------------------------------------
-class DetailsInhabitantsTableViewCell: UITableViewCell {
+final class DetailsInhabitantsTableViewCell: UITableViewCell {
 
     // ------------------------------------------------------------------------------
     // MARK: - Class Properties

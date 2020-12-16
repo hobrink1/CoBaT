@@ -16,7 +16,7 @@ import UIKit
 // MARK: -
 // MARK: - Class
 // -------------------------------------------------------------------------------------------------
-class BrowseRKIViewController: UIViewController {
+final class BrowseRKIViewController: UIViewController {
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - UI Outlets
@@ -64,7 +64,9 @@ class BrowseRKIViewController: UIViewController {
         GlobalUIData.unique.saveUIData()
 
         // local notification to update UI
-        NotificationCenter.default.post(Notification(name: .CoBaT_UserDidSelectSort))
+        DispatchQueue.main.async(execute: {
+            NotificationCenter.default.post(Notification(name: .CoBaT_UserDidSelectSort))
+        })
         
         #if DEBUG_PRINT_FUNCCALLS
         print("SortButtonAction just posted .CoBaT_UserDidSelectSort")

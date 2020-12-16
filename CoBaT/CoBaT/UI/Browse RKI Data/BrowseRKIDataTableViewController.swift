@@ -87,7 +87,9 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             GlobalUIData.unique.saveUIData()
             
             // local notification to update UI
+            DispatchQueue.main.async(execute: {
             NotificationCenter.default.post(Notification(name: .CoBaT_UserDidSelectState))
+            })
             
             #if DEBUG_PRINT_FUNCCALLS
             print("selectButtonTapped just posted .CoBaT_UserDidSelectState")
@@ -112,7 +114,9 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             GlobalUIData.unique.saveUIData()
             
             // local notification to update UI
-            NotificationCenter.default.post(Notification(name: .CoBaT_UserDidSelectCounty))
+            DispatchQueue.main.async(execute: {
+                NotificationCenter.default.post(Notification(name: .CoBaT_UserDidSelectCounty))
+            })
             
             #if DEBUG_PRINT_FUNCCALLS
             print("selectButtonTapped just posted .CoBaT_UserDidSelectCounty")
@@ -152,6 +156,9 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             GlobalUIData.unique.UIDetailsRKITextColor = cell.Cases.textColor
             GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
                 ?? UIColor.systemBackground
+            
+            //GlobalUIData.unique.UIDetailsRKISelectedMyID = ""
+
             break
             
             
@@ -160,11 +167,18 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataState
             GlobalUIData.unique.UIDetailsRKISelectedMyID = localDataArray[row].stateID
             
+            
             // set the colors according to the current cell
             GlobalUIData.unique.UIDetailsRKITextColor = cell.Cases.textColor
             GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
                 ?? UIColor.systemBackground
 
+            // report that we have selected a new detail
+            DispatchQueue.main.async(execute: {
+                NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))
+            })
+            
+            // call the detail screen
             performSegue(withIdentifier: "CallDetailsRKIViewControllerFromBrowser", sender: self)
 
             
@@ -178,6 +192,12 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
             GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
                 ?? UIColor.systemBackground
             
+            // report that we have selected a new detail
+            DispatchQueue.main.async(execute: {
+                NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))
+            })
+            
+            // call the detail screen
             performSegue(withIdentifier: "CallDetailsRKIViewControllerFromBrowser", sender: self)
 
             

@@ -47,13 +47,15 @@ final class GlobalUIData: NSObject {
     // The size of that graphs will be depending on the screen width of the device
     // thius are the constants which are used in differtent functions
     
-    let UIScreenWidth: CGFloat         = UIScreen.main.bounds.width
+    let UIScreenWidth: CGFloat         = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
     let RKIGraphSideMargins: CGFloat   = 10.0
     let RKIGraphTopMargine: CGFloat    = 0.0
     let RKIGraphBottomMargine: CGFloat = 5.0
-    let RKIGraphNeededWidth  =  round((UIScreen.main.bounds.width - (10.0 * 2)) * 0.32)
+    let RKIGraphNeededWidth  =  round((min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+                                        - (10.0 * 2)) * 0.32)
     let RKIGraphNeededHeight = round(
-                                round((UIScreen.main.bounds.width - (10.0 * 2)) * 0.32)
+                                round((min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+                                        - (10.0 * 2)) * 0.32)
                                     / 5 * 4)
 
 
@@ -246,7 +248,10 @@ final class GlobalUIData: NSObject {
                 forKey: "CoBaT.UIMainTabBarSelectedTab")
             
             // the load of some UI elemnts is faster than this restore, so we send a post to sync it
-            NotificationCenter.default.post(Notification(name: .CoBaT_UIDataRestored))
+            DispatchQueue.main.async(execute: {
+                NotificationCenter.default.post(Notification(name: .CoBaT_UIDataRestored))
+            })
+            
             #if DEBUG_PRINT_FUNCCALLS
             print("restoreSavedUIData just posted .CoBaT_UIDataRestored")
             #endif

@@ -23,7 +23,7 @@ protocol BrowseRKIDataTableViewCellPlacesDelegate {
 // ----------------------------------------------------------------------------------
 // MARK: - Class
 // ----------------------------------------------------------------------------------
-class BrowseRKIDataTableViewCell: UITableViewCell {
+final class BrowseRKIDataTableViewCell: UITableViewCell {
 
     // ------------------------------------------------------------------------------
     // MARK: - Class Properties

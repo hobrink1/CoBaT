@@ -13,7 +13,7 @@ import BackgroundTasks
 // MARK: -
 // MARK: - RKI Data Download
 // -------------------------------------------------------------------------------------------------
-class CoBaTBackgroundService: NSObject {
+final class CoBaTBackgroundService: NSObject {
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Singleton

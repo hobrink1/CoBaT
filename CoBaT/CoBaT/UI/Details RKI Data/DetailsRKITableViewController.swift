@@ -12,7 +12,7 @@ import UIKit
 // MARK: - Details RKI Table View Controller
 // -------------------------------------------------------------------------------------------------
 
-class DetailsRKITableViewController: UITableViewController {
+final class DetailsRKITableViewController: UITableViewController {
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Local storage
@@ -23,15 +23,24 @@ class DetailsRKITableViewController: UITableViewController {
     
     var newRKIDataReadyObserver: NSObjectProtocol?
     var commonTabBarChangedContentObserver: NSObjectProtocol?
-
+    var newGraphReadyObserver: NSObjectProtocol?
+    
+    // flag if the initial data are displayed. Will be used in refreshCellWithGraph()
+    var initialDataAreDone: Bool = false
+    
     // color codes for the first row
     var myBackgroundColor = UIColor.systemBackground
     var myTextColor = UIColor.label
     
     // the variables to fill the "kindOf" and "Inhabitants" labels
+    let rowNumberForInhabitantsCell: Int = 0
     var myKindOfString : String = ""
     var myInhabitantsValueString: String = ""
     var myInhabitantsLabelString: String = ""
+    
+    
+    // the cell with the three graphs
+    let rowNumberForGraphCells: Int = 1
     
     // we have three different kind of detail cells, this is the enum for them
     enum showDeltaCellTypeEnum: Int {
@@ -101,6 +110,13 @@ class DetailsRKITableViewController: UITableViewController {
     // MARK: - Helper
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     refreshLocalData()
+     
+     -----------------------------------------------------------------------------------------------
+     */
     private func refreshLocalData() {
         
         // create shortcuts
@@ -148,7 +164,7 @@ class DetailsRKITableViewController: UITableViewController {
                 self.myInhabitantsValueString = numberNoFractionFormatter.string(from: NSNumber(value: item.inhabitants)) ?? ""
                 self.myInhabitantsLabelString = self.inhabitantsText
                 
-            }
+            //}
             
             for index in 0 ..< localRKIDataLoaded.count {
                 
@@ -188,65 +204,66 @@ class DetailsRKITableViewController: UITableViewController {
                 
             }
             
-            let upperBorderFreezed = localDataBuiling.count - 1
-            
-            for index in 0 ..< upperBorderFreezed {
+            // just to prevent crashes (empty localDataBuiling[])
+            //if localDataBuiling.isEmpty == false {
                 
-                let itemCurrent = localDataBuiling[index]
-                let itemNextDay = localDataBuiling[index + 1]
-                
-                
-                let diffInhabitants    = itemCurrent.rkiDataStruct.inhabitants       - itemNextDay.rkiDataStruct.inhabitants
-                let diffCases          = itemCurrent.rkiDataStruct.cases             - itemNextDay.rkiDataStruct.cases
-                let diffCases100k      = itemCurrent.rkiDataStruct.casesPer100k      - itemNextDay.rkiDataStruct.casesPer100k
-                let diffDeaths         = itemCurrent.rkiDataStruct.deaths            - itemNextDay.rkiDataStruct.deaths
-                let diffCases7Days100k = itemCurrent.rkiDataStruct.cases7DaysPer100K - itemNextDay.rkiDataStruct.cases7DaysPer100K
-                
-                let myRKIDataStruct = GlobalStorage.RKIDataStruct(
-                    stateID:            itemCurrent.rkiDataStruct.stateID,
-                    myID:               itemCurrent.rkiDataStruct.myID ?? "",
-                    name:               itemCurrent.rkiDataStruct.name,
-                    kindOf:             itemCurrent.rkiDataStruct.kindOf,
-                    inhabitants:        diffInhabitants,
-                    cases:              diffCases,
-                    deaths:             diffDeaths,
-                    casesPer100k:       diffCases100k,
-                    cases7DaysPer100K:  diffCases7Days100k,
-                    timeStamp:          itemCurrent.rkiDataStruct.timeStamp)
-                
-                
-                let diffDeaths100k     = itemCurrent.deaths100k - itemNextDay.deaths100k
-                let diffCases7Days     = itemCurrent.cases7Days - itemNextDay.cases7Days
-                
-                
-                let indexString: String
-                if let temp = numberNoFraction3DigitsFormatter.string(from: NSNumber(value: index)) {
-                    indexString = temp
-                } else {
-                    indexString = "   "
+                // get the deltas
+                for index in 0 ..< (localDataBuiling.count - 1) {
+                    
+                    let itemCurrent = localDataBuiling[index]
+                    let itemNextDay = localDataBuiling[index + 1]
+                    
+                    
+                    let diffInhabitants    = itemCurrent.rkiDataStruct.inhabitants       - itemNextDay.rkiDataStruct.inhabitants
+                    let diffCases          = itemCurrent.rkiDataStruct.cases             - itemNextDay.rkiDataStruct.cases
+                    let diffCases100k      = itemCurrent.rkiDataStruct.casesPer100k      - itemNextDay.rkiDataStruct.casesPer100k
+                    let diffDeaths         = itemCurrent.rkiDataStruct.deaths            - itemNextDay.rkiDataStruct.deaths
+                    let diffCases7Days100k = itemCurrent.rkiDataStruct.cases7DaysPer100K - itemNextDay.rkiDataStruct.cases7DaysPer100K
+                    
+                    let myRKIDataStruct = GlobalStorage.RKIDataStruct(
+                        stateID:            itemCurrent.rkiDataStruct.stateID,
+                        myID:               itemCurrent.rkiDataStruct.myID ?? "",
+                        name:               itemCurrent.rkiDataStruct.name,
+                        kindOf:             itemCurrent.rkiDataStruct.kindOf,
+                        inhabitants:        diffInhabitants,
+                        cases:              diffCases,
+                        deaths:             diffDeaths,
+                        casesPer100k:       diffCases100k,
+                        cases7DaysPer100K:  diffCases7Days100k,
+                        timeStamp:          itemCurrent.rkiDataStruct.timeStamp)
+                    
+                    
+                    let diffDeaths100k     = itemCurrent.deaths100k - itemNextDay.deaths100k
+                    let diffCases7Days     = itemCurrent.cases7Days - itemNextDay.cases7Days
+                    
+                    
+                    let indexString: String
+                    if let temp = numberNoFraction3DigitsFormatter.string(from: NSNumber(value: index)) {
+                        indexString = temp
+                    } else {
+                        indexString = "   "
+                    }
+                    
+                    let cellType: showDeltaCellTypeEnum = .dayDiff
+                    
+                    let sortKey = "\(indexString)\(cellType.rawValue)"
+                    
+                    
+                    localDataBuiling.append(showDetailStruct(
+                                                rkiDataStruct: myRKIDataStruct,
+                                                deaths100k: diffDeaths100k,
+                                                cases7Days: diffCases7Days,
+                                                cellType: cellType,
+                                                sortKey: sortKey,
+                                                otherDayTimeStamp: itemNextDay.rkiDataStruct.timeStamp,
+                                                backgroundColor: itemCurrent.backgroundColor,
+                                                textColor: itemCurrent.textColorLower,
+                                                textColorLower: itemCurrent.textColorLower))
                 }
                 
-                let cellType: showDeltaCellTypeEnum = .dayDiff
-                
-                let sortKey = "\(indexString)\(cellType.rawValue)"
-                
-                
-                localDataBuiling.append(showDetailStruct(
-                                            rkiDataStruct: myRKIDataStruct,
-                                            deaths100k: diffDeaths100k,
-                                            cases7Days: diffCases7Days,
-                                            cellType: cellType,
-                                            sortKey: sortKey,
-                                            otherDayTimeStamp: itemNextDay.rkiDataStruct.timeStamp,
-                                            backgroundColor: itemCurrent.backgroundColor,
-                                            textColor: itemCurrent.textColorLower,
-                                            textColorLower: itemCurrent.textColorLower))
-            }
-            
-            
-            localDataBuiling.sort(by: { $0.sortKey < $1.sortKey } )
-            
-            
+                // sort it to get the deltas inbetween teir original data cells
+                localDataBuiling.sort(by: { $0.sortKey < $1.sortKey } )
+            } // localDataBuiling.isEmpty
             
             // set the label text on main thread
             DispatchQueue.main.async(execute: {
@@ -259,11 +276,37 @@ class DetailsRKITableViewController: UITableViewController {
                 
                 // reload the cells
                 self.tableView.reloadData()
+                
+                self.initialDataAreDone = true
             })
         })
         
     }
     
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     refreshCellWithGraph()
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func refreshCellWithGraph() {
+        
+        DispatchQueue.main.async(execute: {
+            
+            if (self.initialDataAreDone == true)
+                && (self.tableView.numberOfRows(inSection: 0) >= self.rowNumberForGraphCells) {
+                
+                self.tableView.reloadRows(at: [IndexPath(row: self.rowNumberForGraphCells, section: 0)], with: .fade)
+                
+            } else {
+               
+                #if DEBUG_PRINT_FUNCCALLS
+                print("refreshCellWithGraph() initialDataAreDone == false or numberOfRows < 1")
+                #endif
+            }
+        })
+    }
     
     
     // ---------------------------------------------------------------------------------------------
@@ -347,6 +390,20 @@ class DetailsRKITableViewController: UITableViewController {
                 
                 self.refreshLocalData()
             })
+        
+        // we have new graphs available
+        newGraphReadyObserver = NotificationCenter.default.addObserver(
+            forName: .CoBaT_Graph_NewGraphAvailable,
+            object: nil,
+            queue: OperationQueue.main,
+            using: { Notification in
+
+                #if DEBUG_PRINT_FUNCCALLS
+                print("DetailsRKITableViewController just recieved signal .CoBaT_Graph_NewGraphAvailable, call refreshCellWithGraph()")
+                #endif
+
+                self.refreshCellWithGraph()
+            })
 
     }
  
@@ -369,6 +426,12 @@ class DetailsRKITableViewController: UITableViewController {
         if let observer = commonTabBarChangedContentObserver {
             NotificationCenter.default.removeObserver(observer)
         }
+        
+        // remove the observer if set
+        if let observer = newGraphReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+
         
     }
 
@@ -433,7 +496,7 @@ class DetailsRKITableViewController: UITableViewController {
         
         switch index {
         
-        case 0:
+        case rowNumberForInhabitantsCell:
             // line with kind of elment and the inhabitants
             // dequeue a cell
             let cell = tableView.dequeueReusableCell(withIdentifier: "DetailsInhabitantsTableViewCell",
@@ -460,7 +523,7 @@ class DetailsRKITableViewController: UITableViewController {
             return cell
             
             
-        case 1:
+        case rowNumberForGraphCells:
             
             // three graphs to show development
             // dequeue a cell
@@ -475,9 +538,11 @@ class DetailsRKITableViewController: UITableViewController {
             cell.contentView.backgroundColor = backgroundColor
 
             // get the graphs
-            cell.LeftImage.image = DetailsRKIGraphic.unique.GraphLeft
-            cell.MiddleImage.image = DetailsRKIGraphic.unique.GraphMiddle
-            cell.RightImage.image = DetailsRKIGraphic.unique.GraphRight
+            RKIGraphicQueue.sync(execute: {
+                cell.LeftImage.image = DetailsRKIGraphic.unique.GraphLeft
+                cell.MiddleImage.image = DetailsRKIGraphic.unique.GraphMiddle
+                cell.RightImage.image = DetailsRKIGraphic.unique.GraphRight
+            })
 
             return cell
             

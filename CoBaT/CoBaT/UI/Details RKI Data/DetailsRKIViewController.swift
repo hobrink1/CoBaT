@@ -17,7 +17,7 @@ import UIKit
 // MARK: -
 // MARK: - Class
 // -------------------------------------------------------------------------------------------------
-class DetailsRKIViewController: UIViewController {
+final class DetailsRKIViewController: UIViewController {
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Class Properties
@@ -25,6 +25,7 @@ class DetailsRKIViewController: UIViewController {
     // the oberserver have to be released, otherwise there wil be a memory leak.
     // this variable were set in "ViewDidApear()" and released in "ViewDidDisappear()"
     var newRKIDataReadyObserver: NSObjectProtocol?
+    var newGraphReadyObserver: NSObjectProtocol?
 
     // variables to hold the related strings for the Labels
     var forTitel: String = ""
@@ -104,6 +105,8 @@ class DetailsRKIViewController: UIViewController {
                 self.updateLabels()
             })
         
+ 
+        
     }
  
     /**
@@ -118,6 +121,9 @@ class DetailsRKIViewController: UIViewController {
         
         // remove the observer if set
         if let observer = newRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        if let observer = newGraphReadyObserver {
             NotificationCenter.default.removeObserver(observer)
         }
     }

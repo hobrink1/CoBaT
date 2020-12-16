@@ -18,7 +18,7 @@ import UIKit
 // MARK: - Class
 // -------------------------------------------------------------------------------------------------
     
-class HelpTableViewController: UITableViewController {
+final class HelpTableViewController: UITableViewController {
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Class Properties

@@ -15,7 +15,7 @@ import Foundation
 // MARK: -
 // MARK: - RKI Data Download
 // -------------------------------------------------------------------------------------------------
-class RKIDataDownload: NSObject {
+final class RKIDataDownload: NSObject {
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Singleton

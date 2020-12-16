@@ -220,6 +220,26 @@ bestimmte öffentliche Plätze ab 21:00";
 
 /**************************************************************************************************
  *
+ * class DetailsRKIGraphic
+ *
+ **************************************************************************************************/
+
+/* Label text that we are working on it */
+"willShowSoon" = "Gleich...";
+
+/* Label text for graph "new cases" */
+"RKIGraph-Cases" = "Neuinfektionen";
+
+/* Label text for graph "new deaths" */
+"RKIGraph-Deaths" = "Neue Tote";
+
+/* Label text for graph "incidencess" */
+"RKIGraph-Incidences" = "Inzidenz";
+
+
+
+/**************************************************************************************************
+ *
  * class CoBaTUserNotification
  *
  **************************************************************************************************/

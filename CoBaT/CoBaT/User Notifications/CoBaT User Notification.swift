@@ -14,7 +14,7 @@ import UserNotifications
 // MARK: -
 // MARK: - CoBaT User Notification
 // -------------------------------------------------------------------------------------------------
-class CoBaTUserNotification: NSObject {
+final class CoBaTUserNotification: NSObject {
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Singleton

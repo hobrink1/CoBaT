@@ -10,7 +10,7 @@ import UIKit
 // ----------------------------------------------------------------------------------
 // MARK: - Class
 // ----------------------------------------------------------------------------------
-class CommonTabTableViewCell: UITableViewCell {
+final class CommonTabTableViewCell: UITableViewCell {
 
     // ------------------------------------------------------------------------------
     // MARK: - Class Properties

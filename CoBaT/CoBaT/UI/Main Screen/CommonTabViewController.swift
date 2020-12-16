@@ -16,7 +16,7 @@ import UIKit
 // MARK: -
 // MARK: - Class
 // -------------------------------------------------------------------------------------------------
-class CommonTabViewControllerV2: UIViewController {
+final class CommonTabViewControllerV2: UIViewController {
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Properties
@@ -168,10 +168,15 @@ class CommonTabViewControllerV2: UIViewController {
 
                 
             default:
+                GlobalUIData.unique.UIDetailsRKISelectedMyID = ""
+
                 break
             }
             
-            
+            // report that we have selected a new detail
+            DispatchQueue.main.async(execute: {
+                NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))
+            })
             
             // Check if we found a usefull ID
             if myIDToLookFor != "" {
@@ -293,7 +298,9 @@ class CommonTabViewControllerV2: UIViewController {
                 
                 
                 // Finally, report we are done
-                NotificationCenter.default.post(Notification(name: .CoBaT_CommonTabBarChangedContent))
+                DispatchQueue.main.async(execute: {
+                    NotificationCenter.default.post(Notification(name: .CoBaT_CommonTabBarChangedContent))
+                })
             })
             
             #if DEBUG_PRINT_FUNCCALLS
@@ -463,7 +470,7 @@ class CommonTabViewControllerV2: UIViewController {
 // MARK: -
 // MARK: - Class
 // -------------------------------------------------------------------------------------------------
-class CommonTabViewController: UIViewController {
+final class CommonTabViewController: UIViewController {
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Properties
@@ -681,6 +688,7 @@ class CommonTabViewController: UIViewController {
             default:
                 break
             }
+            
             
             // Check if we found a usefull ID
             if myIDToLookFor != "" {
@@ -962,7 +970,9 @@ class CommonTabViewController: UIViewController {
                 }
                 
                 // Finally, report we are done
-                NotificationCenter.default.post(Notification(name: .CoBaT_CommonTabBarChangedContent))
+                DispatchQueue.main.async(execute: {
+                     NotificationCenter.default.post(Notification(name: .CoBaT_CommonTabBarChangedContent))
+                })
             })
             
             #if DEBUG_PRINT_FUNCCALLS

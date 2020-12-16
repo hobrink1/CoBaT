@@ -220,6 +220,26 @@ specific public places form 21:00";
 
 /**************************************************************************************************
  *
+ * class DetailsRKIGraphic
+ *
+ **************************************************************************************************/
+
+/* Label text that we are working on it */
+"willShowSoon" = "Soon";
+
+/* Label text for graph "new cases" */
+"RKIGraph-Cases" = "New Cases";
+
+/* Label text for graph "new deaths" */
+"RKIGraph-Deaths" = "New Deaths";
+
+/* Label text for graph "incidencess" */
+"RKIGraph-Incidences" = "Incidences";
+
+
+
+/**************************************************************************************************
+ *
  * class CoBaTUserNotification
  *
  **************************************************************************************************/

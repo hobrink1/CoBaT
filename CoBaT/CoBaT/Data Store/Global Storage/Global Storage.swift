@@ -99,7 +99,7 @@ final class GlobalStorage: NSObject {
     public func restoreSavedRKIData() {
         
         GlobalStorageQueue.async(flags: .barrier, execute: {
-
+            
             #if DEBUG_PRINT_FUNCCALLS
             print("restoreSavedRKIData just started")
             #endif
@@ -122,12 +122,16 @@ final class GlobalStorage: NSObject {
                     do {
                         
                         var myRKIData = try JSONDecoder().decode([[[RKIDataStruct]]].self,
-                                                                       from: (loadedRKIData as? Data)!)
+                                                                 from: (loadedRKIData as? Data)!)
                         
                         let myRKIDataTimeStamps = try JSONDecoder().decode([[TimeInterval]].self,
-                                                                                 from: (loadedRKIDataTimeStamps as? Data)!)
+                                                                           from: (loadedRKIDataTimeStamps as? Data)!)
                         
                         // if we got to here, no errors encountered
+                        
+                        
+                        
+                        
                         
                         // now we have to check if we probably have to migrate data
                         // V1: Initial version
@@ -147,7 +151,7 @@ final class GlobalStorage: NSObject {
                             var weDidChangeSomething: Bool = false
                             
                             for indexArea in 0 ..< myRKIData.count {
-
+                                
                                 for indexDay in 1 ..< myRKIData[indexArea].count {
                                     
                                     for indexMember in 0 ..< myRKIData[indexArea][indexDay].count {
@@ -176,18 +180,40 @@ final class GlobalStorage: NSObject {
                             }
                             
                             // End DataCleansing ---------------------------------------------------
-
+                            
                             
                             // we have the current version, so restore the date
                             self.RKIData = myRKIData
                             self.RKIDataTimeStamps = myRKIDataTimeStamps
                             self.RKIDataLastUpdated = loadedRKIDataLastUpdated
                             self.RKIDataLastRetreived = loadedRKIDataLastRetreived
-
+                            
+                            // build the Weekdays array
+                            
+                            // reset the array
+                            self.RKIDataWeekdays = []
+                            
+                            // loop over all area levels
+                            for areaIndex in 0 ..< self.RKIDataTimeStamps.count {
+                                
+                                // append an empty array per area level
+                                self.RKIDataWeekdays.append([])
+                                
+                                // loop over all days
+                                for dayIndex in 0 ..< self.RKIDataTimeStamps[areaIndex].count {
+                                    
+                                    // get the day of the week and store it
+                                    let weekday = self.getWeekdayFromTimeInterval(
+                                        time: self.RKIDataTimeStamps[areaIndex][dayIndex])
+                                    self.RKIDataWeekdays[areaIndex].append(weekday)
+                                    
+                                }
+                            }
+                            
                             // Start DataCleansing -------------------------------------------------
                             // after the cleansing we save the new
                             // TODO: TODO: Remove data cleansing
-
+                            
                             if weDidChangeSomething == true {
                                 self.saveRKIData(kindOf: 0)
                             }
@@ -197,13 +223,13 @@ final class GlobalStorage: NSObject {
                             // rebuild the delta values
                             // but to not set the flags
                             self.rebuildRKIDeltas(kindOf: -1, newData: false)
-
+                            
                         } else {
                             
                             // make a working copy of the loaded data
                             var migratedRKIData = myRKIData
                             var migratedRKIDataTimeStamps = myRKIDataTimeStamps
-
+                            
                             // loop until all migrations are done
                             while currentVersionOfPermanentStorage != self.VersionOfPermanentStorage {
                                 
@@ -237,7 +263,7 @@ final class GlobalStorage: NSObject {
                                         var cases: Int = 0
                                         var deaths: Int = 0
                                         var cases7Days: Double = 0
-
+                                        
                                         // loop over the states
                                         for singleState in currentStateDayData {
                                             
@@ -248,8 +274,8 @@ final class GlobalStorage: NSObject {
                                             
                                             // for the case in 7 days we have to calculate this number
                                             cases7Days          += Double(singleState.cases7DaysPer100K)
-                                                                    * Double(singleState.inhabitants)
-                                                                    / 100_000.0
+                                                * Double(singleState.inhabitants)
+                                                / 100_000.0
                                         }
                                         
                                         // we calculate the casesPer100k and the cases7DaysPer100K
@@ -304,7 +330,29 @@ final class GlobalStorage: NSObject {
                             self.RKIDataTimeStamps = migratedRKIDataTimeStamps
                             self.RKIDataLastUpdated = loadedRKIDataLastUpdated
                             self.RKIDataLastRetreived = loadedRKIDataLastRetreived
-
+                            
+                            // build the Weekdays array
+                            
+                            // reset the array
+                            self.RKIDataWeekdays = []
+                            
+                            // loop over all area levels
+                            for areaIndex in 0 ..< self.RKIDataTimeStamps.count {
+                                
+                                // append an empty array per area level
+                                self.RKIDataWeekdays.append([])
+                                
+                                // loop over all days
+                                for dayIndex in 0 ..< self.RKIDataTimeStamps[areaIndex].count {
+                                    
+                                    // get the day of the week and store it
+                                    let weekday = self.getWeekdayFromTimeInterval(
+                                        time: self.RKIDataTimeStamps[areaIndex][dayIndex])
+                                    self.RKIDataWeekdays[areaIndex].append(weekday)
+                                    
+                                }
+                            }
+                            
                             // and force a save to secure what we have done
                             self.saveRKIData(kindOf: -1)
                             
@@ -312,7 +360,7 @@ final class GlobalStorage: NSObject {
                             self.rebuildRKIDeltas(kindOf: -1, newData: false)
                             
                         } // Check version
-                                                
+                        
                     } catch let error as NSError {
                         
                         // encode did fail, log the message
@@ -320,7 +368,7 @@ final class GlobalStorage: NSObject {
                     }
                     
                 } else {
- 
+                    
                     // could not read the stored data, report it
                     self.storeLastError(errorText: "CoBaT.GlobalStorage.restoreSavedRKIData: Error: could not read RKIDataTimeStamps")
                 }
@@ -338,11 +386,12 @@ final class GlobalStorage: NSObject {
             print("restoreSavedRKIData done, call getRKIData() and startGraphicSystem()")
             #endif
             
-            // start the production of the three graphs on the details table view
-            DetailsRKIGraphic.unique.startGraphicSystem()
         })
-            // get fresh data
-            RKIDataDownload.unique.getRKIData()
+        // start the production of the three graphs on the details table view
+        DetailsRKIGraphic.unique.startGraphicSystem()
+        
+        // get fresh data
+        RKIDataDownload.unique.getRKIData()
         //})
     }
     
@@ -457,6 +506,7 @@ final class GlobalStorage: NSObject {
     
     public var RKIDataTimeStamps : [[TimeInterval]] = [[], [], []]       // initialise with two empty arrays, so first index level not empty
     
+    public var RKIDataWeekdays : [[Int]] = [[], [], []]       // initialise with two empty arrays, so first index level not empty
     
     // the timeStamp the data was last updated (updates only if data changed)
     public var RKIDataLastUpdated: TimeInterval = 0
@@ -567,7 +617,9 @@ final class GlobalStorage: NSObject {
             self.permanentStore.set(self.RKIDataLastRetreived, forKey: "CoBaT.RKIDataLastRetreived")
 
             // local notification to update UI
-            NotificationCenter.default.post(Notification(name: .CoBaT_RKIDataRetrieved))
+            DispatchQueue.main.async(execute: {
+                NotificationCenter.default.post(Notification(name: .CoBaT_RKIDataRetrieved))
+            })
             
             #if DEBUG_PRINT_FUNCCALLS
             print("refresh_RKIData just posted .CoBaT_RKIDataRetrieved")
@@ -604,6 +656,7 @@ final class GlobalStorage: NSObject {
             
             self.RKIData[kindOfArea].append(newRKIData)
             self.RKIDataTimeStamps[kindOfArea].append(timeStamp)
+            self.RKIDataWeekdays[kindOfArea].append(getWeekdayFromTimeInterval(time: timeStamp))
             
         } else {
             
@@ -611,10 +664,12 @@ final class GlobalStorage: NSObject {
                 
                 self.RKIData[kindOfArea].removeLast()
                 self.RKIDataTimeStamps[kindOfArea].removeLast()
+                self.RKIDataWeekdays[kindOfArea].removeLast()
             }
             
             self.RKIData[kindOfArea].insert(newRKIData, at: 0)
             self.RKIDataTimeStamps[kindOfArea].insert(timeStamp, at: 0)
+            self.RKIDataWeekdays[kindOfArea].insert(getWeekdayFromTimeInterval(time: timeStamp), at: 0)
         }
         
         // check if state data were chenged
@@ -670,16 +725,24 @@ final class GlobalStorage: NSObject {
             print("replaceDataOfToday just started")
             #endif
             
-            if self.RKIData[kindOfArea].isEmpty == true {
-                
-                self.RKIData[kindOfArea].append(newRKIData)
-                self.RKIDataTimeStamps[kindOfArea].append(timeStamp)
-                
-            } else {
+        if self.RKIData[kindOfArea].isEmpty == true {
+            
+            self.RKIData[kindOfArea].append(newRKIData)
+            self.RKIDataTimeStamps[kindOfArea].append(timeStamp)
+            
+            // get the day of the week and store it
+            let weekday = self.getWeekdayFromTimeInterval(time: timeStamp)
+            self.RKIDataWeekdays[kindOfArea].append(weekday)
+             
+        } else {
                 
                 self.RKIData[kindOfArea][0] = newRKIData
                 self.RKIDataTimeStamps[kindOfArea][0] = timeStamp
-            }
+
+            // get the day of the week and store it
+            let weekday = self.getWeekdayFromTimeInterval(time: timeStamp)
+            self.RKIDataWeekdays[kindOfArea][0] = weekday
+}
             
             // check if state data were chenged
             if kindOfArea == self.RKIDataState {
@@ -789,6 +852,7 @@ final class GlobalStorage: NSObject {
         
         // we just copy county and state data as the timestamps for countries and states have the same values
         self.RKIDataTimeStamps[RKIDataCountry] = self.RKIDataTimeStamps[RKIDataState]
+        self.RKIDataWeekdays[RKIDataCountry] = self.RKIDataWeekdays[RKIDataState]
     }
     
     /**
@@ -926,10 +990,15 @@ final class GlobalStorage: NSObject {
         } // loop over country, state, county
         
         
-        // local notification to update UI
-        NotificationCenter.default.post(Notification(name: .CoBaT_NewRKIDataReady))
-        
-        
+        DispatchQueue.main.async(execute: {
+            
+            // local notification to update UI
+            NotificationCenter.default.post(Notification(name: .CoBaT_NewRKIDataReady))
+            
+            // local notification to update graphs
+            NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))
+        })
+
         // check if we really should inform the user (there must be both data parts delivered, and no errors at all)
         
         // check which kind of data we recieved and set the right flag
@@ -1047,6 +1116,53 @@ final class GlobalStorage: NSObject {
     }
     
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     get the weekday of the given timeInterval for timezone "Europe/Berlin" (RKI reference timezone)
+     
+     -----------------------------------------------------------------------------------------------
+     
+     - Parameters:
+        - time: given TimeInterval
+     
+     - Returns:
+        - day of week (sunday = 1 ... saturday = 7, error = 0
+     
+     */
+    private func getWeekdayFromTimeInterval(time: TimeInterval) -> Int {
+        
+        // we use the gregorian calender
+        let myCalendar = Calendar(identifier: .gregorian)
+        
+        // we have to use the timeZone of Berlin
+        let timeZone:TimeZone
+        if let tryTimeZone = TimeZone(identifier: "Europe/Berlin") {
+            
+            // this is the correct one
+            timeZone = tryTimeZone
+            
+        } else {
+            
+            // if we don't find Berlin we use the current one
+            timeZone = TimeZone.current
+        }
+        
+        // get the date
+        let currentDate = Date(timeIntervalSinceReferenceDate: time)
+        
+        // and finally the weekday
+        if let weekday =  myCalendar.dateComponents(in: timeZone, from: currentDate).weekday {
+            
+            // return the day of the week
+            return weekday
+            
+        } else {
+            
+            // we could not calculate the day, so return 0 for error
+           return 0
+        }
+    }
     
     
     // ---------------------------------------------------------------------------------------------
@@ -1082,9 +1198,11 @@ final class GlobalStorage: NSObject {
             
             // append the new error
             self.lastErrors.append(lastErrorStruct(errorText: errorText))
-            
+             
             // local notification to update UI
-            NotificationCenter.default.post(Notification(name: .CoBat_NewErrorStored))
+            DispatchQueue.main.async(execute: {
+                NotificationCenter.default.post(Notification(name: .CoBat_NewErrorStored))
+            })
             
             #if DEBUG_PRINT_FUNCCALLS
             print("storeLastError: just posted .CoBat_NewErrorStored")

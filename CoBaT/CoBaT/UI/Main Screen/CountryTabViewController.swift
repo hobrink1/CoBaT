@@ -16,7 +16,7 @@ import UIKit
 // MARK: -
 // MARK: - Class
 // -------------------------------------------------------------------------------------------------
-class CountryTabViewController: UIViewController {
+final class CountryTabViewController: UIViewController {
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Life cycle

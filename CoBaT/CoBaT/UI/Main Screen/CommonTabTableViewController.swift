@@ -17,7 +17,7 @@ import UIKit
 // -------------------------------------------------------------------------------------------------
 
 
-class CommonTabTableViewController: UITableViewController {
+final class CommonTabTableViewController: UITableViewController {
     // ---------------------------------------------------------------------------------------------
     // MARK: - Properties
     // ---------------------------------------------------------------------------------------------

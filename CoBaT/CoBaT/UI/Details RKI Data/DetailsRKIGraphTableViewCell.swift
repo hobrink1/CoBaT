@@ -9,7 +9,7 @@ import UIKit
 // ----------------------------------------------------------------------------------
 // MARK: - Class
 // ----------------------------------------------------------------------------------
-class DetailsRKIGraphTableViewCell: UITableViewCell {
+final class DetailsRKIGraphTableViewCell: UITableViewCell {
 
     // ------------------------------------------------------------------------------
     // MARK: - Class Properties

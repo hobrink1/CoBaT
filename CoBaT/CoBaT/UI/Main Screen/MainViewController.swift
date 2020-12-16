@@ -18,7 +18,7 @@ import UIKit
 // MARK: -
 // MARK: - Class
 // -------------------------------------------------------------------------------------------------
-class MainViewController: UIViewController {
+final class MainViewController: UIViewController {
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Properties

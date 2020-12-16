@@ -63,4 +63,18 @@ extension Notification.Name {
     // Event: CommonTabBar did change its content, so the embedded TableView should update as well
     static let CoBaT_CommonTabBarChangedContent = Notification.Name(rawValue: "CoBaT.CommonTabBarChangedContent")
 
+    
+    // ---------------------------------------------------------------------------------------------
+    // MARK: -
+    // MARK: - Graph
+    // ---------------------------------------------------------------------------------------------
+
+    // Event: User selected a new detail, so we have to rebuild the graph
+    static let CoBaT_Graph_NewDetailSelected = Notification.Name(rawValue: "CoBaT.Graph.NewDetailSelected")
+    
+    // Event: DetailsRKIGraphic created a new set of graphs
+    static let CoBaT_Graph_NewGraphAvailable = Notification.Name(rawValue: "CoBaT.Graph.NewGraphAvailable")
+    
+
+
 }
