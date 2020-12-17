@@ -29,6 +29,17 @@ final class GlobalUIData: NSObject {
     public var UIDetailsRKIAreaLevel: Int = GlobalStorage.unique.RKIDataCounty
     public var UIDetailsRKISelectedMyID: String = "9"
     
+    // the details screen is called in two differnt scenarios: First form main screen and
+    // in rki browser. to make sure that the right graph will be shown when user gets back
+    // to the main screen, we have to save the selected arealevel and ID and restore it, when
+    // the browsed detail screen disapeared
+    // we do that by saving the two values in BrowseRKIDataTableViewController.detailsButtonTapped()
+    // and restore it in DetailsRKIViewController.viewDidDisappear()
+    public var UIDetailsRKIAreaLevelSaved: Int = GlobalStorage.unique.RKIDataCounty
+    public var UIDetailsRKISelectedMyIDSaved: String = "9"
+
+
+
     // tabBar currently active, will be set by CountryTabViewController (0), StateTabViewController (1) or CountyTabViewController (2)
     public var UITabBarCurrentlyActive: Int = 0
     

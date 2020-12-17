@@ -135,7 +135,7 @@ final class CommonTabViewControllerV2: UIViewController {
         GlobalStorageQueue.async(flags: .barrier, execute: {
             
             #if DEBUG_PRINT_FUNCCALLS
-            print("refreshOwnDataOutlets just started")
+            print("CommonTabViewControllerV2.refreshOwnDataOutlets() just started")
             #endif
             
             // shortcut for the selected tab => selected area Level
@@ -173,6 +173,10 @@ final class CommonTabViewControllerV2: UIViewController {
                 break
             }
             
+            #if DEBUG_PRINT_FUNCCALLS
+            print("CommonTabViewControllerV2.refreshOwnDataOutlets(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Arera to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
+            #endif
+
             // report that we have selected a new detail
             DispatchQueue.main.async(execute: {
                 NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))

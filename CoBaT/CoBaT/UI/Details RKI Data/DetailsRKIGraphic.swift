@@ -68,7 +68,8 @@ final class DetailsRKIGraphic: NSObject {
 
     // the oberserver to recognize that a new set of graphs have to be produced
     var newDetailsSelectedObserver: NSObjectProtocol?
-    
+    var newRKIDataReadyObserver: NSObjectProtocol?
+
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - API
@@ -96,8 +97,13 @@ final class DetailsRKIGraphic: NSObject {
   
 
     
-    
-
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     startGraphicSystem()
+     
+     -----------------------------------------------------------------------------------------------
+     */
     public func startGraphicSystem() {
         
         #if DEBUG_PRINT_FUNCCALLS
@@ -128,6 +134,21 @@ final class DetailsRKIGraphic: NSObject {
                 self.createNewSetOfGraphs()
             })
 
+        newRKIDataReadyObserver = NotificationCenter.default.addObserver(
+            forName: .CoBaT_NewRKIDataReady,
+            object: nil,
+            queue: OperationQueue.main,
+            using: { Notification in
+
+                #if DEBUG_PRINT_FUNCCALLS
+                print("DetailsRKIGraphic.startGraphicSystem() just recieved signal .CoBaT_NewRKIDataReady, call createNewSetOfGraphs()")
+                #endif
+
+                self.createNewSetOfGraphs()
+            })
+
+
+        
         self.createNewSetOfGraphs()
         
 
@@ -141,6 +162,9 @@ final class DetailsRKIGraphic: NSObject {
     deinit {
 
         if let observer = newDetailsSelectedObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        if let observer = newRKIDataReadyObserver {
             NotificationCenter.default.removeObserver(observer)
         }
 

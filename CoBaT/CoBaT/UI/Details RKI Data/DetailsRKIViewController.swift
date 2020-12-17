@@ -76,6 +76,7 @@ final class DetailsRKIViewController: UIViewController {
         
         // Do any additional setup after loading the view.
         
+
         // set title and label
         self.updateLabels()
     }
@@ -99,7 +100,7 @@ final class DetailsRKIViewController: UIViewController {
             using: { Notification in
 
                 #if DEBUG_PRINT_FUNCCALLS
-                print("DetailsRKIViewController just recieved signal .CoBaT_NewRKIDataReady, call updateLabels()")
+                print("DetailsRKIViewControllerDetailsRKIViewController just recieved signal .CoBaT_NewRKIDataReady, call updateLabels()")
                 #endif
 
                 self.updateLabels()
@@ -126,6 +127,29 @@ final class DetailsRKIViewController: UIViewController {
         if let observer = newGraphReadyObserver {
             NotificationCenter.default.removeObserver(observer)
         }
+        
+        // the details screen is called in two differnt scenarios: First form main screen and
+        // in rki browser. to make sure that the right graph will be shown when user gets back
+        // to the main screen, we have to save the selected arealevel and ID and restore it, when
+        // the browsed detail screen disapeared
+        // we do that by saving the two values in BrowseRKIDataTableViewController.detailsButtonTapped()
+        // and restore it in DetailsRKIViewController.viewDidDisappear()
+
+        // restore the vaues
+        GlobalStorageQueue.async(flags: .barrier, execute: {
+            GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalUIData.unique.UIDetailsRKIAreaLevelSaved
+            GlobalUIData.unique.UIDetailsRKISelectedMyID = GlobalUIData.unique.UIDetailsRKISelectedMyIDSaved
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("DetailsRKIViewController.viewDidDisappear(): reset ID to \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Arera to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
+            #endif
+            
+            
+            DispatchQueue.main.async(execute: {
+                NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))
+            })
+        })
+
     }
 
     
@@ -148,6 +172,10 @@ final class DetailsRKIViewController: UIViewController {
             // create shortcuts
             let selectedAreaLevel = GlobalUIData.unique.UIDetailsRKIAreaLevel
             let selectedMyID = GlobalUIData.unique.UIDetailsRKISelectedMyID
+
+            #if DEBUG_PRINT_FUNCCALLS
+            print("DetailsRKIViewController.updateLabels(): will use ID to \"\(selectedMyID)\" and Arera to \(selectedAreaLevel)")
+            #endif
 
             // shortcut
             let RKIDataToUse = GlobalStorage.unique.RKIData[selectedAreaLevel][0]

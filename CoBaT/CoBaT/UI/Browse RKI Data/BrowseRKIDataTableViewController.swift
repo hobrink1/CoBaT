@@ -164,14 +164,29 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
             
         case GlobalStorage.unique.RKIDataState:
             
+            // the details screen is called in two differnt scenarios: First form main screen and
+            // in rki browser. to make sure that the right graph will be shown when user gets back
+            // to the main screen, we have to save the selected arealevel and ID and restore it, when
+            // the browsed detail screen disapeared
+            // we do that by saving the two values in BrowseRKIDataTableViewController.detailsButtonTapped()
+            // and restore it in DetailsRKIViewController.viewDidDisappear()
+
+            // save the current values
+            GlobalUIData.unique.UIDetailsRKIAreaLevelSaved = GlobalUIData.unique.UIDetailsRKIAreaLevel
+            GlobalUIData.unique.UIDetailsRKISelectedMyIDSaved = GlobalUIData.unique.UIDetailsRKISelectedMyID
+            
+            // set the new values
             GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataState
             GlobalUIData.unique.UIDetailsRKISelectedMyID = localDataArray[row].stateID
-            
             
             // set the colors according to the current cell
             GlobalUIData.unique.UIDetailsRKITextColor = cell.Cases.textColor
             GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
                 ?? UIColor.systemBackground
+
+            #if DEBUG_PRINT_FUNCCALLS
+            print("BrowseRKIDataTableViewController.detailsButtonTapped(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Arera to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
+            #endif
 
             // report that we have selected a new detail
             DispatchQueue.main.async(execute: {
@@ -184,6 +199,18 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
             
         case GlobalStorage.unique.RKIDataCounty:
             
+            // the details screen is called in two differnt scenarios: First form main screen and
+            // in rki browser. to make sure that the right graph will be shown when user gets back
+            // to the main screen, we have to save the selected arealevel and ID and restore it, when
+            // the browsed detail screen disapeared
+            // we do that by saving the two values in BrowseRKIDataTableViewController.detailsButtonTapped()
+            // and restore it in DetailsRKIViewController.viewDidDisappear()
+
+            // save the current values
+            GlobalUIData.unique.UIDetailsRKIAreaLevelSaved = GlobalUIData.unique.UIDetailsRKIAreaLevel
+            GlobalUIData.unique.UIDetailsRKISelectedMyIDSaved = GlobalUIData.unique.UIDetailsRKISelectedMyID
+            
+            // set the new values
             GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataCounty
             GlobalUIData.unique.UIDetailsRKISelectedMyID = localDataArray[row].myID ?? ""
             
@@ -192,6 +219,11 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
             GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
                 ?? UIColor.systemBackground
             
+            #if DEBUG_PRINT_FUNCCALLS
+            print("BrowseRKIDataTableViewController.detailsButtonTapped(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Arera to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
+            #endif
+
+
             // report that we have selected a new detail
             DispatchQueue.main.async(execute: {
                 NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))

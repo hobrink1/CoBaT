@@ -485,6 +485,7 @@ final class DetailsRKITableViewController: UITableViewController {
 
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
         switch indexPath.row {
         
         case 1:
@@ -495,6 +496,7 @@ final class DetailsRKITableViewController: UITableViewController {
         
         default:
             
+            tableView.estimatedRowHeight = 116
             return UITableView.automaticDimension
             
         }
@@ -703,6 +705,9 @@ final class DetailsRKITableViewController: UITableViewController {
                     fraction: 1)
                 
             }
+            
+            cell.sizeToFit()
+            cell.setNeedsLayout()
             
             return cell
 
