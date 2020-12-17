@@ -51,18 +51,44 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         DispatchQueue.main.async(execute: {
             
             // first tab is always Country level
-            self.tabBar.items?[GlobalStorage.unique.RKIDataCountry].title = "Deutschland"
-            self.tabBar.items?[GlobalStorage.unique.RKIDataCountry].image = nil
-            self.tabBar.items?[GlobalStorage.unique.RKIDataCountry].selectedImage = nil
+            let firstItem = self.tabBar.items?[GlobalStorage.unique.RKIDataCountry]
+            
+//            let firstViewTabBar = firstItem?.value(forKey: "view") as? UIView
+//            let firstLabel = firstViewTabBar?.subviews.last as? UILabel
+//            firstLabel?.lineBreakMode = .byWordWrapping
+//            firstLabel?.numberOfLines = 0
+            
+            firstItem?.title = "Deutschland"
+            firstItem?.image = nil
+            firstItem?.selectedImage = nil
+            
+            
             
             // set the state level
-            self.tabBar.items?[GlobalStorage.unique.RKIDataState].title = GlobalUIData.unique.UIBrowserRKISelectedStateName
-            self.tabBar.items?[GlobalStorage.unique.RKIDataState].image = nil
-            self.tabBar.items?[GlobalStorage.unique.RKIDataState].selectedImage = nil
+            let secondItem = self.tabBar.items?[GlobalStorage.unique.RKIDataState]
             
-            self.tabBar.items?[GlobalStorage.unique.RKIDataCounty].title = GlobalUIData.unique.UIBrowserRKISelectedCountyName
-            self.tabBar.items?[GlobalStorage.unique.RKIDataCounty].image = nil
-            self.tabBar.items?[GlobalStorage.unique.RKIDataCounty].selectedImage = nil
+//            let secondViewTabBar = secondItem?.value(forKey: "view") as? UIView
+//            let secondLabel = secondViewTabBar?.subviews.last as? UILabel
+//            secondLabel?.lineBreakMode = .byWordWrapping
+//            secondLabel?.numberOfLines = 0
+
+            secondItem?.title = GlobalUIData.unique.UIBrowserRKISelectedStateName
+            secondItem?.image = nil
+            secondItem?.selectedImage = nil
+            
+            
+            
+            // set the county level
+            let thirdItem = self.tabBar.items?[GlobalStorage.unique.RKIDataCounty]
+            
+//            let thirdViewTabBar = secondItem?.value(forKey: "view") as? UIView
+//            let thirdLabel = thirdViewTabBar?.subviews.last as? UILabel
+//            thirdLabel?.lineBreakMode = .byWordWrapping
+//            thirdLabel?.numberOfLines = 0
+
+            thirdItem?.title = GlobalUIData.unique.UIBrowserRKISelectedCountyName
+            thirdItem?.image = nil
+            thirdItem?.selectedImage = nil
         })
     }
     

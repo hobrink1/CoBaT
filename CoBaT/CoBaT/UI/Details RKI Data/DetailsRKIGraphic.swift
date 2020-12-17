@@ -42,17 +42,17 @@ final class DetailsRKIGraphic: NSObject {
     // ---------------------------------------------------------------------------------------------
     // MARK: - Class Properties
     // ---------------------------------------------------------------------------------------------
-    private let ScreenScale = UIScreen.main.scale
-    private let graphBackgroundUIColor = UIColor.secondarySystemBackground
-    private let graphBackgroundCGColor = UIColor.secondarySystemBackground.cgColor
-    private let graphLabelUIColor = UIColor.label
-    private let graphLabelCGColor = UIColor.label.cgColor
-    private let graphAxisUIColor = UIColor.secondaryLabel
-    private let graphAxisCGColor = UIColor.secondaryLabel.cgColor
-    private let graphBarNormalUIColor = UIColor.systemGray
-    private let graphBarNormalCGColor = UIColor.systemGray.cgColor
-    private let graphBarHighlightedUIColor = UIColor.systemIndigo
-    private let graphBarHighlightedCGColor = UIColor.systemIndigo.cgColor
+    private let ScreenScale: CGFloat = UIScreen.main.scale
+    private let graphBackgroundUIColor: UIColor = UIColor.tertiarySystemBackground
+    private let graphBackgroundCGColor: CGColor = UIColor.tertiarySystemBackground.cgColor
+    private let graphLabelUIColor: UIColor = UIColor.label
+    private let graphLabelCGColor: CGColor = UIColor.label.cgColor
+    private let graphAxisUIColor: UIColor = UIColor.tertiaryLabel
+    private let graphAxisCGColor: CGColor = UIColor.tertiaryLabel.cgColor
+    private let graphBarNormalUIColor: UIColor = UIColor.systemGray
+    private let graphBarNormalCGColor: CGColor = UIColor.systemGray.cgColor
+    private let graphBarHighlightedUIColor: UIColor = UIColor.systemOrange
+    private let graphBarHighlightedCGColor: CGColor = UIColor.systemOrange.cgColor
 
     private var topBorder:      CGFloat = 1.0
     private var bottomBorder:   CGFloat = 1.0
@@ -381,16 +381,33 @@ final class DetailsRKIGraphic: NSObject {
                     errorText: "DetailsRKIGraphic.createNewSetOfGraphs().leftImage createCasesGraph() returned nil")
             }
             
+            let newMiddleGraph = createDeathsGraph()
             
+            // check if it worked
+            if newMiddleGraph == nil {
+                
+                // no it did not, so file the errormiddleImage
+                GlobalStorage.unique.storeLastError(
+                    errorText: "DetailsRKIGraphic.createNewSetOfGraphs().middleImage createCasesGraph() returned nil")
+            }
+ 
             
+            let newRightGraph = createIncidencesGraph()
             
-            
+            // check if it worked
+            if newRightGraph == nil {
+                
+                // no it did not, so file the errormiddleImage
+                GlobalStorage.unique.storeLastError(
+                    errorText: "DetailsRKIGraphic.createNewSetOfGraphs().rightImage createIncidencesGraph() returned nil")
+            }
+             
             // store the newly created images and post the event
             RKIGraphicQueue.async(flags: .barrier, execute: {
                 
                 self.GraphLeft = newLeftGraph ?? self.GraphLeftNoData
-                self.GraphMiddle = self.GraphMiddleNoData
-                self.GraphRight = self.GraphRightNoData
+                self.GraphMiddle = newMiddleGraph ?? self.GraphMiddleNoData
+                self.GraphRight = newRightGraph ?? self.GraphRightNoData
                 
                 // report that we have selected a new detail
                 DispatchQueue.main.async(execute: {
@@ -398,12 +415,8 @@ final class DetailsRKIGraphic: NSObject {
                 })
             })
             
-            
-            
         } else {
-            
-            
-            
+                        
             RKIGraphicQueue.async(flags: .barrier, execute: {
                 
                 self.GraphLeft = self.GraphLeftNoData
@@ -433,7 +446,7 @@ final class DetailsRKIGraphic: NSObject {
         var selectedArea: Int!
         var selectedData: [[GlobalStorage.RKIDataStruct]]!
         var selectedWeekdays: [Int]!
-
+        
         GlobalStorageQueue.sync(execute: {
             selectedID = GlobalUIData.unique.UIDetailsRKISelectedMyID
             selectedArea = GlobalUIData.unique.UIDetailsRKIAreaLevel
@@ -451,13 +464,13 @@ final class DetailsRKIGraphic: NSObject {
             
             return nil
         }
-
+        
         // try to calculate the index of the selected ID
-        var selectedIDIndex : Int = 0
+        var selectedIDIndex: Int = 0
         if let foundIndex = selectedData[0].firstIndex(where: { $0.myID == selectedID } ) {
             
             selectedIDIndex = foundIndex
-
+            
         } else {
             
             // did not found the index, return nil
@@ -470,32 +483,56 @@ final class DetailsRKIGraphic: NSObject {
         
         // OK, now we have the data, so produce an easier to handle array with the values we need
         // calculate the number of days we have to do
-        let numberOfDays = min(16, selectedData.count)
+        // make sure we do not have too much values (there is only room for 15 bars)
+        let numberOfDays: Int = min(16, selectedData.count)
         
+        // this will be the values we want to draw
         var valuesToDraw: [Int] = []
-        for index in 0 ..< numberOfDays {
-            valuesToDraw.append(selectedData[index][selectedIDIndex].cases)
+        
+        // if we only have one day ...
+        if numberOfDays == 1 {
+            
+            // ... we just draw the current value
+            valuesToDraw.append(selectedData[0][selectedIDIndex].cases)
+            
+        } else {
+            
+            //... otherwise the diff to the day before
+            
+            // so walk over the data and calculate the diff values
+            for index in 0 ..< numberOfDays - 1 {
+                
+                // calculate the delta
+                let delta = selectedData[index][selectedIDIndex].cases
+                    - selectedData[index + 1][selectedIDIndex].cases
+                
+                // and append
+                valuesToDraw.append(delta)
+            }
         }
         
-        
-        
         // shortcut for the image we use as background
-        let imageToUse = self.GraphLeftInitial
-        
-        // shortcut for the dimensions of the image
-        let newImageWidth = GlobalUIData.unique.RKIGraphNeededWidth
-        let newImageHeight = GlobalUIData.unique.RKIGraphNeededHeight
-        let rectOfImage = CGRect(x: 0, y: 0, width: newImageWidth, height: newImageHeight)
-
-        // get the max value with some headroom for a better look
-        let maxValue = (CGFloat(valuesToDraw.max()!) * 1.05)
-        let valuePerUnit = CGFloat(self.lengthYAxis / CGFloat(maxValue)) * -1.0
-        
-        // get the day of the week for reference (all bars with this weekday will be drawnd diffenrently)
-        let weekDayReference = selectedWeekdays.first
+        //let imageToUse: UIImage = self.GraphLeftInitial
+        let imageToUse: UIImage = RKIGraphicQueue.sync(execute: { self.GraphLeftInitial })
         
         // this will hold the return image or nil
         let returnImage: UIImage?
+        
+        
+        // shortcut for the dimensions of the image
+        let newImageWidth: CGFloat = GlobalUIData.unique.RKIGraphNeededWidth
+        let newImageHeight: CGFloat = GlobalUIData.unique.RKIGraphNeededHeight
+        let rectOfImage: CGRect = CGRect(x: 0, y: 0, width: newImageWidth, height: newImageHeight)
+        
+        // get the max value with some headroom for a better look
+        let maxValue: CGFloat = (CGFloat(valuesToDraw.max()!) * 1.05)
+        
+        // this is the value we use to calulate the height of the bar (negative, because of the draw direction)
+        let valuePerUnit: CGFloat = CGFloat(self.lengthYAxis / CGFloat(maxValue)) * -1.0
+        
+        // get the day of the week for reference (all bars with this weekday will be drawnd diffenrently)
+        let weekDayReference: Int = selectedWeekdays.first!
+        
         
         // the initial canvas
         UIGraphicsBeginImageContextWithOptions(CGSize(width: newImageWidth, height: newImageHeight),
@@ -511,10 +548,10 @@ final class DetailsRKIGraphic: NSObject {
             //flip coordinats
             context.translateBy(x: 0, y: newImageHeight)
             context.scaleBy(x: 1.0, y: -1.0)
-
+            
             //draw image
             context.draw(imageToUse.cgImage!, in: rectOfImage)
-
+            
             //flip back
             context.scaleBy(x: 1.0, y: -1.0)
             context.translateBy(x: 0, y: (newImageHeight * -1.0))
@@ -536,57 +573,71 @@ final class DetailsRKIGraphic: NSObject {
             // draw the x-axis
             context.move(to: CGPoint(x: self.leftBorder, y: self.yAxisY))
             context.addLine(to: CGPoint(x: self.rightBorder, y: self.yAxisY))
-
+            
             // draw the axis
             context.drawPath(using: .stroke)
-        
+            
             
             
             // ----- draw the bars
-
+            
             // we will try to draw the bars in different colors, so save the state
             context.saveGState()
             
             // prepare the drawing
-
-            
             var nextStartOfBar = CGPoint(
                 x: self.rightBorder - self.barWidth - self.barGap,
                 y: self.yAxisY)
-
-            if numberOfDays == 1 {
-                
-                context.setFillColor(graphBarHighlightedCGColor)
-
-                
-                
-            } else {
-     
-                context.setFillColor(graphBarNormalCGColor)
-
+            
+            // set the color for the normal bars
+            context.setFillColor(graphBarNormalCGColor)
             
             // walk over the values
-            for index in 0 ..< numberOfDays {
+            for index in 0 ..< (valuesToDraw.count) {
                 
+                // shortcuts for the values we need
                 let currentValue = CGFloat(valuesToDraw[index])
-                let currentWeekend = selectedWeekdays[index]
+                let currentWeekday = selectedWeekdays[index]
                 
+                // start the path
                 context.beginPath()
                 
+                // move to the start point
                 context.move(to: nextStartOfBar)
                 
+                // add the bar
                 context.addRect(CGRect(x: nextStartOfBar.x,
                                        y: nextStartOfBar.y,
                                        width: self.barWidth,
                                        height: currentValue * valuePerUnit))
                 
-                context.drawPath(using: .fill)
-
+                // chack if that bar is on the same weekday as the reference
+                if currentWeekday == weekDayReference {
+                    
+                    // yes, so highlight the bar with a different color
+                    
+                    // as we change the color we have to push sthe state
+                    context.saveGState()
+                    
+                    // change the color
+                    context.setFillColor(graphBarHighlightedCGColor)
+                    
+                    // draw the bar
+                    context.drawPath(using: .fill)
+                    
+                    // restore the state
+                    context.restoreGState()
+                    
+                } else {
+                    
+                    // normal bar, so just draw it
+                    context.drawPath(using: .fill)
+                }
+                
+                // set the next startpoint
                 nextStartOfBar = CGPoint(
                     x: nextStartOfBar.x - self.barWidth - self.barGap,
                     y: nextStartOfBar.y)
-             }
-            
             }
             
             
@@ -607,24 +658,461 @@ final class DetailsRKIGraphic: NSObject {
         // OK, we now have a nice new image, store it
         UIGraphicsEndImageContext()
         
-//        if returnImage != nil {
-//
-//
-//            let test = self.textToImage(text: "A: \(selectedArea), ID: \(selectedID)",
-//                                        image: returnImage!,
-//                                        atPoint: CGPoint(x: 0, y: self.messageY))
-//
-//            return test
-//
-//
-//        } else {
         
-            return returnImage
-//        }
+        return returnImage
         
     }
+
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     creates the left image with the new deaths
+     
+     -----------------------------------------------------------------------------------------------
+
+     - Returns: the new Image or nil if an error happens
+     
+     */
+    private func createDeathsGraph() -> UIImage? {
+        
+        // get and freeze the global data
+        var selectedID: String!
+        var selectedArea: Int!
+        var selectedData: [[GlobalStorage.RKIDataStruct]]!
+        var selectedWeekdays: [Int]!
+        
+        GlobalStorageQueue.sync(execute: {
+            selectedID = GlobalUIData.unique.UIDetailsRKISelectedMyID
+            selectedArea = GlobalUIData.unique.UIDetailsRKIAreaLevel
+            selectedData = GlobalStorage.unique.RKIData[selectedArea]
+            selectedWeekdays = GlobalStorage.unique.RKIDataWeekdays[selectedArea]
+        })
+        
+        // check if there is work to do
+        if selectedData.isEmpty == true {
+            
+            // nothing to do, return nil
+            #if DEBUG_PRINT_FUNCCALLS
+            print("createCasesGraph(), RKIData[\(selectedArea!)] is empty, return nil")
+            #endif
+            
+            return nil
+        }
+        
+        // try to calculate the index of the selected ID
+        var selectedIDIndex: Int = 0
+        if let foundIndex = selectedData[0].firstIndex(where: { $0.myID == selectedID } ) {
+            
+            selectedIDIndex = foundIndex
+            
+        } else {
+            
+            // did not found the index, return nil
+            #if DEBUG_PRINT_FUNCCALLS
+            print("createCasesGraph(), RKIData[\(selectedArea!)] could not find ID \(selectedID!), return nil")
+            #endif
+            
+            return nil
+        }
+        
+        // OK, now we have the data, so produce an easier to handle array with the values we need
+        // calculate the number of days we have to do
+        // make sure we do not have too much values (there is only room for 15 bars)
+        let numberOfDays: Int = min(16, selectedData.count)
+        
+        // this will be the values we want to draw
+        var valuesToDraw: [Int] = []
+        
+        // if we only have one day ...
+        if numberOfDays == 1 {
+            
+            // ... we just draw the current value
+            valuesToDraw.append(selectedData[0][selectedIDIndex].deaths)
+            
+        } else {
+            
+            //... otherwise the diff to the day before
+            
+            // so walk over the data and calculate the diff values
+            for index in 0 ..< numberOfDays - 1 {
+                
+                // calculate the delta
+                let delta = selectedData[index][selectedIDIndex].deaths
+                    - selectedData[index + 1][selectedIDIndex].deaths
+                
+                // and append
+                valuesToDraw.append(delta)
+            }
+        }
+        
+        // shortcut for the image we use as background
+        //let imageToUse: UIImage = self.GraphMiddleInitial
+        let imageToUse: UIImage = RKIGraphicQueue.sync(execute: { self.GraphMiddleInitial })
+
+        // this will hold the return image or nil
+        let returnImage: UIImage?
+        
+        
+        // shortcut for the dimensions of the image
+        let newImageWidth: CGFloat = GlobalUIData.unique.RKIGraphNeededWidth
+        let newImageHeight: CGFloat = GlobalUIData.unique.RKIGraphNeededHeight
+        let rectOfImage: CGRect = CGRect(x: 0, y: 0, width: newImageWidth, height: newImageHeight)
+        
+        // get the max value with some headroom for a better look
+        let maxValue: CGFloat = (CGFloat(valuesToDraw.max()!) * 1.05)
+        
+        // this is the value we use to calulate the height of the bar (negative, because of the draw direction)
+        let valuePerUnit: CGFloat = CGFloat(self.lengthYAxis / CGFloat(maxValue)) * -1.0
+        
+        // get the day of the week for reference (all bars with this weekday will be drawnd diffenrently)
+        let weekDayReference: Int = selectedWeekdays.first!
+        
+        
+        // the initial canvas
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: newImageWidth, height: newImageHeight),
+                                               false,
+                                               ScreenScale)
+        
+        // get the current context (our canvas)
+        if let context = UIGraphicsGetCurrentContext() {
+            
+            // ----- get the background image
+            
+            // we have to flip the canvas, to make sure the image is not upside down etc.
+            //flip coordinats
+            context.translateBy(x: 0, y: newImageHeight)
+            context.scaleBy(x: 1.0, y: -1.0)
+            
+            //draw image
+            context.draw(imageToUse.cgImage!, in: rectOfImage)
+            
+            //flip back
+            context.scaleBy(x: 1.0, y: -1.0)
+            context.translateBy(x: 0, y: (newImageHeight * -1.0))
+            
+            // start the drawing (we just set the background)
+            context.beginPath()
+            
+            
+            // ----- draw the axis
+            
+            // prepare drawing of axises
+            context.setLineWidth(self.widthAxis)
+            context.setStrokeColor(graphAxisCGColor)
+            
+            // draw the y-axis
+            context.move(to: CGPoint(x: self.leftBorder, y: self.topBorder))
+            context.addLine(to: CGPoint(x: self.leftBorder, y: self.yAxisY))
+            
+            // draw the x-axis
+            context.move(to: CGPoint(x: self.leftBorder, y: self.yAxisY))
+            context.addLine(to: CGPoint(x: self.rightBorder, y: self.yAxisY))
+            
+            // draw the axis
+            context.drawPath(using: .stroke)
+            
+            
+            
+            // ----- draw the bars
+            
+            // we will try to draw the bars in different colors, so save the state
+            context.saveGState()
+            
+            // prepare the drawing
+            var nextStartOfBar = CGPoint(
+                x: self.rightBorder - self.barWidth - self.barGap,
+                y: self.yAxisY)
+            
+            // set the color for the normal bars
+            context.setFillColor(graphBarNormalCGColor)
+            
+            // walk over the values
+            for index in 0 ..< (valuesToDraw.count) {
+                
+                // shortcuts for the values we need
+                let currentValue = CGFloat(valuesToDraw[index])
+                let currentWeekday = selectedWeekdays[index]
+                
+                // start the path
+                context.beginPath()
+                
+                // move to the start point
+                context.move(to: nextStartOfBar)
+                
+                // add the bar
+                context.addRect(CGRect(x: nextStartOfBar.x,
+                                       y: nextStartOfBar.y,
+                                       width: self.barWidth,
+                                       height: currentValue * valuePerUnit))
+                
+                // chack if that bar is on the same weekday as the reference
+                if currentWeekday == weekDayReference {
+                    
+                    // yes, so highlight the bar with a different color
+                    
+                    // as we change the color we have to push sthe state
+                    context.saveGState()
+                    
+                    // change the color
+                    context.setFillColor(graphBarHighlightedCGColor)
+                    
+                    // draw the bar
+                    context.drawPath(using: .fill)
+                    
+                    // restore the state
+                    context.restoreGState()
+                    
+                } else {
+                    
+                    // normal bar, so just draw it
+                    context.drawPath(using: .fill)
+                }
+                
+                // set the next startpoint
+                nextStartOfBar = CGPoint(
+                    x: nextStartOfBar.x - self.barWidth - self.barGap,
+                    y: nextStartOfBar.y)
+            }
+            
+            
+            // ----- close it
+            
+            // restore the state to have it balanced
+            context.restoreGState()
+            
+            // OK, that's it, we take this as the new image
+            returnImage = UIGraphicsGetImageFromCurrentImageContext()
+            
+        } else {
+            
+            // couln't get the context, return nil
+            returnImage = nil
+        }
+        
+        // OK, we now have a nice new image, store it
+        UIGraphicsEndImageContext()
+        
+        
+        return returnImage
+        
+    }
+
     
     
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     creates the left image with the incidences
+     
+     -----------------------------------------------------------------------------------------------
+
+     - Returns: the new Image or nil if an error happens
+     
+     */
+    private func createIncidencesGraph() -> UIImage? {
+        
+        // get and freeze the global data
+        var selectedID: String!
+        var selectedArea: Int!
+        var selectedData: [[GlobalStorage.RKIDataStruct]]!
+        var selectedWeekdays: [Int]!
+        var newImageWidth: CGFloat!
+        var newImageHeight: CGFloat!
+        
+        GlobalStorageQueue.sync(execute: {
+            selectedID = GlobalUIData.unique.UIDetailsRKISelectedMyID
+            selectedArea = GlobalUIData.unique.UIDetailsRKIAreaLevel
+            selectedData = GlobalStorage.unique.RKIData[selectedArea]
+            selectedWeekdays = GlobalStorage.unique.RKIDataWeekdays[selectedArea]
+
+            newImageWidth = GlobalUIData.unique.RKIGraphNeededWidth
+            newImageHeight = GlobalUIData.unique.RKIGraphNeededHeight
+        })
+        
+        // check if there is work to do
+        if selectedData.isEmpty == true {
+            
+            // nothing to do, return nil
+            #if DEBUG_PRINT_FUNCCALLS
+            print("createCasesGraph(), RKIData[\(selectedArea!)] is empty, return nil")
+            #endif
+            
+            return nil
+        }
+        
+        // try to calculate the index of the selected ID
+        var selectedIDIndex: Int = 0
+        if let foundIndex = selectedData[0].firstIndex(where: { $0.myID == selectedID } ) {
+            
+            selectedIDIndex = foundIndex
+            
+        } else {
+            
+            // did not found the index, return nil
+            #if DEBUG_PRINT_FUNCCALLS
+            print("createCasesGraph(), RKIData[\(selectedArea!)] could not find ID \(selectedID!), return nil")
+            #endif
+            
+            return nil
+        }
+        
+        // OK, now we have the data, so produce an easier to handle array with the values we need
+        // calculate the number of days we have to do
+        // make sure we do not have too much values (there is only room for 15 bars)
+        let numberOfDays: Int = min(15, selectedData.count)
+        
+        // this will be the values we want to draw
+        var valuesToDraw: [Double] = []
+        
+        for index in 0 ..< numberOfDays {
+            
+             valuesToDraw.append(selectedData[index][selectedIDIndex].cases7DaysPer100K)
+        }
+
+        
+        // shortcut for the image we use as background
+        
+        let imageToUse: UIImage = RKIGraphicQueue.sync(execute: { self.GraphRightInitial })
+        
+        // this will hold the return image or nil
+        let returnImage: UIImage?
+        
+        
+        // shortcut for the dimensions of the image
+        let rectOfImage: CGRect = CGRect(x: 0, y: 0, width: newImageWidth, height: newImageHeight)
+        
+        // get the max value with some headroom for a better look
+        let maxValue: CGFloat = (CGFloat(valuesToDraw.max()!) * 1.05)
+        
+        // this is the value we use to calulate the height of the bar (negative, because of the draw direction)
+        let valuePerUnit: CGFloat = CGFloat(self.lengthYAxis / CGFloat(maxValue)) * -1.0
+        
+        // get the day of the week for reference (all bars with this weekday will be drawnd diffenrently)
+        //let weekDayReference: Int = selectedWeekdays.first!
+        
+        
+        // the initial canvas
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: newImageWidth, height: newImageHeight),
+                                               false,
+                                               ScreenScale)
+        
+        // get the current context (our canvas)
+        if let context = UIGraphicsGetCurrentContext() {
+            
+            // ----- get the background image
+            
+            // we have to flip the canvas, to make sure the image is not upside down etc.
+            //flip coordinats
+            context.translateBy(x: 0, y: newImageHeight)
+            context.scaleBy(x: 1.0, y: -1.0)
+            
+            //draw image
+            context.draw(imageToUse.cgImage!, in: rectOfImage)
+            
+            //flip back
+            context.scaleBy(x: 1.0, y: -1.0)
+            context.translateBy(x: 0, y: (newImageHeight * -1.0))
+            
+            // start the drawing (we just set the background)
+            context.beginPath()
+            
+            
+            // ----- draw the axis
+            
+            // prepare drawing of axises
+            context.setLineWidth(self.widthAxis)
+            context.setStrokeColor(graphAxisCGColor)
+            
+            // draw the y-axis
+            context.move(to: CGPoint(x: self.leftBorder, y: self.topBorder))
+            context.addLine(to: CGPoint(x: self.leftBorder, y: self.yAxisY))
+            
+            // draw the x-axis
+            context.move(to: CGPoint(x: self.leftBorder, y: self.yAxisY))
+            context.addLine(to: CGPoint(x: self.rightBorder, y: self.yAxisY))
+            
+            // draw the axis
+            context.drawPath(using: .stroke)
+            
+            
+            
+            // ----- draw the bars
+            
+            // we will try to draw the bars in different colors, so save the state
+            context.saveGState()
+            
+            // prepare the drawing
+            var nextStartOfBar = CGPoint(
+                x: self.rightBorder - self.barWidth - self.barGap,
+                y: self.yAxisY)
+            
+            // set the color for the normal bars
+            context.setFillColor(graphBarNormalCGColor)
+            
+            // walk over the values
+            for index in 0 ..< (numberOfDays) {
+                
+                // shortcuts for the values we need
+                let currentValue = CGFloat(valuesToDraw[index])
+                //let currentWeekday = selectedWeekdays[index]
+                
+                // start the path
+                context.beginPath()
+                
+                // move to the start point
+                context.move(to: nextStartOfBar)
+                
+                // add the bar
+                context.addRect(CGRect(x: nextStartOfBar.x,
+                                       y: nextStartOfBar.y,
+                                       width: self.barWidth,
+                                       height: currentValue * valuePerUnit))
+                
+                    
+                    // as we change the color we have to push sthe state
+                    context.saveGState()
+                    
+                let (covidColor, _, _, _) = CovidRating.unique.getColorsForValue(valuesToDraw[index])
+                    // change the color
+                context.setFillColor(covidColor.cgColor)
+                    
+                    // draw the bar
+                    context.drawPath(using: .fill)
+                    
+                    // restore the state
+                    context.restoreGState()
+                    
+
+                
+                // set the next startpoint
+                nextStartOfBar = CGPoint(
+                    x: nextStartOfBar.x - self.barWidth - self.barGap,
+                    y: nextStartOfBar.y)
+            }
+            
+            
+            // ----- close it
+            
+            // restore the state to have it balanced
+            context.restoreGState()
+            
+            // OK, that's it, we take this as the new image
+            returnImage = UIGraphicsGetImageFromCurrentImageContext()
+            
+        } else {
+            
+            // couln't get the context, return nil
+            returnImage = nil
+        }
+        
+        // OK, we now have a nice new image, store it
+        UIGraphicsEndImageContext()
+        
+        
+        return returnImage
+        
+    }
     /**
      -----------------------------------------------------------------------------------------------
      

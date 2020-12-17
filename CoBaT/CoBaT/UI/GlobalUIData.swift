@@ -47,13 +47,13 @@ final class GlobalUIData: NSObject {
     // The size of that graphs will be depending on the screen width of the device
     // thius are the constants which are used in differtent functions
     
-    let UIScreenWidth: CGFloat         = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
-    let RKIGraphSideMargins: CGFloat   = 10.0
-    let RKIGraphTopMargine: CGFloat    = 0.0
-    let RKIGraphBottomMargine: CGFloat = 5.0
-    let RKIGraphNeededWidth  =  round((min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+    public let UIScreenWidth: CGFloat         = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+    public let RKIGraphSideMargins: CGFloat   = 10.0
+    public let RKIGraphTopMargine: CGFloat    = 0.0
+    public let RKIGraphBottomMargine: CGFloat = 5.0
+    public let RKIGraphNeededWidth: CGFloat =  round((min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
                                         - (10.0 * 2)) * 0.32)
-    let RKIGraphNeededHeight = round(
+    public let RKIGraphNeededHeight: CGFloat = round(
                                 round((min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
                                         - (10.0 * 2)) * 0.32)
                                     / 5 * 4)

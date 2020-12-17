@@ -21,26 +21,31 @@ final class DetailsRKITableViewController: UITableViewController {
     // the oberservers have to be released, otherwise there wil be a memory leak.
     // this variables were set in "ViewDidApear()" and released in "ViewDidDisappear()"
     
-    var newRKIDataReadyObserver: NSObjectProtocol?
-    var commonTabBarChangedContentObserver: NSObjectProtocol?
-    var newGraphReadyObserver: NSObjectProtocol?
+    private var newRKIDataReadyObserver: NSObjectProtocol?
+    private var commonTabBarChangedContentObserver: NSObjectProtocol?
+    private var newGraphReadyObserver: NSObjectProtocol?
     
     // flag if the initial data are displayed. Will be used in refreshCellWithGraph()
-    var initialDataAreDone: Bool = false
+    private var initialDataAreDone: Bool = false
     
     // color codes for the first row
-    var myBackgroundColor = UIColor.systemBackground
-    var myTextColor = UIColor.label
+    private var myBackgroundColor = UIColor.systemBackground
+    private var myTextColor = UIColor.label
     
     // the variables to fill the "kindOf" and "Inhabitants" labels
-    let rowNumberForInhabitantsCell: Int = 0
-    var myKindOfString : String = ""
-    var myInhabitantsValueString: String = ""
-    var myInhabitantsLabelString: String = ""
+    private let rowNumberForInhabitantsCell: Int = 0
+    private var myKindOfString : String = ""
+    private var myInhabitantsValueString: String = ""
+    private var myInhabitantsLabelString: String = ""
     
+    // the three images
+    private var leftImage: UIImage?
+    private var middleImage: UIImage?
+    private var rightImage: UIImage?
+        
     
     // the cell with the three graphs
-    let rowNumberForGraphCells: Int = 1
+    private let rowNumberForGraphCells: Int = 1
     
     // we have three different kind of detail cells, this is the enum for them
     enum showDeltaCellTypeEnum: Int {
@@ -86,25 +91,25 @@ final class DetailsRKITableViewController: UITableViewController {
         }
     }
 
-    var showDetailData: [showDetailStruct] = []
+    private var showDetailData: [showDetailStruct] = []
 
     // the id string of the selected item, to highlight the related cell
-    var selectedItemID: String = ""
+    private var selectedItemID: String = ""
 
 
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Translated strings
     // ---------------------------------------------------------------------------------------------
-    let casesText = NSLocalizedString("label-cases", comment: "Label text for cases")
-    let incidencesText = NSLocalizedString("label-cases-7days", comment: "Label text for cases in 7 days")
-    let inhabitantsText = NSLocalizedString("label-inhabitants", comment: "Label text for inhabitants")
-    let deathsText = NSLocalizedString("label-deaths", comment: "Label text for deaths")
+    private let casesText = NSLocalizedString("label-cases", comment: "Label text for cases")
+    private let incidencesText = NSLocalizedString("label-cases-7days", comment: "Label text for cases in 7 days")
+    private let inhabitantsText = NSLocalizedString("label-inhabitants", comment: "Label text for inhabitants")
+    private let deathsText = NSLocalizedString("label-deaths", comment: "Label text for deaths")
 
-    let totalText = NSLocalizedString("label-total", comment: "Label text for total")
-    let per100kText = NSLocalizedString("label-per-100k", comment: "Label text for per 100k")
+    private let totalText = NSLocalizedString("label-total", comment: "Label text for total")
+    private let per100kText = NSLocalizedString("label-per-100k", comment: "Label text for per 100k")
     
-    let changeText = NSLocalizedString("label-change", comment: "Text for changes")
+    private let changeText = NSLocalizedString("label-change", comment: "Text for changes")
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Helper
@@ -134,6 +139,13 @@ final class DetailsRKITableViewController: UITableViewController {
             self.myBackgroundColor = GlobalUIData.unique.UIDetailsRKIBackgroundColor
             self.myTextColor = GlobalUIData.unique.UIDetailsRKITextColor
             
+            // get the graphs
+            RKIGraphicQueue.sync(execute: {
+                self.leftImage = DetailsRKIGraphic.unique.GraphLeft
+                self.middleImage = DetailsRKIGraphic.unique.GraphMiddle
+                self.rightImage = DetailsRKIGraphic.unique.GraphRight
+            })
+
             
             // go over the data
             for dayIndex in 0 ..< GlobalStorage.unique.RKIData[selectedAreaLevel].count {
@@ -297,6 +309,12 @@ final class DetailsRKITableViewController: UITableViewController {
             if (self.initialDataAreDone == true)
                 && (self.tableView.numberOfRows(inSection: 0) >= self.rowNumberForGraphCells) {
                 
+                RKIGraphicQueue.sync(execute: {
+                    self.leftImage = DetailsRKIGraphic.unique.GraphLeft
+                    self.middleImage = DetailsRKIGraphic.unique.GraphMiddle
+                    self.rightImage = DetailsRKIGraphic.unique.GraphRight
+                })
+
                 self.tableView.reloadRows(at: [IndexPath(row: self.rowNumberForGraphCells, section: 0)], with: .fade)
                 
             } else {
@@ -538,11 +556,11 @@ final class DetailsRKITableViewController: UITableViewController {
             cell.contentView.backgroundColor = backgroundColor
 
             // get the graphs
-            RKIGraphicQueue.sync(execute: {
-                cell.LeftImage.image = DetailsRKIGraphic.unique.GraphLeft
-                cell.MiddleImage.image = DetailsRKIGraphic.unique.GraphMiddle
-                cell.RightImage.image = DetailsRKIGraphic.unique.GraphRight
-            })
+            //RKIGraphicQueue.sync(execute: {
+            cell.LeftImage.image = self.leftImage
+            cell.MiddleImage.image = self.middleImage
+            cell.RightImage.image = self.rightImage
+            //})
 
             return cell
             

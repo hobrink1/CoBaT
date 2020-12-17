@@ -11,7 +11,7 @@ import UIKit
 // MARK: -
 // MARK: - Browse County Data Table View Controller
 // -------------------------------------------------------------------------------------------------
-class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTableViewCellPlacesDelegate {
+final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTableViewCellPlacesDelegate {
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Local storage
@@ -19,24 +19,24 @@ class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDataTabl
 
     // the oberservers have to be released, otherwise there wil be a memory leak.
     // this variables were set in "ViewDidApear()" and released in "ViewDidDisappear()"
-    var userDidSelectSortObserver: NSObjectProtocol?
-    var newRKIDataReadyObserver: NSObjectProtocol?
+    private var userDidSelectSortObserver: NSObjectProtocol?
+    private var newRKIDataReadyObserver: NSObjectProtocol?
 
 
     // local copy of County Data, susetted by selected State
-    var localDataArray: [GlobalStorage.RKIDataStruct] = []
-    var localDataArrayDelta1: [GlobalStorage.RKIDataStruct] = []
-    var localDataArrayDelta7: [GlobalStorage.RKIDataStruct] = []
+    private var localDataArray: [GlobalStorage.RKIDataStruct] = []
+    private var localDataArrayDelta1: [GlobalStorage.RKIDataStruct] = []
+    private var localDataArrayDelta7: [GlobalStorage.RKIDataStruct] = []
 
     // the number of days available
-    var numberOfDayAvailable: Int = 0
+    private var numberOfDayAvailable: Int = 0
     
     // label texts, translated
-    let casesText = NSLocalizedString("label-cases", comment: "Label text for cases")
-    let IncidencesText = NSLocalizedString("label-incidences", comment: "Label text for incidences")
+    private let casesText: String = NSLocalizedString("label-cases", comment: "Label text for cases")
+    private let IncidencesText: String = NSLocalizedString("label-incidences", comment: "Label text for incidences")
     
     // the id string of the selected item, to highlight the related cell
-    var selectedItemID: String = ""
+    private var selectedItemID: String = ""
 
     // ----------------------------------------------------------------------------------
     // MARK: - Delegate for select button

@@ -28,7 +28,7 @@ final class BrowseRKIDataTableViewCell: UITableViewCell {
     // ------------------------------------------------------------------------------
     // MARK: - Class Properties
     // ------------------------------------------------------------------------------
-    var myIndexPath: IndexPath!
+    public var myIndexPath: IndexPath!
     
     // ------------------------------------------------------------------------------
     // MARK: - IBOutlets
@@ -56,7 +56,7 @@ final class BrowseRKIDataTableViewCell: UITableViewCell {
     // MARK: - Select Button
     // ------------------------------------------------------------------------------
     // var for the delegate, which will be set in "cellForRowAt:"
-    var selectButtonDelegate: BrowseRKIDataTableViewCellPlacesDelegate?
+    public var selectButtonDelegate: BrowseRKIDataTableViewCellPlacesDelegate?
 
     // the button outlet
      @IBOutlet weak var SelectButton: UIButton!
@@ -82,7 +82,7 @@ final class BrowseRKIDataTableViewCell: UITableViewCell {
     // MARK: - details Button
     // ------------------------------------------------------------------------------
     // var for the delegate, which will be set in "cellForRowAt:"
-    var detailsButtonDelegate: BrowseRKIDataTableViewCellPlacesDelegate?
+    public var detailsButtonDelegate: BrowseRKIDataTableViewCellPlacesDelegate?
 
     // the button outlet
     @IBOutlet weak var DetailsButton: UIButton!
