@@ -152,13 +152,13 @@ specific public places form 21:00";
 "Explanation-No-Data" = "Unfortunately there are no data records saved that can be displayed";
 
 /* Explanation if only one day of data available */
-"Explanation-One-Day" = "Cases: Total new infections\nIncidences: Cases of last 7 days per 100,000 inhabitants\n\nData from %@.\n\nEvery day, records are saved. As soon as the data for several days are available, the changes since last data will be shown\n";
+"Explanation-One-Day" = "Cases so far: Total new infections\nIncidences: Cases of last 7 days per 100,000 inhabitants\n\nData from %@.\n\nEvery day, records are saved. As soon as the data for several days are available, the changes since last data will be shown\n";
 
 /* Explanation if exactly two days of data are available */
-"Explanation-Two-Days" = "Cases: Total new infections\nIncidences: Cases of last 7 days per 100,000 inhabitants\nData from %@ and changes since %@";
+"Explanation-Two-Days" = "Cases so far: Total new infections\nIncidences: Cases of last 7 days per 100,000 inhabitants\nData from %@ and changes since %@";
 
 /* Explanation if three or more days of data are available */
-"Explanation-Three-Days" = "Cases: Total new infections\nIncidences: Cases of last  7 days per 100,000 inhabitants\n\nIn addition, the change compared to the penultimate and the %d. record";
+"Explanation-Three-Days" = "Cases so far: Total new infections\nIncidences: Cases of last 7 days per 100,000 inhabitants\n\nIn addition, the change compared to the penultimate and the %d. record";
 
 
 
@@ -181,7 +181,7 @@ specific public places form 21:00";
  **************************************************************************************************/
 
 /* Label text for cases */
-"label-cases" = "Cases:";
+"label-cases" = "Cases so far:";
 
 /* Label text for incidences */
 "label-incidences" = "Incidence:";
@@ -196,7 +196,7 @@ specific public places form 21:00";
 "label-per-100k" = "per 100,000";
 
 /* Label text for deaths */
-"label-deaths" = "Deaths:";
+"label-deaths" = "Deaths so far:";
 
 /* Label text for change */
 "label-change" = "Changes:";
@@ -215,6 +215,9 @@ specific public places form 21:00";
 
 /* Label text for cases in 7 days */
 "label-cases-7days" = "Cases last 7 days";
+
+/* Label text for cases in 7 days */
+"label-cases-7days-new" = "New cases last 7 days";
 
 
 

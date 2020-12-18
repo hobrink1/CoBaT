@@ -101,10 +101,18 @@ final class DetailsRKITableViewController: UITableViewController {
     // ---------------------------------------------------------------------------------------------
     // MARK: - Translated strings
     // ---------------------------------------------------------------------------------------------
-    private let casesText = NSLocalizedString("label-cases", comment: "Label text for cases")
-    private let incidencesText = NSLocalizedString("label-cases-7days", comment: "Label text for cases in 7 days")
     private let inhabitantsText = NSLocalizedString("label-inhabitants", comment: "Label text for inhabitants")
+
+    
+    private let casesText = NSLocalizedString("label-cases", comment: "Label text for cases")
+    private let casesTextNew = NSLocalizedString("RKIGraph-Cases", comment: "Label text for graph \"new cases\"")
+    
     private let deathsText = NSLocalizedString("label-deaths", comment: "Label text for deaths")
+    private let deathsTextNew = NSLocalizedString("RKIGraph-Deaths", comment: "Label text for graph \"new deaths\"")
+
+    private let incidencesText = NSLocalizedString("label-cases-7days", comment: "Label text for cases in 7 days")
+    private let incidencesTextNew = NSLocalizedString("label-cases-7days-new", comment: "Label text for new cases in 7 days")
+
 
     private let totalText = NSLocalizedString("label-total", comment: "Label text for total")
     private let per100kText = NSLocalizedString("label-per-100k", comment: "Label text for per 100k")
@@ -130,7 +138,7 @@ final class DetailsRKITableViewController: UITableViewController {
         
         var localRKIDataLoaded : [GlobalStorage.RKIDataStruct] = []
         
-        var localDataBuiling:[showDetailStruct] = []
+        var localDataBuilding:[showDetailStruct] = []
         
         // get the related data from the global storage in sync
         GlobalStorageQueue.async(execute: {
@@ -203,7 +211,7 @@ final class DetailsRKITableViewController: UITableViewController {
                 
                 let (backgroundColor, textColor, textColorLower, _) = CovidRating.unique.getColorsForValue(item.cases7DaysPer100K)
                 
-                localDataBuiling.append(showDetailStruct(
+                localDataBuilding.append(showDetailStruct(
                                             rkiDataStruct: item,
                                             deaths100k: deaths100k,
                                             cases7Days: cases7Days,
@@ -220,10 +228,10 @@ final class DetailsRKITableViewController: UITableViewController {
             //if localDataBuiling.isEmpty == false {
                 
                 // get the deltas
-                for index in 0 ..< (localDataBuiling.count - 1) {
+                for index in 0 ..< (localDataBuilding.count - 1) {
                     
-                    let itemCurrent = localDataBuiling[index]
-                    let itemNextDay = localDataBuiling[index + 1]
+                    let itemCurrent = localDataBuilding[index]
+                    let itemNextDay = localDataBuilding[index + 1]
                     
                     
                     let diffInhabitants    = itemCurrent.rkiDataStruct.inhabitants       - itemNextDay.rkiDataStruct.inhabitants
@@ -261,7 +269,7 @@ final class DetailsRKITableViewController: UITableViewController {
                     let sortKey = "\(indexString)\(cellType.rawValue)"
                     
                     
-                    localDataBuiling.append(showDetailStruct(
+                    localDataBuilding.append(showDetailStruct(
                                                 rkiDataStruct: myRKIDataStruct,
                                                 deaths100k: diffDeaths100k,
                                                 cases7Days: diffCases7Days,
@@ -274,13 +282,13 @@ final class DetailsRKITableViewController: UITableViewController {
                 }
                 
                 // sort it to get the deltas inbetween teir original data cells
-                localDataBuiling.sort(by: { $0.sortKey < $1.sortKey } )
+                localDataBuilding.sort(by: { $0.sortKey < $1.sortKey } )
             } // localDataBuiling.isEmpty
             
             // set the label text on main thread
             DispatchQueue.main.async(execute: {
                 
-                self.showDetailData = localDataBuiling
+                self.showDetailData = localDataBuilding
                 
                 #if DEBUG_PRINT_FUNCCALLS
                 print("DetailsRKITableViewController.refreshLocalData done")
@@ -608,9 +616,19 @@ final class DetailsRKITableViewController: UITableViewController {
             cell.Incidences100k.textColor = textColorToUse
             
             // set the fixed texts (labels etc.)
-            cell.LabelCases.text = casesText
-            cell.LabelDeaths.text = deathsText
-            cell.LabelIncidences.text = incidencesText
+            if myData.cellType == .current {
+                
+                cell.LabelCases.text = casesText
+                cell.LabelDeaths.text = deathsText
+                cell.LabelIncidences.text = incidencesText
+
+            } else {
+                
+                cell.LabelCases.text = casesTextNew
+                cell.LabelDeaths.text = deathsTextNew
+                cell.LabelIncidences.text = incidencesTextNew
+            }
+            
             
             cell.LabelTotal.text = totalText
             cell.LabelPer100k.text = per100kText
@@ -677,7 +695,7 @@ final class DetailsRKITableViewController: UITableViewController {
                     from: Date(timeIntervalSinceReferenceDate: myData.otherDayTimeStamp))
                 
                 //cell.LabelDate.text = "\(changeText) \(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))"
-                cell.LabelDate.text = "<\(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))>"
+                cell.LabelDate.text = "\(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))"
                 
                 //cell.ValueInhabitans.text = getFormattedDeltaTextInt(
                 //    number: myData.rkiDataStruct.inhabitants)

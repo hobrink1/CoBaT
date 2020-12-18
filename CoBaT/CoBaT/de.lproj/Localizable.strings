@@ -155,13 +155,13 @@ bestimmte öffentliche Plätze ab 21:00";
 "Explanation-No-Data" = "Leider sind noch keine Datensätze gespeichert, die anzeigt werden können";
 
 /* Explanation if only one day of data available */
-"Explanation-One-Day" = "Fälle: Neuinfektionen insgesamt\nInzidenz: Fälle letzte 7 Tage pro 100.000 Einwohner\n\nDaten von %@.\n\nJeden Tag werden Datensätze gespeichert. Sobald die Daten mehrerer Tage verfügbar sind, werden die Veränderung seit dem letzten Datensatz gezeigt";
+"Explanation-One-Day" = "Fälle bisher: Infektionen insgesamt\nInzidenz: Fälle letzte 7 Tage pro 100.000 Einwohner\n\nDaten von %@.\n\nJeden Tag werden Datensätze gespeichert. Sobald die Daten mehrerer Tage verfügbar sind, werden die Veränderung seit dem letzten Datensatz gezeigt";
 
 /* Explanation if exactly two days of data are available */
-"Explanation-Two-Days" = "Fälle: Neuinfektionen insgesamt\nInzidenz: Fälle letzte 7 Tage pro 100.000 Einwohner\nDaten von %@ und Veränderungen seit %@";
+"Explanation-Two-Days" = "Fälle bisher: Infektionen insgesamt\nInzidenz: Fälle letzte 7 Tage pro 100.000 Einwohner\nDaten von %@ und Veränderungen seit %@";
 
 /* Explanation if three or more days of data are available */
-"Explanation-Three-Days" = "Fälle: Neuinfektionen insgesamt\nInzidenz: Fälle letzte 7 Tage pro 100.000 Einwohner\n\nAußerdem jeweils die Veränderung gegenüber des vorletzten und dem %d. Datensatz gezeigt";
+"Explanation-Three-Days" = "Fälle bisher: Infektionen insgesamt\nInzidenz: Fälle letzte 7 Tage pro 100.000 Einwohner\n\nAußerdem jeweils die Veränderung gegenüber des vorletzten und dem %d. Datensatz gezeigt";
 
 /* usage line hint "< Select" if usefull */
 "Explanation-select-If-Useful" = "< Auswahl";
@@ -182,7 +182,7 @@ bestimmte öffentliche Plätze ab 21:00";
  **************************************************************************************************/
 
 /* Label text for cases */
-"label-cases" = "Fälle:";
+"label-cases" = "Fälle bisher:";
 
 /* Label text for incidences */
 "label-incidences" = "Inzidenz:";
@@ -197,7 +197,7 @@ bestimmte öffentliche Plätze ab 21:00";
 "label-per-100k" = "pro 100.000";
 
 /* Label text for deaths */
-"label-deaths" = "Tote:";
+"label-deaths" = "Tote bisher:";
 
 /* Label text for change */
 "label-change" = "Delta:";
@@ -216,6 +216,9 @@ bestimmte öffentliche Plätze ab 21:00";
 
 /* Label text for cases in 7 days */
 "label-cases-7days" = "Fälle letzte 7 Tage";
+
+/* Label text for cases in 7 days */
+"label-cases-7days-new" = "Neue Fälle letzte 7 Tage";
 
 
 /**************************************************************************************************
