@@ -117,7 +117,9 @@ final class GlobalStorage: NSObject {
                     let loadedRKIDataLastRetreived = self.permanentStore.double(
                         forKey: "CoBaT.RKIDataLastRetreived")
                     
-                    
+                    let loadedLastErrors = self.permanentStore.object(
+                        forKey: "CoBaT.lastErrors")
+
                     // got the data, try to decode it
                     do {
                         
@@ -125,7 +127,14 @@ final class GlobalStorage: NSObject {
                                                                  from: (loadedRKIData as? Data)!)
                         
                         let myRKIDataTimeStamps = try JSONDecoder().decode([[TimeInterval]].self,
-                                                                           from: (loadedRKIDataTimeStamps as? Data)!)
+                                                                from: (loadedRKIDataTimeStamps as? Data)!)
+                        
+                        var myLastErrors: [lastErrorStruct] = []
+                        if loadedLastErrors != nil {
+                            
+                            myLastErrors = try JSONDecoder().decode([lastErrorStruct].self,
+                                                                        from: (loadedLastErrors as? Data)!)
+                        }
                         
                         // if we got to here, no errors encountered
                         
@@ -187,6 +196,8 @@ final class GlobalStorage: NSObject {
                             self.RKIDataTimeStamps = myRKIDataTimeStamps
                             self.RKIDataLastUpdated = loadedRKIDataLastUpdated
                             self.RKIDataLastRetreived = loadedRKIDataLastRetreived
+                            
+                            self.lastErrors = myLastErrors
                             
                             // build the Weekdays array
                             
@@ -1059,6 +1070,9 @@ final class GlobalStorage: NSObject {
                 self.permanentStore.set(encodedRKIDataTimeStamps, forKey: "CoBaT.RKIDataTimeStamps")
                 self.permanentStore.set(self.RKIDataLastUpdated, forKey: "CoBaT.RKIDataLastUpdated")
                 
+                let encodedLastErrors = try JSONEncoder().encode(self.lastErrors)
+                self.permanentStore.set(encodedLastErrors, forKey: "CoBaT.lastErrors")
+                
                 self.permanentStore.set(self.VersionOfPermanentStorage, forKey: "CoBaT.VersionOfPermanentStorage")
                 
                 #if DEBUG_PRINT_FUNCCALLS
@@ -1072,7 +1086,8 @@ final class GlobalStorage: NSObject {
             }
             
             // check if we have to inform the background service
-            if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+            if (kindOf != -1) // -1 => error log
+                &&  CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
                 
                 CoBaTBackgroundService.unique.newRKIDataArrived(kindOf: kindOf)
                 
@@ -1199,6 +1214,7 @@ final class GlobalStorage: NSObject {
             // append the new error
             self.lastErrors.append(lastErrorStruct(errorText: errorText))
              
+            self.saveRKIData(kindOf: -1)
             // local notification to update UI
             DispatchQueue.main.async(execute: {
                 NotificationCenter.default.post(Notification(name: .CoBat_NewErrorStored))
@@ -1215,7 +1231,7 @@ final class GlobalStorage: NSObject {
     // MARK: - Last Errors Storage (not permanent)
     // ---------------------------------------------------------------------------------------------
 
-    public struct lastErrorStruct {
+    public struct lastErrorStruct: Decodable, Encodable {
         let errorText: String
         let errorTimeStamp: TimeInterval
         
