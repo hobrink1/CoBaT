@@ -39,10 +39,10 @@ final class DetailsRKITableViewController: UITableViewController {
     private var myInhabitantsLabelString: String = ""
     
     // the color for the row which have the same weekday than the current one
-    private let rowHighlightedBackgroundUIColor: UIColor = UIColor.systemOrange
-    private let rowhBarHighlightedBackgroundCGColor: CGColor = UIColor.systemOrange.cgColor
-    private let rowHighlightedTextUIColor: UIColor = UIColor.black
-    private let rowhBarHighlightedTextCGColor: CGColor = UIColor.black.cgColor
+    private let rowHighlightedBackgroundUIColor: UIColor = UIColor.gray
+    private let rowhBarHighlightedBackgroundCGColor: CGColor = UIColor.gray.cgColor
+    private let rowHighlightedTextUIColor: UIColor = UIColor.white
+    private let rowhBarHighlightedTextCGColor: CGColor = UIColor.white.cgColor
 
     private var weekdayOfCurrentDay: Int = 0
     
@@ -639,8 +639,6 @@ final class DetailsRKITableViewController: UITableViewController {
                 backgroundColor = myData.backgroundColor
                 textColorToUse = myData.textColor
             }
-            
-            
             
             // set the background of the cell
             cell.contentView.backgroundColor = backgroundColor

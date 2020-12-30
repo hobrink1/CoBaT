@@ -56,10 +56,10 @@ final class CoBaTUserNotification: NSObject {
         if weAreInBackground == false {
 
             // no , not in background, so the user sees the news right in front of him, no need to message
-            #if DEBUG_PRINT_FUNCCALLS
+            //#if DEBUG_PRINT_FUNCCALLS
             GlobalStorage.unique.storeLastError(
                 errorText:"sendUserNotification: called, but weAreInBackground == false, do nothing and return")
-            #endif
+            //#endif
 
             return
         }
@@ -167,10 +167,10 @@ final class CoBaTUserNotification: NSObject {
                         
                         // we got an index, so we do have the same text still to send
                         // just report and return
-                        #if DEBUG_PRINT_FUNCCALLS
+                        //#if DEBUG_PRINT_FUNCCALLS
                         GlobalStorage.unique.storeLastError(
                             errorText: "sendUserNotification: text \"\(textToSend)\" already in message queue, do not send")
-                        #endif
+                        //#endif
                         
                     } else {
                         

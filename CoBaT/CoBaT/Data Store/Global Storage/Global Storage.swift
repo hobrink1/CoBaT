@@ -877,9 +877,9 @@ final class GlobalStorage: NSObject {
      */
     private func rebuildRKIDeltas(kindOf: Int, newData: Bool) {
         
-        #if DEBUG_PRINT_FUNCCALLS
-        print("rebuildRKIDeltas just started")
-        #endif
+        //#if DEBUG_PRINT_FUNCCALLS
+        GlobalStorage.unique.storeLastError(errorText: "rebuildRKIDeltas just started, newData: \(newData)")
+        //#endif
 
         // first step, remove the old data, and make sure we have an empty array per area level
         self.RKIDataDeltas = [ [], [], [] ]
@@ -1031,9 +1031,9 @@ final class GlobalStorage: NSObject {
             
             CoBaTUserNotification.unique.sendUserNotification(type: .newRKIData)
             
-            #if DEBUG_PRINT_FUNCCALLS
+            //#if DEBUG_PRINT_FUNCCALLS
             self.storeLastError(errorText:"rebuildRKIDeltas just called sendUserNotification(type: .newRKIData)")
-            #endif
+            //#endif
 
         }
         
