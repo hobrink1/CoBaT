@@ -17,6 +17,7 @@
 		F22D00C12567B5D500C908AA /* CoBaTUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F22D00C02567B5D500C908AA /* CoBaTUITests.swift */; };
 		F22D00D1256872B100C908AA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F22D00A92567B5D500C908AA /* LaunchScreen.storyboard */; };
 		F22D00D5256872B200C908AA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F22D00A92567B5D500C908AA /* LaunchScreen.storyboard */; };
+		F23657F7259E01C500252809 /* JSON RKI Age.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23657F6259E01C500252809 /* JSON RKI Age.swift */; };
 		F24D37E4257398110036FEE3 /* DetailsRKIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F24D37E3257398110036FEE3 /* DetailsRKIViewController.swift */; };
 		F24D37E9257398380036FEE3 /* DetailsRKITableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F24D37E8257398380036FEE3 /* DetailsRKITableViewController.swift */; };
 		F24D37EE257398620036FEE3 /* DetailsRKITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F24D37ED257398620036FEE3 /* DetailsRKITableViewCell.swift */; };
@@ -84,6 +85,7 @@
 		F22D00DA256872B700C908AA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		F22D00E725687CD900C908AA /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Main.strings; sourceTree = "<group>"; };
 		F22D00EB25687CD900C908AA /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
+		F23657F6259E01C500252809 /* JSON RKI Age.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSON RKI Age.swift"; sourceTree = "<group>"; };
 		F24D37E3257398110036FEE3 /* DetailsRKIViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRKIViewController.swift; sourceTree = "<group>"; };
 		F24D37E8257398380036FEE3 /* DetailsRKITableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRKITableViewController.swift; sourceTree = "<group>"; };
 		F24D37ED257398620036FEE3 /* DetailsRKITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRKITableViewCell.swift; sourceTree = "<group>"; };
@@ -242,6 +244,7 @@
 				F2AD3071256D10D400FDDE4B /* RKI Data Download.swift */,
 				F2AD3055256D00B700FDDE4B /* JSON RKI County.swift */,
 				F2AD305E256D035E00FDDE4B /* JSON RKI State.swift */,
+				F23657F6259E01C500252809 /* JSON RKI Age.swift */,
 				F2AD3063256D043900FDDE4B /* JSON RKI Helpers.swift */,
 			);
 			path = "RKI Data";
@@ -492,6 +495,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F23657F7259E01C500252809 /* JSON RKI Age.swift in Sources */,
 				F2DB33852577828800C47972 /* CountyTabViewController.swift in Sources */,
 				F2DB33942577833700C47972 /* CommonTabTableViewCell.swift in Sources */,
 				F2DB33C52579251E00C47972 /* CoBaT User Notification.swift in Sources */,

@@ -61,10 +61,6 @@ final class CoBaTBackgroundService: NSObject {
         // it will set it to false after all is done
         RKIBackgroundFetchIsOngoingFlag = true
         
-        // set the flag to be able to determin if both data typs are done
-        RKICountyDataOK = false
-        RKIStateDataOK = false
-        
         // check if we already restored the saved data. We need them to determin if the recieved data are new ones
         if GlobalStorage.unique.savedRKIDataRestored == true {
             
@@ -124,16 +120,24 @@ final class CoBaTBackgroundService: NSObject {
             && (RKICountyDataOK == true) {
             
             // yes both parts are done, so close the task
-            #if DEBUG_PRINT_FUNCCALLS
+            //#if DEBUG_PRINT_FUNCCALLS
             GlobalStorage.unique.storeLastError(
-                errorText:"newRKIDataArrived: RKIStateDataOK == true) && (RKICountyDataOK == true), close background task")
-            #endif
+                errorText:"newRKIDataArrived: kindOf: \(kindOf), (RKIStateDataOK == \(RKIStateDataOK)) && (RKICountyDataOK == \(RKICountyDataOK)), close background task")
+            //#endif
          
             // with this flag GlobalStorage knows it have to use this class
             RKIBackgroundFetchIsOngoingFlag = false
 
             // close the current task
             RKIBackgroundFetchTask?.setTaskCompleted(success: true)
+            
+        } else {
+            
+            //#if DEBUG_PRINT_FUNCCALLS
+            GlobalStorage.unique.storeLastError(
+                errorText:"newRKIDataArrived: kindOf: \(kindOf), RKIStateDataOK == \(RKIStateDataOK), RKICountyDataOK == \(RKICountyDataOK), DO NOT close background task")
+            //#endif
+
         }
     }
 }

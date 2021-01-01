@@ -40,6 +40,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Override point for customization after application launch.
         
+        
         // build the formatters
         buildAllFormatters()
 
@@ -163,9 +164,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       */
     func handleRKIBackgroundFetch(task: BGAppRefreshTask) {
 
-        #if DEBUG_PRINT_FUNCCALLS
-        print("handleRKIBackgroundFetch(): just started")
-        #endif
+        //#if DEBUG_PRINT_FUNCCALLS
+        GlobalStorage.unique.storeLastError(
+            errorText: "handleRKIBackgroundFetch(): just started")
+        //#endif
 
         // Schedule a new refresh task
         scheduleAppRefresh()
@@ -177,6 +179,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Provide an expiration handler for the background task that cancels the operation
         task.expirationHandler = {
             
+            //#if DEBUG_PRINT_FUNCCALLS
+            GlobalStorage.unique.storeLastError(
+                errorText: "handleRKIBackgroundFetch().expirationHandler: will call setTaskCompleted(success: false)")
+            //#endif
+
             task.setTaskCompleted(success: false)
         }
     }
@@ -198,9 +205,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         do {
             try BGTaskScheduler.shared.submit(request)
             
-            #if DEBUG_PRINT_FUNCCALLS
-            print("scheduleAppRefresh(): did submit task")
-            #endif
+            //#if DEBUG_PRINT_FUNCCALLS
+            GlobalStorage.unique.storeLastError(
+                errorText: "scheduleAppRefresh(): did submit task")
+            //#endif
             
         } catch let error as NSError {
             

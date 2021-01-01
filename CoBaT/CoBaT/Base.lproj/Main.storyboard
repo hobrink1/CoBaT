@@ -626,7 +626,7 @@
                                                                 </label>
                                                             </subviews>
                                                             <constraints>
-                                                                <constraint firstAttribute="width" constant="120" id="0Bi-Z4-ET9"/>
+                                                                <constraint firstAttribute="width" relation="lessThanOrEqual" constant="120" id="0Bi-Z4-ET9"/>
                                                             </constraints>
                                                         </stackView>
                                                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="ZRT-pm-hLv">

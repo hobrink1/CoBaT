@@ -29,7 +29,7 @@ final class RKIDataDownload: NSObject {
     // The methode getRKIData() will walk over this array and calls the URL For each item.
     //
     private enum RKI_DataTypeEnum {
-        case county, state
+        case county, state, age
     }
     
     private struct RKI_DataTabStruct {
@@ -47,6 +47,9 @@ final class RKIDataDownload: NSObject {
         RKI_DataTabStruct(.county,  "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json"),
         
         RKI_DataTabStruct(.state, "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/Coronaf%C3%A4lle_in_den_Bundesl%C3%A4ndern/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json")
+        //,
+        
+//        RKI_DataTabStruct(.age, "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_COVID19/FeatureServer/0/query?where=IdLandkreis%20%3D%20'01001'&outFields=*&outSR=4326&f=json")
     ]
     
     // ---------------------------------------------------------------------------------------------
@@ -328,6 +331,34 @@ final class RKIDataDownload: NSObject {
                 
                 #if DEBUG_PRINT_FUNCCALLS
                 print("handleRKIContent State done")
+                #endif
+
+                
+            case .age:
+                #if DEBUG_PRINT_FUNCCALLS
+                print("handleRKIContent Age Start")
+                #endif
+
+                
+                let ageData = try newJSONDecoder().decode(RKI_Age_RKIAgeDeviation.self, from: data)
+                
+                let filtered = ageData.features.filter( { $0.attributes.idLandkreis == "01001" } )
+                let sorted = filtered.sorted(by: {$0.attributes.altersgruppe.rawValue < $1.attributes.altersgruppe.rawValue})
+                for item in sorted {
+                    print ("\(item.attributes.altersgruppe.rawValue): Fall: \(item.attributes.anzahlFall), tot: \(item.attributes.anzahlTodesfall), genesen: \(item.attributes.anzahlGenesen)")
+                }
+                print(sorted)
+                
+                
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("handleRKIContent after decoding")
+                #endif
+
+                
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("handleRKIContent Age Done")
                 #endif
 
             }

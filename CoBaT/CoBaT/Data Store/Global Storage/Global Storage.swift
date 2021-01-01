@@ -966,7 +966,9 @@ final class GlobalStorage: NSObject {
                                 // names are different, so data structure might have been changed, break loop and discard data
                                 noErrors = false
                                 
-                                print ("CoBaT.GlobalStorage.rebuildRKIDeltas: Day \(dayIndex): areaMemberToday.name (\"\(areaMemberToday.name)\") != areaMemberYesterday.name (\"\(areaMemberOldDay.name)\"), set error, break loop")
+                                //#if DEBUG_PRINT_FUNCCALLS
+                                GlobalStorage.unique.storeLastError(errorText:"CoBaT.GlobalStorage.rebuildRKIDeltas: Day \(dayIndex): areaMemberToday.name (\"\(areaMemberToday.name)\") != areaMemberYesterday.name (\"\(areaMemberOldDay.name)\"), set error, break loop")
+                                //#endif
                                 break
                             }
                             
@@ -1033,6 +1035,12 @@ final class GlobalStorage: NSObject {
             
             //#if DEBUG_PRINT_FUNCCALLS
             self.storeLastError(errorText:"rebuildRKIDeltas just called sendUserNotification(type: .newRKIData)")
+            //#endif
+
+        } else {
+            
+            //#if DEBUG_PRINT_FUNCCALLS
+            self.storeLastError(errorText:"rebuildRKIDeltas did NOT called sendUserNotification(type: .newRKIData), because of: worthSending: \(worthToSendUserNotification), StateData: \(self.didRecieveStateData), CountyData: \(self.didRecieveCountyData )")
             //#endif
 
         }
