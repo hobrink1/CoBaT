@@ -940,7 +940,7 @@ final class DetailsRKIGraphic: NSObject {
         var selectedID: String!
         var selectedArea: Int!
         var selectedData: [[GlobalStorage.RKIDataStruct]]!
-        var selectedWeekdays: [Int]!
+        //var selectedWeekdays: [Int]!
         var newImageWidth: CGFloat!
         var newImageHeight: CGFloat!
         
@@ -948,7 +948,7 @@ final class DetailsRKIGraphic: NSObject {
             selectedID = GlobalUIData.unique.UIDetailsRKISelectedMyID
             selectedArea = GlobalUIData.unique.UIDetailsRKIAreaLevel
             selectedData = GlobalStorage.unique.RKIData[selectedArea]
-            selectedWeekdays = GlobalStorage.unique.RKIDataWeekdays[selectedArea]
+            //selectedWeekdays = GlobalStorage.unique.RKIDataWeekdays[selectedArea]
 
             newImageWidth = GlobalUIData.unique.RKIGraphNeededWidth
             newImageHeight = GlobalUIData.unique.RKIGraphNeededHeight

@@ -552,6 +552,13 @@ final class GlobalStorage: NSObject {
         
         GlobalStorageQueue.async(flags: .barrier, execute: {
             
+            // at least we have a new retrieving date
+            self.RKIDataLastRetreived = CFAbsoluteTimeGetCurrent()
+
+            // make it permamnent
+            self.permanentStore.set(self.RKIDataLastRetreived, forKey: "CoBaT.RKIDataLastRetreived")
+
+            
             // check if this is the very first entry
             if self.RKIData[kindOf].isEmpty == true {
                 
@@ -612,20 +619,37 @@ final class GlobalStorage: NSObject {
                     // check if we have to inform the background service
                     if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
                         
-                        CoBaTBackgroundService.unique.newRKIDataArrived(kindOf: kindOf)
-                        
-                        #if DEBUG_PRINT_FUNCCALLS
-                        print("refresh_RKIData just called CoBaTBackgroundService.unique.newRKIDataArrived(kindOf: \(kindOf))")
-                        #endif
+                        // check what kind of data we got
+                        if kindOf == self.RKIDataState {
+                            self.didRecieveStateData = true
+                        } else if kindOf == self.RKIDataCounty {
+                            self.didRecieveCountyData = true
+                        }
+
+                        // if we have both parts, close the background task
+                        if (self.didRecieveStateData == true)
+                            && (self.didRecieveCountyData == true) {
+                            
+                            // yes both parts are done, so close the task
+                            //#if DEBUG_PRINT_FUNCCALLS
+                            GlobalStorage.unique.storeLastError(
+                                errorText:"newRKIDataArrived: kindOf: \(kindOf), (didRecieveStateData == \(self.didRecieveStateData)) && (didRecieveCountyData == \(self.didRecieveCountyData)), call closeBackgroundTask()")
+                            //#endif
+                         
+                            CoBaTBackgroundService.unique.closeBackgroundTask()
+                            
+                        } else {
+                            
+                            //#if DEBUG_PRINT_FUNCCALLS
+                            GlobalStorage.unique.storeLastError(
+                                errorText:"newRKIDataArrived: kindOf: \(kindOf), didRecieveStateData == \(self.didRecieveStateData), didRecieveCountyData == \(self.didRecieveCountyData), DO NOT close background task")
+                            //#endif
+
+                        }
                     }
                 }
             }
             
-            // at least we have a new retrieving date
-            self.RKIDataLastRetreived = CFAbsoluteTimeGetCurrent()
-
-            // make it permamnent
-            self.permanentStore.set(self.RKIDataLastRetreived, forKey: "CoBaT.RKIDataLastRetreived")
 
             // local notification to update UI
             DispatchQueue.main.async(execute: {
@@ -1022,27 +1046,46 @@ final class GlobalStorage: NSObject {
         }
         
         // now make the decision ...
-        if (worthToSendUserNotification == true)
-            && (self.didRecieveStateData == true)
+        if (self.didRecieveStateData == true)
             && (self.didRecieveCountyData == true) {
 
+            
             // OK, we will send it...
             // reset the flags, and send the notification
             self.didRecieveStateData = false
             self.didRecieveCountyData = false
             
-            CoBaTUserNotification.unique.sendUserNotification(type: .newRKIData)
-            
-            //#if DEBUG_PRINT_FUNCCALLS
-            self.storeLastError(errorText:"rebuildRKIDeltas just called sendUserNotification(type: .newRKIData)")
-            //#endif
+            if (worthToSendUserNotification == true) {
+                
+                //#if DEBUG_PRINT_FUNCCALLS
+                self.storeLastError(errorText:"rebuildRKIDeltas will call sendUserNotification(type: .newRKIData)")
+                //#endif
+                CoBaTUserNotification.unique.sendUserNotification(type: .newRKIData)
+                
+            } else {
+                
+                // check if we have to inform the background service
+                if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                    
+                    //#if DEBUG_PRINT_FUNCCALLS
+                    self.storeLastError(errorText:"rebuildRKIDeltas will call closeBackgroundTask(), because of: worthToSendUserNotification: \(worthToSendUserNotification), RKIBackgroundFetchIsOngoingFlag: \(CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag)")
+                    //#endif
+
+                    CoBaTBackgroundService.unique.closeBackgroundTask()
+                    
+                } else {
+                    
+                    //#if DEBUG_PRINT_FUNCCALLS
+                    self.storeLastError(errorText:"rebuildRKIDeltas did NOT called sendUserNotification() and not closeBackgroundTask(), because of: worthToSendUserNotification: \(worthToSendUserNotification), RKIBackgroundFetchIsOngoingFlag: \(CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag)")
+                    //#endif
+                }
+            }
 
         } else {
             
             //#if DEBUG_PRINT_FUNCCALLS
-            self.storeLastError(errorText:"rebuildRKIDeltas did NOT called sendUserNotification(type: .newRKIData), because of: worthSending: \(worthToSendUserNotification), StateData: \(self.didRecieveStateData), CountyData: \(self.didRecieveCountyData )")
+            self.storeLastError(errorText:"rebuildRKIDeltas did NOT called sendUserNotification(type: .newRKIData), because of: StateData: \(self.didRecieveStateData), CountyData: \(self.didRecieveCountyData )")
             //#endif
-
         }
         
         #if DEBUG_PRINT_FUNCCALLS
@@ -1093,16 +1136,7 @@ final class GlobalStorage: NSObject {
                 self.storeLastError(errorText: "CoBaT.GlobalStorage.saveRKIData: Error: JSON encoder could not encode RKIData: error: \"\(error.description)\"")
             }
             
-            // check if we have to inform the background service
-            if (kindOf != -1) // -1 => error log
-                &&  CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
-                
-                CoBaTBackgroundService.unique.newRKIDataArrived(kindOf: kindOf)
-                
-                #if DEBUG_PRINT_FUNCCALLS
-                print("addNewData just called CoBaTBackgroundService.unique.newRKIDataArrived(kindOf: \(kindOf))")
-                #endif
-            }
+   
             
        // })
     }

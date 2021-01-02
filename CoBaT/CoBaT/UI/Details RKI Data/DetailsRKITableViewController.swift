@@ -150,7 +150,7 @@ final class DetailsRKITableViewController: UITableViewController {
             let selectedMyID = GlobalUIData.unique.UIDetailsRKISelectedMyID
             
             var localRKIDataLoaded : [GlobalStorage.RKIDataStruct] = []
-            var selectedWekdays: [Int] = GlobalStorage.unique.RKIDataWeekdays[selectedAreaLevel]
+            let selectedWekdays: [Int] = GlobalStorage.unique.RKIDataWeekdays[selectedAreaLevel]
             if selectedWekdays.isEmpty == false {
                 self.weekdayOfCurrentDay = selectedWekdays.first!
             }

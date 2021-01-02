@@ -56,11 +56,23 @@ final class CoBaTUserNotification: NSObject {
         if weAreInBackground == false {
 
             // no , not in background, so the user sees the news right in front of him, no need to message
-            //#if DEBUG_PRINT_FUNCCALLS
-            GlobalStorage.unique.storeLastError(
-                errorText:"sendUserNotification: called, but weAreInBackground == false, do nothing and return")
-            //#endif
 
+            // check if we have to inform the background service
+            if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                
+                //#if DEBUG_PRINT_FUNCCALLS
+                GlobalStorage.unique.storeLastError(errorText:"sendUserNotification: will call closeBackgroundTask(), because of: weAreInBackground: \(weAreInBackground), RKIBackgroundFetchIsOngoingFlag: \(CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag)")
+                //#endif
+
+                CoBaTBackgroundService.unique.closeBackgroundTask()
+                
+            } else {
+                
+                //#if DEBUG_PRINT_FUNCCALLS
+                GlobalStorage.unique.storeLastError(
+                    errorText:"sendUserNotification: called, but weAreInBackground == false, do nothing and return")
+                //#endif
+            }
             return
         }
             
@@ -110,9 +122,24 @@ final class CoBaTUserNotification: NSObject {
                     countyName = county.name
                     incidencesCounty = county.cases7DaysPer100K
                 }
+                
             } else {
                 
-                GlobalStorage.unique.storeLastError(errorText: "sendUserNotification: did not find any RKI data, will not notify user")
+                // check if we have to inform the background service
+                if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                    
+                    //#if DEBUG_PRINT_FUNCCALLS
+                    GlobalStorage.unique.storeLastError(errorText:"sendUserNotification: will call closeBackgroundTask(), because of: did not find any RKI data, RKIBackgroundFetchIsOngoingFlag: \(CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag)")
+                    //#endif
+
+                    CoBaTBackgroundService.unique.closeBackgroundTask()
+                    
+                } else {
+                    
+                    //#if DEBUG_PRINT_FUNCCALLS
+                   GlobalStorage.unique.storeLastError(errorText: "sendUserNotification: did not find any RKI data, will not notify user")
+                    //#endif
+                }
             }
             
             // check if we have any data
@@ -167,10 +194,23 @@ final class CoBaTUserNotification: NSObject {
                         
                         // we got an index, so we do have the same text still to send
                         // just report and return
-                        //#if DEBUG_PRINT_FUNCCALLS
-                        GlobalStorage.unique.storeLastError(
-                            errorText: "sendUserNotification: text \"\(textToSend)\" already in message queue, do not send")
-                        //#endif
+                        
+                        // check if we have to inform the background service
+                        if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                            
+                            //#if DEBUG_PRINT_FUNCCALLS
+                            GlobalStorage.unique.storeLastError(errorText:"sendUserNotification: will call closeBackgroundTask(), because of: text \"\(textToSend)\" already in message queue, RKIBackgroundFetchIsOngoingFlag: \(CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag)")
+                            //#endif
+
+                            CoBaTBackgroundService.unique.closeBackgroundTask()
+                            
+                        } else {
+                            
+                            //#if DEBUG_PRINT_FUNCCALLS
+                            GlobalStorage.unique.storeLastError(
+                                errorText: "sendUserNotification: text \"\(textToSend)\" already in message queue, do not send")
+                            //#endif
+                        }
                         
                     } else {
                         
@@ -188,11 +228,30 @@ final class CoBaTUserNotification: NSObject {
                             
                             // do the call
                             self.doNextSendCycle()
-                        }
-                    }
-                })
-            }
-        })
+                        } // already sending
+                    } // already in queue
+                }) // main
+                
+            } else {
+                
+                // check if we have to inform the background service
+                if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                    
+                    //#if DEBUG_PRINT_FUNCCALLS
+                    GlobalStorage.unique.storeLastError(errorText:"sendUserNotification: will call closeBackgroundTask(), because of: numberOfDays (\(numberOfDays)) <= 0, RKIBackgroundFetchIsOngoingFlag: \(CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag)")
+                    //#endif
+
+                    CoBaTBackgroundService.unique.closeBackgroundTask()
+                    
+                } else {
+                    
+                    //#if DEBUG_PRINT_FUNCCALLS
+                   GlobalStorage.unique.storeLastError(errorText: "sendUserNotification: numberOfDays (\(numberOfDays)) <= 0, will not notify user")
+                    //#endif
+                }
+
+            } // days > 0
+        }) // queue global storage
     }
     
     
@@ -215,6 +274,7 @@ final class CoBaTUserNotification: NSObject {
             // check the authorization statsu
             UNUserNotificationCenter.current().requestAuthorization(options: [.alert]) { granted, error in
                 if error == nil {
+                    
                     if granted == true {
                         
                         #if DEBUG_PRINT_FUNCCALLS
@@ -235,8 +295,8 @@ final class CoBaTUserNotification: NSObject {
                 } else if let error = error {
                     
                     GlobalStorage.unique.storeLastError(errorText: "doNextSendCycle: error: \(error.localizedDescription)")
-                    self.notGrantedHandler()
                     
+                    self.notGrantedHandler()
                 }
             }
         })
@@ -289,6 +349,16 @@ final class CoBaTUserNotification: NSObject {
             
             // close the session
             self.alreadyInSendMode = false
+            
+            // check if we have to inform the background service
+            if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                
+                //#if DEBUG_PRINT_FUNCCALLS
+                GlobalStorage.unique.storeLastError(errorText:"grantedHandler: will call closeBackgroundTask(), because of: RKIBackgroundFetchIsOngoingFlag: \(CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag)")
+                //#endif
+
+                CoBaTBackgroundService.unique.closeBackgroundTask()
+            }
         })
     }
     
@@ -305,7 +375,16 @@ final class CoBaTUserNotification: NSObject {
             
             self.queueOfMessagesToSend.removeAll()
             self.alreadyInSendMode = false
+    
+            // check if we have to inform the background service
+            if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                
+                //#if DEBUG_PRINT_FUNCCALLS
+                GlobalStorage.unique.storeLastError(errorText:"notGrantedHandler: will call closeBackgroundTask(), because of: RKIBackgroundFetchIsOngoingFlag: \(CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag)")
+                //#endif
+
+                CoBaTBackgroundService.unique.closeBackgroundTask()
+            }
         })
     }
-    
 }
