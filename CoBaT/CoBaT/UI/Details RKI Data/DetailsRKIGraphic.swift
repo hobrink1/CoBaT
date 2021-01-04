@@ -440,12 +440,16 @@ final class DetailsRKIGraphic: NSObject {
             })
             
         } else {
-                        
+                  
+            // UIDetailsRKISelectedMyID == ""
             RKIGraphicQueue.async(flags: .barrier, execute: {
                 
                 self.GraphLeft = self.GraphLeftNoData
                 self.GraphMiddle = self.GraphMiddleNoData
                 self.GraphRight = self.GraphRightNoData
+                
+                GlobalStorage.unique.storeLastError(
+                    errorText: "DetailsRKIGraphic.createNewSetOfGraphs().UIDetailsRKISelectedMyID == \"\", post .CoBaT_Graph_NewGraphAvailable anyway, with NoData graphs")
                 
                 // report that we have selected a new detail
                 NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewGraphAvailable))

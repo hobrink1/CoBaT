@@ -174,7 +174,7 @@ final class CommonTabViewControllerV2: UIViewController {
             }
             
             #if DEBUG_PRINT_FUNCCALLS
-            print("CommonTabViewControllerV2.refreshOwnDataOutlets(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Arera to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
+            print("CommonTabViewControllerV2.refreshOwnDataOutlets(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Area to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
             #endif
 
             // report that we have selected a new detail

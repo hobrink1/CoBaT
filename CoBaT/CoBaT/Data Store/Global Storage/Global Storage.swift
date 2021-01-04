@@ -68,6 +68,8 @@ final class GlobalStorage: NSObject {
     // Version of permanent storage
     private let VersionOfPermanentStorage: Int = 2
 
+    
+    // Calender
     /**
      -----------------------------------------------------------------------------------------------
      
@@ -1190,37 +1192,41 @@ final class GlobalStorage: NSObject {
     private func getWeekdayFromTimeInterval(time: TimeInterval) -> Int {
         
         // we use the gregorian calender
-        let myCalendar = Calendar(identifier: .gregorian)
+        let RKICalendar: Calendar = Calendar(identifier: .gregorian)
         
-        // we have to use the timeZone of Berlin
-        let timeZone:TimeZone
-        if let tryTimeZone = TimeZone(identifier: "Europe/Berlin") {
-            
-            // this is the correct one
-            timeZone = tryTimeZone
-            
-        } else {
-            
-            // if we don't find Berlin we use the current one
-            timeZone = TimeZone.current
-        }
-        
+        // we have to use the timeZone of Berlin, if that does not work, use the durrent timezone
+        let RKITimeZone: TimeZone = TimeZone(identifier: "Europe/Berlin") ?? TimeZone.current
+
         // get the date
         let currentDate = Date(timeIntervalSinceReferenceDate: time)
         
-        // and finally the weekday
-        if let weekday =  myCalendar.dateComponents(in: timeZone, from: currentDate).weekday {
-            
-            // return the day of the week
-            return weekday
-            
-        } else {
-            
-            // we could not calculate the day, so return 0 for error
-           return 0
-        }
+        // and finally the weekday (with default value "0")
+        return RKICalendar.dateComponents(in: RKITimeZone, from: currentDate).weekday ?? 0
     }
     
+    private func getDayNumberFromTimeInterval(time: TimeInterval) -> Int {
+        
+        // we use the gregorian calender
+        var RKICalendar: Calendar = Calendar(identifier: .gregorian)
+        
+        // we have to use the timeZone of Berlin, if that does not work, use the durrent timezone
+        let RKITimeZone: TimeZone = TimeZone(identifier: "Europe/Berlin") ?? TimeZone.current
+        RKICalendar.timeZone = RKITimeZone
+
+        // this is the reference date (noon)
+        let refDate: Date = Date(timeIntervalSinceReferenceDate: 0)
+        let refDateNoon : Date = RKICalendar.date(bySettingHour: 12, minute: 0, second: 0,
+                                                    of: refDate) ?? refDate
+        // get the noon of the endDate
+        let ofDate: Date = Date(timeIntervalSinceReferenceDate: time)
+        let ofDateNoon : Date = RKICalendar.date(bySettingHour: 12, minute: 0, second: 0,
+                                                  of: ofDate) ?? ofDate
+        
+        
+       return Calendar.current.dateComponents([.day],
+                                              from: refDateNoon,
+                                              to: ofDateNoon).day ?? -1
+    }
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Last Errors API

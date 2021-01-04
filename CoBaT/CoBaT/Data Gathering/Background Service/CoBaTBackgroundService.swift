@@ -133,7 +133,6 @@ final class CoBaTBackgroundService: NSObject {
             GlobalStorage.unique.storeLastError(
                 errorText:"newRKIDataArrived: kindOf: \(kindOf), RKIStateDataOK == \(RKIStateDataOK), RKICountyDataOK == \(RKICountyDataOK), DO NOT close background task")
             //#endif
-
         }
     }
     
@@ -151,11 +150,18 @@ final class CoBaTBackgroundService: NSObject {
         GlobalStorage.unique.storeLastError(
             errorText:"closeBackgroundTask: will call setTaskCompleted(success: true)")
         //#endif
-     
-        // with this flag GlobalStorage knows it have to use this class
-        RKIBackgroundFetchIsOngoingFlag = false
+        
+        // to make sure we did everything we wanted to do, before the background task will be killed,
+        // we do an async .barrier call
+        GlobalStorageQueue.async(flags: .barrier, execute: {
+            
+            // with this flag GlobalStorage knows it have to use this class
+            self.RKIBackgroundFetchIsOngoingFlag = false
+            
+            myCoBaTAppDelegate.stopCurrentBackgroundTask()
 
-        // close the current task
-        RKIBackgroundFetchTask?.setTaskCompleted(success: true)
+            // close the current task
+            self.RKIBackgroundFetchTask?.setTaskCompleted(success: true)
+        })
     }
 }

@@ -185,7 +185,7 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
                 ?? UIColor.systemBackground
 
             #if DEBUG_PRINT_FUNCCALLS
-            print("BrowseRKIDataTableViewController.detailsButtonTapped(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Arera to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
+            print("BrowseRKIDataTableViewController.detailsButtonTapped(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Area to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
             #endif
 
             // report that we have selected a new detail
@@ -220,7 +220,7 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
                 ?? UIColor.systemBackground
             
             #if DEBUG_PRINT_FUNCCALLS
-            print("BrowseRKIDataTableViewController.detailsButtonTapped(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Arera to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
+            print("BrowseRKIDataTableViewController.detailsButtonTapped(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Area to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
             #endif
 
 

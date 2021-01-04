@@ -141,7 +141,7 @@ final class DetailsRKIViewController: UIViewController {
             GlobalUIData.unique.UIDetailsRKISelectedMyID = GlobalUIData.unique.UIDetailsRKISelectedMyIDSaved
             
             #if DEBUG_PRINT_FUNCCALLS
-            print("DetailsRKIViewController.viewDidDisappear(): reset ID to \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Arera to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
+            print("DetailsRKIViewController.viewDidDisappear(): reset ID to \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Area to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
             #endif
             
             
@@ -174,7 +174,7 @@ final class DetailsRKIViewController: UIViewController {
             let selectedMyID = GlobalUIData.unique.UIDetailsRKISelectedMyID
 
             #if DEBUG_PRINT_FUNCCALLS
-            print("DetailsRKIViewController.updateLabels(): will use ID to \"\(selectedMyID)\" and Arera to \(selectedAreaLevel)")
+            print("DetailsRKIViewController.updateLabels(): will use ID to \"\(selectedMyID)\" and Area to \(selectedAreaLevel)")
             #endif
 
             // shortcut

@@ -9,13 +9,15 @@ import UIKit
 import Foundation
 import BackgroundTasks
 
-let VersionLabel: String = "CoBaT V2.0.9"
+let VersionLabel: String = "CoBaT V2.0.10"
 
 
 // simple variable to detect if we are in background or not
 // this avoids to call UIApplication.shared.applicationState, as this always have to be called on main thread
 var weAreInBackground: Bool = true
 
+var backgroundTaskID: UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier.invalid
+var myCoBaTAppDelegate: AppDelegate!
 
 // -------------------------------------------------------------------------------------------------
 // MARK: -
@@ -39,7 +41,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         // Override point for customization after application launch.
-        
+        myCoBaTAppDelegate = self
+
         
         // build the formatters
         buildAllFormatters()
@@ -171,11 +174,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // Schedule a new refresh task
         scheduleAppRefresh()
+        
+        // ask for more background time
+        // but make sure that a possible old one has been canceled
+        self.stopCurrentBackgroundTask()
+        backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: "CoBaT.BackgroundFetchBackgroundTask") {
+            
+            // End the task if time expires.
+            self.stopCurrentBackgroundTask()
+        }
 
         // call the background handler. The handler will also call task.setTaskCompleted(success: )
         CoBaTBackgroundService.unique.startRKIBackgroundFetch(task: task)
         
- 
         // Provide an expiration handler for the background task that cancels the operation
         task.expirationHandler = {
             
@@ -183,6 +194,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             GlobalStorage.unique.storeLastError(
                 errorText: "handleRKIBackgroundFetch().expirationHandler: will call setTaskCompleted(success: false)")
             //#endif
+
+            self.stopCurrentBackgroundTask()
 
             task.setTaskCompleted(success: false)
         }
@@ -199,7 +212,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let request = BGAppRefreshTaskRequest(identifier: "org.hobrink.CoBat.refreshRKIBackground")
         
-        // Fetch no earlier than 10 minutes from now
+        // Fetch no earlier than 60 minutes from now
         request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60)
         
         do {
@@ -217,11 +230,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
     
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     We need that function to give the CoBaTBackgroundService a chance to call it
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    public func stopCurrentBackgroundTask() {
+        
+        if backgroundTaskID != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTaskID)
+            backgroundTaskID = UIBackgroundTaskIdentifier.invalid
+        }
+    }
+    
     // ---------------------------------------------------------------------------------------------
     // MARK: - UISceneSession Lifecycle
     // ---------------------------------------------------------------------------------------------
-
- 
     /**
      -----------------------------------------------------------------------------------------------
      
