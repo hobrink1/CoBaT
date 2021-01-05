@@ -72,7 +72,11 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
 //            secondLabel?.lineBreakMode = .byWordWrapping
 //            secondLabel?.numberOfLines = 0
 
-            secondItem?.title = GlobalUIData.unique.UIBrowserRKISelectedStateName
+            if GlobalUIData.unique.UIBrowserRKISelectedStateName.count > 11 {
+            secondItem?.title = String(GlobalUIData.unique.UIBrowserRKISelectedStateName.prefix(10) + ".")
+            } else {
+                secondItem?.title = GlobalUIData.unique.UIBrowserRKISelectedStateName
+            }
             secondItem?.image = nil
             secondItem?.selectedImage = nil
             
@@ -86,9 +90,30 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
 //            thirdLabel?.lineBreakMode = .byWordWrapping
 //            thirdLabel?.numberOfLines = 0
 
-            thirdItem?.title = GlobalUIData.unique.UIBrowserRKISelectedCountyName
+            //thirdItem?.title = String(GlobalUIData.unique.UIBrowserRKISelectedCountyName.prefix(11))
+            if GlobalUIData.unique.UIBrowserRKISelectedCountyName.count > 11 {
+                thirdItem?.title = String(GlobalUIData.unique.UIBrowserRKISelectedCountyName.prefix(10) + ".")
+            } else {
+                thirdItem?.title = GlobalUIData.unique.UIBrowserRKISelectedCountyName
+            }
             thirdItem?.image = nil
             thirdItem?.selectedImage = nil
+            
+            
+            // set favorites Level
+            let fourthItem = self.tabBar.items?[3]
+            
+//            let thirdViewTabBar = secondItem?.value(forKey: "view") as? UIView
+//            let thirdLabel = thirdViewTabBar?.subviews.last as? UILabel
+//            thirdLabel?.lineBreakMode = .byWordWrapping
+//            thirdLabel?.numberOfLines = 0
+
+            fourthItem?.title = "Auswahl"
+            fourthItem?.image = nil
+            fourthItem?.selectedImage = nil
+//            fourthItem?.image = UIImage(systemName: "heart.fill")
+//            fourthItem?.selectedImage = UIImage(systemName: "heart.fill")
+
         })
     }
     
@@ -171,9 +196,10 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         
         // we use a largher font for the barItems, as we do not use images
         let appearance = UITabBarItem.appearance()
-        let attributes = [NSAttributedString.Key.font:UIFont.systemFont(ofSize: 17)]
+        let attributes = [NSAttributedString.Key.font:UIFont.systemFont(ofSize: 16)]
         appearance.setTitleTextAttributes(attributes as [NSAttributedString.Key : Any], for: .normal)
 
+        self.tabBar.itemPositioning = .automatic
         // set the tab names
         self.refreshBarItemTitles()
          

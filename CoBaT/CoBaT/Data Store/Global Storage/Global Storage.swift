@@ -55,14 +55,15 @@ final class GlobalStorage: NSObject {
     private let permanentStore = UserDefaults.standard
 
     // usefull constants to index the right Level
-    public let RKIDataCountry: Int = 0
-    public let RKIDataState: Int = 1
-    public let RKIDataCounty: Int = 2
+    public let RKIDataCountry:   Int = 0
+    public let RKIDataState:     Int = 1
+    public let RKIDataCounty:    Int = 2
+    public let RKIDataFavorites: Int = 3
     
     public let RKIIDForBavaria: String = "9"
     
     // size of storage
-    private let maxNumberOfDaysStored: Int = 15
+    private let maxNumberOfDaysStored: Int = 20
     private let maxNumberOfErrorsStored: Int = 50
     
     // Version of permanent storage
@@ -121,6 +122,9 @@ final class GlobalStorage: NSObject {
                     
                     let loadedLastErrors = self.permanentStore.object(
                         forKey: "CoBaT.lastErrors")
+                    
+                    let loadedRKIFavorites = self.permanentStore.object(
+                        forKey: "CoBaT.RKIFavorites")
 
                     // got the data, try to decode it
                     do {
@@ -131,6 +135,7 @@ final class GlobalStorage: NSObject {
                         let myRKIDataTimeStamps = try JSONDecoder().decode([[TimeInterval]].self,
                                                                 from: (loadedRKIDataTimeStamps as? Data)!)
                         
+                        // there might be no last Errors, so make sure we have a clear start point
                         var myLastErrors: [lastErrorStruct] = []
                         if loadedLastErrors != nil {
                             
@@ -138,10 +143,15 @@ final class GlobalStorage: NSObject {
                                                                         from: (loadedLastErrors as? Data)!)
                         }
                         
+                        
+                        // there might be no favorites, so make sure we have a clear start point
+                        var myRKIFavorites: [[String]] = [[], [], [], []]
+                        if loadedRKIFavorites != nil {
+                            myRKIFavorites = try JSONDecoder().decode([[String]].self,
+                                                                      from: (loadedRKIFavorites as? Data)!)
+                        }
+                        
                         // if we got to here, no errors encountered
-                        
-                        
-                        
                         
                         
                         // now we have to check if we probably have to migrate data
@@ -199,7 +209,12 @@ final class GlobalStorage: NSObject {
                             self.RKIDataLastUpdated = loadedRKIDataLastUpdated
                             self.RKIDataLastRetreived = loadedRKIDataLastRetreived
                             
+                            // and rebuild the diconary
+                            self.rebuildStateDic()
+                            
                             self.lastErrors = myLastErrors
+                            
+                            self.RKIFavorites = myRKIFavorites
                             
                             // build the Weekdays array
                             
@@ -228,7 +243,7 @@ final class GlobalStorage: NSObject {
                             // TODO: TODO: Remove data cleansing
                             
                             if weDidChangeSomething == true {
-                                self.saveRKIData(kindOf: 0)
+                                self.saveRKIData()
                             }
                             
                             // End DataCleansing ---------------------------------------------------
@@ -344,6 +359,13 @@ final class GlobalStorage: NSObject {
                             self.RKIDataLastUpdated = loadedRKIDataLastUpdated
                             self.RKIDataLastRetreived = loadedRKIDataLastRetreived
                             
+                            // and rebuild the diconary
+                            self.rebuildStateDic()
+                            
+                            // and also the not migrated values
+                            self.lastErrors = myLastErrors
+                            self.RKIFavorites = myRKIFavorites
+                            
                             // build the Weekdays array
                             
                             // reset the array
@@ -367,7 +389,7 @@ final class GlobalStorage: NSObject {
                             }
                             
                             // and force a save to secure what we have done
-                            self.saveRKIData(kindOf: -1)
+                            self.saveRKIData()
                             
                             // rebuild the delta values
                             self.rebuildRKIDeltas(kindOf: -1, newData: false)
@@ -446,6 +468,105 @@ final class GlobalStorage: NSObject {
     }
     
     
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     save a new favorite in the array and also permanent
+     
+     -----------------------------------------------------------------------------------------------
+     
+     - Parameters:
+        - level: area level of the new favorite
+        - id: ID of the new favorite
+     
+     - Returns: nothing
+     */
+    public func saveNewFavorite(level: Int, id: String) {
+        
+        GlobalStorageQueue.async(flags: .barrier, execute: {
+            
+            // check if this is really a new favorite
+            if self.RKIFavorites[level].contains(id) == false {
+                
+                // yes, it's a new one, so save it
+                self.RKIFavorites[level].append(id)
+                
+                // rebuild the favorites
+                self.rebuildFavorites()
+                
+                // make it permanant
+                self.saveRKIData()
+                
+                // rebuild the delta values
+                self.rebuildRKIDeltas(kindOf: self.RKIDataFavorites, newData: false)
+                
+
+//                do {
+//
+//                    let encodedRKIFavorites = try JSONEncoder().encode(self.RKIFavorites)
+//                    self.permanentStore.set(encodedRKIFavorites, forKey: "CoBaT.RKIFavorites")
+//
+//                } catch let error as NSError {
+//
+//                    // encode did fail, log the message
+//                    self.storeLastError(errorText: "CoBaT.GlobalStorage.saveNewFavorite: Error: JSON encoder could not encode RKIFavorites: error: \"\(error.description)\"")
+//                }
+                
+                
+                
+            } else {
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("saveNewFavorite level: \(level), id: \(id) already a favorite, do nothing")
+                #endif
+            }
+        })
+    }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     remove an existing favorite in the array and also permanent
+     
+     -----------------------------------------------------------------------------------------------
+     
+     - Parameters:
+        - level: area level of the new favorite
+        - id: ID of the new favorite
+     
+     - Returns: nothing
+     */
+    public func removeFavorite(level: Int, id: String) {
+        
+        GlobalStorageQueue.async(flags: .barrier, execute: {
+            
+            // try to find the index of id
+            if let index = self.RKIFavorites[level].firstIndex(of: id) {
+                
+                // we found it, so we can remove it
+                self.RKIFavorites[level].remove(at: index)
+                
+                // rebuild the favorites
+                self.rebuildFavorites()
+                
+                // make it permanant
+                self.saveRKIData()
+                
+                // rebuild the delta values
+                self.rebuildRKIDeltas(kindOf: self.RKIDataFavorites, newData: false)
+
+            } else {
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("removeFavorite level: \(level), id: \(id) is not a favorite, do nothing")
+                #endif
+            }
+        })
+    }
+    
+    
+
+    
     // ---------------------------------------------------------------------------------------------
     // MARK: - RKI data storage (permanent)
     // ---------------------------------------------------------------------------------------------
@@ -497,7 +618,7 @@ final class GlobalStorage: NSObject {
     //
     // example: "State (1), today (0), Bavaria (9), cases" looks like: RKIData[1][0][9].cases
     
-    public var RKIData : [[[RKIDataStruct]]] = [[], [], []]   // initialise with three empty arrays, avoid empty level
+    public var RKIData : [[[RKIDataStruct]]] = [[], [], [], []]   // initialise with three empty arrays, avoid empty level
     
     
     // We use this to precalculate the deltas (differneces to yesterday and to 7 days back).
@@ -506,7 +627,7 @@ final class GlobalStorage: NSObject {
     // This array is recalculated each time the data in RKIData[] changed
     // this array will not stored permanently!
     
-    public var RKIDataDeltas : [[[RKIDataStruct]]] = [[], [], []]   // initialise with three empty arrays, avoid empty level
+    public var RKIDataDeltas : [[[RKIDataStruct]]] = [[], [], [], []]   // initialise with three empty arrays, avoid empty level
 
     
     // TimeStamps per array item
@@ -517,9 +638,9 @@ final class GlobalStorage: NSObject {
     //
     // example: "Country (0), yesterday (1), timestamp" looks like: RKIDataTimeStamps[0][1]
     
-    public var RKIDataTimeStamps : [[TimeInterval]] = [[], [], []]       // initialise with two empty arrays, so first index level not empty
+    public var RKIDataTimeStamps : [[TimeInterval]] = [[], [], [], []]       // initialise with three empty arrays, so first index level not empty
     
-    public var RKIDataWeekdays : [[Int]] = [[], [], []]       // initialise with two empty arrays, so first index level not empty
+    public var RKIDataWeekdays : [[Int]] = [[], [], [], []]       // initialise with three empty arrays, so first index level not empty
     
     // the timeStamp the data was last updated (updates only if data changed)
     public var RKIDataLastUpdated: TimeInterval = 0
@@ -527,6 +648,13 @@ final class GlobalStorage: NSObject {
     
     // the timeStamp data was last retrieved
     public var RKIDataLastRetreived: TimeInterval = 0
+    
+    
+    // the list of the favorite details
+    public var RKIFavorites: [[String]] = [[], [], []]
+    
+    // the dictonary of stateIDs and state names
+    public var RKIStateDic: [String : String] = [:]
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - RKI Data Handling
@@ -711,15 +839,22 @@ final class GlobalStorage: NSObject {
         
         // check if state data were chenged
         if kindOfArea == self.RKIDataState {
+            
             // yes state data changed, so rebuild country data
             self.rebuildCountryData()
+            
+            // and rebuild the diconary
+            self.rebuildStateDic()
         }
         
         // remember the timeStamp
         self.RKIDataLastUpdated = CFAbsoluteTimeGetCurrent()
         
+        // rebuild the favorites
+        self.rebuildFavorites()
+        
         // make it permanant
-        self.saveRKIData(kindOf: kindOfArea)
+        self.saveRKIData()
         
         // rebuild the delta values
         self.rebuildRKIDeltas(kindOf: kindOfArea, newData: true)
@@ -757,11 +892,11 @@ final class GlobalStorage: NSObject {
                                     _ timeStamp: TimeInterval) {
         
         // GlobalStorageQueue.async(flags: .barrier, execute: {
-            
-            #if DEBUG_PRINT_FUNCCALLS
-            print("replaceDataOfToday just started")
-            #endif
-            
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("replaceDataOfToday just started")
+        #endif
+        
         if self.RKIData[kindOfArea].isEmpty == true {
             
             self.RKIData[kindOfArea].append(newRKIData)
@@ -770,42 +905,49 @@ final class GlobalStorage: NSObject {
             // get the day of the week and store it
             let weekday = self.getWeekdayFromTimeInterval(time: timeStamp)
             self.RKIDataWeekdays[kindOfArea].append(weekday)
-             
+            
         } else {
-                
-                self.RKIData[kindOfArea][0] = newRKIData
-                self.RKIDataTimeStamps[kindOfArea][0] = timeStamp
-
+            
+            self.RKIData[kindOfArea][0] = newRKIData
+            self.RKIDataTimeStamps[kindOfArea][0] = timeStamp
+            
             // get the day of the week and store it
             let weekday = self.getWeekdayFromTimeInterval(time: timeStamp)
             self.RKIDataWeekdays[kindOfArea][0] = weekday
-}
+        }
+        
+        // check if state data were chenged
+        if kindOfArea == self.RKIDataState {
             
-            // check if state data were chenged
-            if kindOfArea == self.RKIDataState {
-                // yes state data changed, so rebuild country data
-                self.rebuildCountryData()
-            }
+            // yes state data changed, so rebuild country data
+            self.rebuildCountryData()
             
-            // remember the timeStamp
-            self.RKIDataLastUpdated = CFAbsoluteTimeGetCurrent()
-            
-            // make it permanant
-        self.saveRKIData(kindOf: kindOfArea)
-
-            // rebuild the delta values
+            // and rebuild the diconary
+            self.rebuildStateDic()
+        }
+        
+        // remember the timeStamp
+        self.RKIDataLastUpdated = CFAbsoluteTimeGetCurrent()
+        
+        // rebuild the favorites
+        self.rebuildFavorites()
+        
+        // make it permanant
+        self.saveRKIData()
+        
+        // rebuild the delta values
         self.rebuildRKIDeltas(kindOf: kindOfArea, newData: true)
-            
-            // just for testing
-            //for item in self.RKIData[kindOfArea][0] {
-            //    print("replaceDataOfToday, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): inz: \(item.cases7DaysPer100K), cases: \(item.cases)")
-            //}
-            //print("replaceDataOfToday, RKIDataTimeStamps[\(kindOfArea)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOfArea][0]))")
-  
-            #if DEBUG_PRINT_FUNCCALLS
-            print("replaceDataOfToday all good")
-            #endif
-       // })
+        
+        // just for testing
+        //for item in self.RKIData[kindOfArea][0] {
+        //    print("replaceDataOfToday, RKIData[\(kindOfArea)][0]: \(item.kindOf) \(item.name): inz: \(item.cases7DaysPer100K), cases: \(item.cases)")
+        //}
+        //print("replaceDataOfToday, RKIDataTimeStamps[\(kindOfArea)][0]: \(Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOfArea][0]))")
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("replaceDataOfToday all good")
+        #endif
+        // })
     }
     
     
@@ -892,6 +1034,36 @@ final class GlobalStorage: NSObject {
         self.RKIDataWeekdays[RKIDataCountry] = self.RKIDataWeekdays[RKIDataState]
     }
     
+    
+    
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     Rebuilds the dictonary which holds the name for each state id
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func rebuildStateDic() {
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("rebuildStateDic just started")
+        #endif
+        
+        // reset the dictonary
+        self.RKIStateDic = [:]
+        
+        // walk over the RKI state data of day 0
+        for stateIndex in 0 ..< self.RKIData[RKIDataState][0].count {
+            
+            // we take day 0 as the reference
+            let currentState = self.RKIData[RKIDataState][0][stateIndex]
+            
+            // set the dictonary item
+            self.RKIStateDic[currentState.myID ?? " "] = currentState.name
+        }
+    }
+    
     /**
      -----------------------------------------------------------------------------------------------
      
@@ -906,9 +1078,9 @@ final class GlobalStorage: NSObject {
         //#if DEBUG_PRINT_FUNCCALLS
         GlobalStorage.unique.storeLastError(errorText: "rebuildRKIDeltas just started, newData: \(newData)")
         //#endif
-
+        
         // first step, remove the old data, and make sure we have an empty array per area level
-        self.RKIDataDeltas = [ [], [], [] ]
+        self.RKIDataDeltas = [ [], [], [], [] ]
         
         // we only send user notification, if there is new data and no error occure in this function
         var worthToSendUserNotification: Bool = newData
@@ -957,7 +1129,7 @@ final class GlobalStorage: NSObject {
                         
                         // we use a flags to decide if the new data can be used
                         var noErrors: Bool = true
-
+                        
                         // build deltas for yesterday
                         for areaMemberIndex in 0 ..< currentArea[0].count {
                             
@@ -1028,72 +1200,230 @@ final class GlobalStorage: NSObject {
             
         } // loop over country, state, county
         
-        
-        DispatchQueue.main.async(execute: {
-            
-            // local notification to update UI
-            NotificationCenter.default.post(Notification(name: .CoBaT_NewRKIDataReady))
-            
-            // local notification to update graphs
-            NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))
-        })
-
-        // check if we really should inform the user (there must be both data parts delivered, and no errors at all)
-        
-        // check which kind of data we recieved and set the right flag
-        if kindOf == self.RKIDataState {
-            self.didRecieveStateData = true
-        } else if kindOf == self.RKIDataCounty {
-            self.didRecieveCountyData = true
-        }
-        
-        // now make the decision ...
-        if (self.didRecieveStateData == true)
-            && (self.didRecieveCountyData == true) {
-
-            
-            // OK, we will send it...
-            // reset the flags, and send the notification
-            self.didRecieveStateData = false
-            self.didRecieveCountyData = false
-            
-            if (worthToSendUserNotification == true) {
+        if kindOf != self.RKIDataFavorites {
+            DispatchQueue.main.async(execute: {
                 
-                //#if DEBUG_PRINT_FUNCCALLS
-                self.storeLastError(errorText:"rebuildRKIDeltas will call sendUserNotification(type: .newRKIData)")
-                //#endif
-                CoBaTUserNotification.unique.sendUserNotification(type: .newRKIData)
+                // local notification to update UI
+                NotificationCenter.default.post(Notification(name: .CoBaT_NewRKIDataReady))
                 
-            } else {
+                // local notification to update graphs
+                NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))
+            })
+            
+            // check if we really should inform the user (there must be both data parts delivered, and no errors at all)
+            
+            // check which kind of data we recieved and set the right flag
+            if kindOf == self.RKIDataState {
+                self.didRecieveStateData = true
+            } else if kindOf == self.RKIDataCounty {
+                self.didRecieveCountyData = true
+            }
+            
+            // now make the decision ...
+            if (self.didRecieveStateData == true)
+                && (self.didRecieveCountyData == true) {
                 
-                // check if we have to inform the background service
-                if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                
+                // OK, we will send it...
+                // reset the flags, and send the notification
+                self.didRecieveStateData = false
+                self.didRecieveCountyData = false
+                
+                if (worthToSendUserNotification == true) {
                     
                     //#if DEBUG_PRINT_FUNCCALLS
-                    self.storeLastError(errorText:"rebuildRKIDeltas will call closeBackgroundTask(), because of: worthToSendUserNotification: \(worthToSendUserNotification), RKIBackgroundFetchIsOngoingFlag: \(CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag)")
+                    self.storeLastError(errorText:"rebuildRKIDeltas will call sendUserNotification(type: .newRKIData)")
                     //#endif
-
-                    CoBaTBackgroundService.unique.closeBackgroundTask()
+                    CoBaTUserNotification.unique.sendUserNotification(type: .newRKIData)
                     
                 } else {
                     
-                    //#if DEBUG_PRINT_FUNCCALLS
-                    self.storeLastError(errorText:"rebuildRKIDeltas did NOT called sendUserNotification() and not closeBackgroundTask(), because of: worthToSendUserNotification: \(worthToSendUserNotification), RKIBackgroundFetchIsOngoingFlag: \(CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag)")
-                    //#endif
+                    // check if we have to inform the background service
+                    if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                        
+                        //#if DEBUG_PRINT_FUNCCALLS
+                        self.storeLastError(errorText:"rebuildRKIDeltas will call closeBackgroundTask(), because of: worthToSendUserNotification: \(worthToSendUserNotification), RKIBackgroundFetchIsOngoingFlag: \(CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag)")
+                        //#endif
+                        
+                        CoBaTBackgroundService.unique.closeBackgroundTask()
+                        
+                    } else {
+                        
+                        //#if DEBUG_PRINT_FUNCCALLS
+                        self.storeLastError(errorText:"rebuildRKIDeltas did NOT called sendUserNotification() and not closeBackgroundTask(), because of: worthToSendUserNotification: \(worthToSendUserNotification), RKIBackgroundFetchIsOngoingFlag: \(CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag)")
+                        //#endif
+                    }
                 }
+                
+            } else {
+                
+                //#if DEBUG_PRINT_FUNCCALLS
+                self.storeLastError(errorText:"rebuildRKIDeltas did NOT called sendUserNotification(type: .newRKIData), because of: StateData: \(self.didRecieveStateData), CountyData: \(self.didRecieveCountyData )")
+                //#endif
             }
-
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("rebuildRKIDeltas just posted .CoBaT_NewRKIDataReady")
+            #endif
+            
         } else {
             
-            //#if DEBUG_PRINT_FUNCCALLS
-            self.storeLastError(errorText:"rebuildRKIDeltas did NOT called sendUserNotification(type: .newRKIData), because of: StateData: \(self.didRecieveStateData), CountyData: \(self.didRecieveCountyData )")
-            //#endif
+            #if DEBUG_PRINT_FUNCCALLS
+            print("rebuildRKIDeltas was Favorites, no postings")
+            #endif
         }
+    }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     Rebuilds the 4th level according to the current favorites of the user
+     
+     This func must be called within a GlobalStorageQueue.async(flags: .barrier, )  !!!
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func rebuildFavorites() {
+        
+        // We rebuild the whole level. It's the most robust solution
         
         #if DEBUG_PRINT_FUNCCALLS
-        print("rebuildRKIDeltas just posted .CoBaT_NewRKIDataReady")
+        print("rebuildFavorites just started")
         #endif
+        
+        // check if the level of favorites is already initalized
+        if self.RKIData.count < (RKIDataFavorites + 1) {
+            
+            // initialize the favorites levels
+            self.RKIData.append([])
+        }
+       
+        if self.RKIDataTimeStamps.count < (RKIDataFavorites + 1) {
+            // initialize the favorites levels
+            self.RKIDataTimeStamps.append([])
+        }
 
+        if self.RKIDataWeekdays.count < (RKIDataFavorites + 1) {
+            // clean level for favorites data
+            self.RKIDataWeekdays.append([])
+        }
+
+        // clean level for favorites data
+        self.RKIData[RKIDataFavorites] = []
+        self.RKIDataTimeStamps[RKIDataFavorites] = []
+        self.RKIDataWeekdays[RKIDataFavorites] = []
+        
+        var sortArray: [[String]] = []
+
+        // loop over the two levels of favorites
+        for levelIndex in 0 ..< self.RKIFavorites.count {
+            for itemIndex in 0 ..< self.RKIFavorites[levelIndex].count {
+                
+                // shortcut for the current ID
+                let currentMyID = self.RKIFavorites[levelIndex][itemIndex]
+                
+                // we collect the data of the current ID in that array
+                var currentRKIDataSet: [RKIDataStruct] = []
+                
+                // go over the data
+                for dayIndex in 0 ..< GlobalStorage.unique.RKIData[levelIndex].count {
+                    
+                    // shortcut
+                    let RKIDataToUse = GlobalStorage.unique.RKIData[levelIndex][dayIndex]
+                    
+                    // try to find the index of the requested ID
+                    if let RKIDataOfDay = RKIDataToUse.first(where: { $0.myID == currentMyID } ) {
+                        
+                        // we found a valid record, so store the data locally
+                        currentRKIDataSet.append(RKIDataOfDay)
+                        
+                    } else {
+                        
+                        // we did not found a valid index, report it and ignore the record
+                        GlobalStorage.unique.storeLastError(errorText: "GlobalStorage.rebuildFavorites: Error: RKIData: did not found valid record for day \(dayIndex) of ID \"\(currentMyID)/” of area level \"\(levelIndex)\", ignore record")
+                    }
+                }
+                
+                // check if we found something useful
+                if currentRKIDataSet.isEmpty == false {
+                    
+                    // Yes, we have something, so insert it in the favorite level
+                    
+                    // first we build the sort key
+                    let currentItem = currentRKIDataSet[0]
+                    
+                    // if the item is a state, the second String is " " to ensure that states are the first
+                    // entry in the sequence of counties of the state
+                    let secondString: String
+                    if (currentItem.myID == currentItem.stateID) {
+                        secondString = " "
+                    } else {
+                        secondString = currentItem.name
+                    }
+                    
+                    // now build the key
+                    let sortKey = "\(self.RKIStateDic[currentItem.stateID] ?? " ")|\(secondString)"
+                    
+                    // loop over the available days
+                    for dayIndex in 0 ..< currentRKIDataSet.count {
+                        
+                        
+                        // check if this is the first day
+                        if self.RKIData[RKIDataFavorites].isEmpty == true {
+                            
+                            // create the first day
+                            self.RKIData[RKIDataFavorites].append([])
+                            sortArray.append([])
+                        }
+                        
+                        while self.RKIData[RKIDataFavorites].count <= dayIndex {
+                            
+                            // create the first day
+                            self.RKIData[RKIDataFavorites].append([])
+                            sortArray.append([])
+                        }
+
+                        if self.RKIData[RKIDataFavorites][dayIndex].isEmpty == true {
+                            // yes, it's the first data, so just append it
+                            self.RKIData[RKIDataFavorites][dayIndex].append(currentRKIDataSet[dayIndex])
+                            
+                            // also append the sort key
+                            sortArray[dayIndex].append(sortKey)
+                            
+                        } else {
+                            
+                            // look for the first dataSet which is bigger
+                            if let indexToInsert = sortArray[dayIndex].firstIndex(
+                                where: { $0 > sortKey }
+                            ) {
+                                
+                                // insert the new data at this index to get sorted data
+                                self.RKIData[RKIDataFavorites][dayIndex].insert(currentRKIDataSet[dayIndex], at: (indexToInsert))
+                                sortArray[dayIndex].insert(sortKey, at: indexToInsert)
+                                
+                            } else {
+                                
+                                // did not found it, so just append the data
+                                self.RKIData[RKIDataFavorites][dayIndex].append(currentRKIDataSet[dayIndex])
+                                sortArray[dayIndex].append(sortKey)
+                            }
+                        }
+                    }
+                } // currentRKIDataSet.isEmpty
+            } // itemIndex
+        } // levelIndex
+       
+        
+        // we just copy county data as the timestamps should be the same
+        self.RKIDataTimeStamps[RKIDataFavorites] = self.RKIDataTimeStamps[RKIDataCounty]
+        self.RKIDataWeekdays[RKIDataFavorites] = self.RKIDataWeekdays[RKIDataCounty]
+        
+        // Finally, report we are done
+        DispatchQueue.main.async(execute: {
+            NotificationCenter.default.post(Notification(name: .CoBaT_FavoriteTabBarChangedContent))
+        })
+
+        
     }
     
     /**
@@ -1103,7 +1433,7 @@ final class GlobalStorage: NSObject {
      
      -----------------------------------------------------------------------------------------------
      */
-    private func saveRKIData(kindOf: Int) {
+    private func saveRKIData() {
         
         // make sure we have consistent data
         //GlobalStorageQueue.async(execute: {
@@ -1117,14 +1447,18 @@ final class GlobalStorage: NSObject {
                 // try to encode the county data and the timeStamps
                 let encodedRKIData = try JSONEncoder().encode(self.RKIData)
                 let encodedRKIDataTimeStamps = try JSONEncoder().encode(self.RKIDataTimeStamps)
+                let encodedRKIFavorites = try JSONEncoder().encode(self.RKIFavorites)
                 
                 // if we got to here, no errors encountered, so store it
                 self.permanentStore.set(encodedRKIData, forKey: "CoBaT.RKIData")
                 self.permanentStore.set(encodedRKIDataTimeStamps, forKey: "CoBaT.RKIDataTimeStamps")
                 self.permanentStore.set(self.RKIDataLastUpdated, forKey: "CoBaT.RKIDataLastUpdated")
+                self.permanentStore.set(encodedRKIFavorites, forKey: "CoBaT.RKIFavorites")
                 
                 let encodedLastErrors = try JSONEncoder().encode(self.lastErrors)
                 self.permanentStore.set(encodedLastErrors, forKey: "CoBaT.lastErrors")
+                
+                
                 
                 self.permanentStore.set(self.VersionOfPermanentStorage, forKey: "CoBaT.VersionOfPermanentStorage")
                 
@@ -1262,7 +1596,7 @@ final class GlobalStorage: NSObject {
             // append the new error
             self.lastErrors.append(lastErrorStruct(errorText: errorText))
              
-            self.saveRKIData(kindOf: -1)
+            self.saveRKIData()
             // local notification to update UI
             DispatchQueue.main.async(execute: {
                 NotificationCenter.default.post(Notification(name: .CoBat_NewErrorStored))

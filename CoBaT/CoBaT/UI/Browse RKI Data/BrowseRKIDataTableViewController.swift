@@ -21,6 +21,8 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
     // this variables were set in "ViewDidApear()" and released in "ViewDidDisappear()"
     private var userDidSelectSortObserver: NSObjectProtocol?
     private var newRKIDataReadyObserver: NSObjectProtocol?
+    private var favoriteTabBarChangedContentObserver: NSObjectProtocol?
+    
 
 
     // local copy of County Data, susetted by selected State
@@ -145,25 +147,96 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
         
         // get the row
         let row = cell.myIndexPath.row
-        
-        // which arae level we have
-        switch GlobalUIData.unique.UIBrowserRKIAreaLevel {
-        
-        case GlobalStorage.unique.RKIDataCountry:
-            
-            // Country Level: just the colors
-            // set the colors according to the current cell
-            GlobalUIData.unique.UIDetailsRKITextColor = cell.Cases.textColor
-            GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
-                ?? UIColor.systemBackground
-            
-            //GlobalUIData.unique.UIDetailsRKISelectedMyID = ""
 
-            break
-            
-            
-        case GlobalStorage.unique.RKIDataState:
-            
+//        // which arae level we have
+//        switch GlobalUIData.unique.UIBrowserRKIAreaLevel {
+//
+//        case GlobalStorage.unique.RKIDataCountry:
+//
+//            // Country Level: just the colors
+//            // set the colors according to the current cell
+//            GlobalUIData.unique.UIDetailsRKITextColor = cell.Cases.textColor
+//            GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
+//                ?? UIColor.systemBackground
+//
+//            //GlobalUIData.unique.UIDetailsRKISelectedMyID = ""
+//
+//            break
+//
+//
+//        case GlobalStorage.unique.RKIDataState:
+//
+//            // the details screen is called in two differnt scenarios: First form main screen and
+//            // in rki browser. to make sure that the right graph will be shown when user gets back
+//            // to the main screen, we have to save the selected arealevel and ID and restore it, when
+//            // the browsed detail screen disapeared
+//            // we do that by saving the two values in BrowseRKIDataTableViewController.detailsButtonTapped()
+//            // and restore it in DetailsRKIViewController.viewDidDisappear()
+//
+//            // save the current values
+//            GlobalUIData.unique.UIDetailsRKIAreaLevelSaved = GlobalUIData.unique.UIDetailsRKIAreaLevel
+//            GlobalUIData.unique.UIDetailsRKISelectedMyIDSaved = GlobalUIData.unique.UIDetailsRKISelectedMyID
+//
+//            // set the new values
+//            GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataState
+//            GlobalUIData.unique.UIDetailsRKISelectedMyID = localDataArray[row].stateID
+//
+//            // set the colors according to the current cell
+//            GlobalUIData.unique.UIDetailsRKITextColor = cell.Cases.textColor
+//            GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
+//                ?? UIColor.systemBackground
+//
+//            #if DEBUG_PRINT_FUNCCALLS
+//            print("BrowseRKIDataTableViewController.detailsButtonTapped(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Area to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
+//            #endif
+//
+//            // report that we have selected a new detail
+//            DispatchQueue.main.async(execute: {
+//                NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))
+//            })
+//
+//            // call the detail screen
+//            performSegue(withIdentifier: "CallDetailsRKIViewControllerFromBrowser", sender: self)
+//
+//
+//        case GlobalStorage.unique.RKIDataCounty:
+//
+//            // the details screen is called in two differnt scenarios: First form main screen and
+//            // in rki browser. to make sure that the right graph will be shown when user gets back
+//            // to the main screen, we have to save the selected arealevel and ID and restore it, when
+//            // the browsed detail screen disapeared
+//            // we do that by saving the two values in BrowseRKIDataTableViewController.detailsButtonTapped()
+//            // and restore it in DetailsRKIViewController.viewDidDisappear()
+//
+//            // save the current values
+//            GlobalUIData.unique.UIDetailsRKIAreaLevelSaved = GlobalUIData.unique.UIDetailsRKIAreaLevel
+//            GlobalUIData.unique.UIDetailsRKISelectedMyIDSaved = GlobalUIData.unique.UIDetailsRKISelectedMyID
+//
+//            // set the new values
+//            GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataCounty
+//            GlobalUIData.unique.UIDetailsRKISelectedMyID = localDataArray[row].myID ?? ""
+//
+//            // set the colors according to the current cell
+//            GlobalUIData.unique.UIDetailsRKITextColor = cell.Cases.textColor
+//            GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
+//                ?? UIColor.systemBackground
+//
+//            #if DEBUG_PRINT_FUNCCALLS
+//            print("BrowseRKIDataTableViewController.detailsButtonTapped(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Area to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
+//            #endif
+//
+//
+//            // report that we have selected a new detail
+//            DispatchQueue.main.async(execute: {
+//                NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))
+//            })
+//
+//            // call the detail screen
+//            performSegue(withIdentifier: "CallDetailsRKIViewControllerFromBrowser", sender: self)
+//
+//
+//        case GlobalStorage.unique.RKIDataFavorites:
+//
             // the details screen is called in two differnt scenarios: First form main screen and
             // in rki browser. to make sure that the right graph will be shown when user gets back
             // to the main screen, we have to save the selected arealevel and ID and restore it, when
@@ -176,42 +249,18 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
             GlobalUIData.unique.UIDetailsRKISelectedMyIDSaved = GlobalUIData.unique.UIDetailsRKISelectedMyID
             
             // set the new values
-            GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataState
-            GlobalUIData.unique.UIDetailsRKISelectedMyID = localDataArray[row].stateID
-            
-            // set the colors according to the current cell
-            GlobalUIData.unique.UIDetailsRKITextColor = cell.Cases.textColor
-            GlobalUIData.unique.UIDetailsRKIBackgroundColor = cell.contentView.backgroundColor
-                ?? UIColor.systemBackground
-
-            #if DEBUG_PRINT_FUNCCALLS
-            print("BrowseRKIDataTableViewController.detailsButtonTapped(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Area to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
-            #endif
-
-            // report that we have selected a new detail
-            DispatchQueue.main.async(execute: {
-                NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))
-            })
-            
-            // call the detail screen
-            performSegue(withIdentifier: "CallDetailsRKIViewControllerFromBrowser", sender: self)
-
-            
-        case GlobalStorage.unique.RKIDataCounty:
-            
-            // the details screen is called in two differnt scenarios: First form main screen and
-            // in rki browser. to make sure that the right graph will be shown when user gets back
-            // to the main screen, we have to save the selected arealevel and ID and restore it, when
-            // the browsed detail screen disapeared
-            // we do that by saving the two values in BrowseRKIDataTableViewController.detailsButtonTapped()
-            // and restore it in DetailsRKIViewController.viewDidDisappear()
-
-            // save the current values
-            GlobalUIData.unique.UIDetailsRKIAreaLevelSaved = GlobalUIData.unique.UIDetailsRKIAreaLevel
-            GlobalUIData.unique.UIDetailsRKISelectedMyIDSaved = GlobalUIData.unique.UIDetailsRKISelectedMyID
-            
-            // set the new values
-            GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataCounty
+            // check if the row is a state
+            if localDataArray[row].myID == localDataArray[row].stateID {
+                
+                // yes, it's a state, so set the level to state
+                GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataState
+                
+            } else {
+                
+                // no, it's county, so set the level to county
+                GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataCounty
+            }
+        
             GlobalUIData.unique.UIDetailsRKISelectedMyID = localDataArray[row].myID ?? ""
             
             // set the colors according to the current cell
@@ -232,11 +281,11 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
             // call the detail screen
             performSegue(withIdentifier: "CallDetailsRKIViewControllerFromBrowser", sender: self)
 
-            
-        default:
-            break
-        }
-    }
+//        default:
+//            break
+//        }
+        
+     }
 
 
     
@@ -265,19 +314,32 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
         // read the current content of the global storage
         GlobalStorageQueue.async(flags: .barrier, execute: {
             
-            self.numberOfDayAvailable = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty].count
-            // get the global storage, filtered to the current selected state
+            while GlobalStorage.unique.RKIData.count <= GlobalUIData.unique.UIBrowserRKIAreaLevel {
+                GlobalStorage.unique.RKIData.append([])
+            }
             
-            // check if we have current data
-            if self.numberOfDayAvailable > 0 {
+            if GlobalStorage.unique.RKIData[GlobalUIData.unique.UIBrowserRKIAreaLevel].isEmpty
+                == false {
                 
-                // yes at least current data are available so try to get some
-                if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
-                    localDataArrayUnsorted = GlobalStorage.unique.RKIData[GlobalUIData.unique.UIBrowserRKIAreaLevel][0].filter(
-                        { $0.stateID == GlobalUIData.unique.UIBrowserRKISelectedStateID})
-                } else {
-                    localDataArrayUnsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][0]
+                self.numberOfDayAvailable = GlobalStorage.unique.RKIData[GlobalUIData.unique.UIBrowserRKIAreaLevel].count
+                // get the global storage, filtered to the current selected state
+                
+                // check if we have current data
+                if self.numberOfDayAvailable > 0 {
+                    
+                    // yes at least current data are available so try to get some
+                    if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCounty {
+                        localDataArrayUnsorted = GlobalStorage.unique.RKIData[GlobalUIData.unique.UIBrowserRKIAreaLevel][0].filter(
+                            { $0.stateID == GlobalUIData.unique.UIBrowserRKISelectedStateID})
+                    } else {
+                        localDataArrayUnsorted = GlobalStorage.unique.RKIDataDeltas [GlobalUIData.unique.UIBrowserRKIAreaLevel][0]
+                    }
                 }
+                
+            } else {
+                
+                // there is nothing to show
+                self.numberOfDayAvailable = 0
             }
             
             // check if we have data from yesterday
@@ -566,6 +628,21 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
                 self.RefreshLocalData()
             })
 
+        // add observer to recognise if user selcted new state
+        favoriteTabBarChangedContentObserver = NotificationCenter.default.addObserver(
+            forName: .CoBaT_FavoriteTabBarChangedContent,
+            object: nil,
+            queue: OperationQueue.main,
+            using: { Notification in
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("BrowseRKIDataTableViewController just recieved signal .CoBaT_FavoriteTabBarChangedContent, call RefreshLocalData()")
+                #endif
+                
+                self.RefreshLocalData()
+            })
+
+        
         // scroll the content to the selected item
         //self.scrollToSelectedItem()
 
@@ -587,6 +664,11 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
         }
         // remove the observer if set
         if let observer = newRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = favoriteTabBarChangedContentObserver {
             NotificationCenter.default.removeObserver(observer)
         }
     }
@@ -662,18 +744,22 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
         cell.ChevronLeft.tintColor = textColorToUse
         cell.ChevronRight.tintColor = textColorToUse
         
-        // on country level, we do not need to select an item, so hide the left chevron and disable the button
-        if GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCountry {
+        // on country or favorites level, we do not need to select an item,
+        // so hide the left chevron and disable the button
+        if (GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataCountry)
+        || (GlobalUIData.unique.UIBrowserRKIAreaLevel == GlobalStorage.unique.RKIDataFavorites) {
             
             // no chevron and no button
             cell.ChevronLeft.isHidden = true
             cell.SelectButton.isEnabled = false
+            cell.SelectButton.isHidden = true
             
         } else {
             
             // show the chevron and enable the button
             cell.ChevronLeft.isHidden = false
             cell.SelectButton.isEnabled = true
+            cell.SelectButton.isHidden = false
         }
         
         

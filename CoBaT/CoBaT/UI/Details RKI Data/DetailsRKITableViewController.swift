@@ -376,8 +376,9 @@ final class DetailsRKITableViewController: UITableViewController {
         // set the id of the selected item
         switch GlobalUIData.unique.UIBrowserRKIAreaLevel {
    
-        case GlobalStorage.unique.RKIDataCountry:
-            break
+//        case GlobalStorage.unique.RKIDataCountry:
+//            self.selectedItemID = ""
+//
             
         case GlobalStorage.unique.RKIDataState:
             self.selectedItemID = GlobalUIData.unique.UIBrowserRKISelectedStateID
@@ -386,7 +387,7 @@ final class DetailsRKITableViewController: UITableViewController {
             self.selectedItemID = GlobalUIData.unique.UIBrowserRKISelectedCountyID
             
         default:
-            break
+            self.selectedItemID = ""
       }
 
         self.refreshLocalData()

@@ -33,7 +33,11 @@ final class DetailsRKIViewController: UIViewController {
     var forLabelInhabitants: String = ""
     var forValueInhabitants: String = ""
     
-    
+    var selectedAreaLevel: Int = 0
+    var selectedMyID: String = ""
+
+    let IsFavoriteImage : UIImage = UIImage(systemName: "heart.fill")!
+    let IsNotFavoriteImage: UIImage = UIImage(systemName: "heart")!
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Translated texts
@@ -58,6 +62,36 @@ final class DetailsRKIViewController: UIViewController {
     
     
     
+    @IBOutlet weak var FavoritesButton: UIBarButtonItem!
+    @IBAction func FavoritesButtonAction(_ sender: UIBarButtonItem) {
+        
+        DispatchQueue.main.async(execute: {
+            
+            // we use the image as a flag if the item is already a favorite or not
+            if self.FavoritesButton.image == self.IsNotFavoriteImage {
+                
+                // item is not a favorite, so save it as a favorite
+                
+                // switch image
+                self.FavoritesButton.image = self.IsFavoriteImage
+                
+                // save it
+                GlobalStorage.unique.saveNewFavorite(level: self.selectedAreaLevel,
+                                                     id: self.selectedMyID)
+                
+            } else {
+                
+                // item was a favorite, so remove it
+                
+                // switch the image
+                self.FavoritesButton.image = self.IsNotFavoriteImage
+                
+                // remove the item from the list
+                GlobalStorage.unique.removeFavorite(level:  self.selectedAreaLevel,
+                                                     id: self.selectedMyID)
+            }
+        })
+    }
     
     // ---------------------------------------------------------------------------------------------
     // MARK: -
@@ -170,18 +204,22 @@ final class DetailsRKIViewController: UIViewController {
         GlobalStorageQueue.async(execute: {
 
             // create shortcuts
-            let selectedAreaLevel = GlobalUIData.unique.UIDetailsRKIAreaLevel
-            let selectedMyID = GlobalUIData.unique.UIDetailsRKISelectedMyID
+            self.selectedAreaLevel = GlobalUIData.unique.UIDetailsRKIAreaLevel
+            self.selectedMyID = GlobalUIData.unique.UIDetailsRKISelectedMyID
 
             #if DEBUG_PRINT_FUNCCALLS
-            print("DetailsRKIViewController.updateLabels(): will use ID to \"\(selectedMyID)\" and Area to \(selectedAreaLevel)")
+            print("DetailsRKIViewController.updateLabels(): will use ID to \"\(self.selectedMyID)\" and Area to \(self.selectedAreaLevel)")
             #endif
 
+            // check if the item is a favorite, we will later set the image of the butto according to this flag
+            let isAFavorite = GlobalStorage.unique.RKIFavorites[self.selectedAreaLevel].contains(self.selectedMyID)
+            
+            
             // shortcut
-            let RKIDataToUse = GlobalStorage.unique.RKIData[selectedAreaLevel][0]
+            let RKIDataToUse = GlobalStorage.unique.RKIData[self.selectedAreaLevel][0]
 
             // try to find the index of the requested ID
-            if let indexRKIData = RKIDataToUse.firstIndex(where: { $0.myID == selectedMyID } ) {
+            if let indexRKIData = RKIDataToUse.firstIndex(where: { $0.myID == self.selectedMyID } ) {
 
                 // we found a valid index, so store the data locally
                 self.forTitel = RKIDataToUse[indexRKIData].name
@@ -198,7 +236,7 @@ final class DetailsRKIViewController: UIViewController {
             } else {
 
                 // we did not found a valid index, report and use default values
-                GlobalStorage.unique.storeLastError(errorText: "DetailsRKIViewController.updateLabels: Error: did not found valid index for ID \"\(selectedMyID)/” of area level \"\(selectedAreaLevel)\", use default texts")
+                GlobalStorage.unique.storeLastError(errorText: "DetailsRKIViewController.updateLabels: Error: did not found valid index for ID \"\(self.selectedMyID)/” of area level \"\(self.selectedAreaLevel)\", use default texts")
 
                 self.forTitel = NSLocalizedString("updateLabels-no-index",
                                              comment: "Label text that we did not found valid data")
@@ -210,14 +248,25 @@ final class DetailsRKIViewController: UIViewController {
         //})
 
         // set the label text on main thread
-        DispatchQueue.main.async(execute: {
-
-            self.title = self.forTitel
-//            self.labelKindOf.text = self.forLabelKindOf
-//
-//            self.labelInhabitants.text = self.forLabelInhabitants
-//            self.ValueInhabitants.text = self.forValueInhabitants
-        })
+            DispatchQueue.main.async(execute: {
+                
+                // set the title
+                self.title = self.forTitel
+                
+                // check if it  is a favorite and set the image
+                if isAFavorite == true {
+                    self.FavoritesButton.image = self.IsFavoriteImage
+                } else {
+                    self.FavoritesButton.image = self.IsNotFavoriteImage
+                }
+                
+                
+                
+                //            self.labelKindOf.text = self.forLabelKindOf
+                //
+                //            self.labelInhabitants.text = self.forLabelInhabitants
+                //            self.ValueInhabitants.text = self.forValueInhabitants
+            })
     })
     }
     

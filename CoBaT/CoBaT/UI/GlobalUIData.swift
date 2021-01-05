@@ -95,6 +95,8 @@ final class GlobalUIData: NSObject {
     public var UIMainTabBarSelectedTab: Int = 0 
     
     
+    
+    
     // ---------------------------------------------------------------------------------------------
     // MARK: - RKI Data API
     // ---------------------------------------------------------------------------------------------
@@ -258,7 +260,7 @@ final class GlobalUIData: NSObject {
             self.UIMainTabBarSelectedTab = self.permanentStore.integer(
                 forKey: "CoBaT.UIMainTabBarSelectedTab")
             
-            // the load of some UI elemnts is faster than this restore, so we send a post to sync it
+            // the load of some UI elements is faster than this restore, so we send a post to sync it
             DispatchQueue.main.async(execute: {
                 NotificationCenter.default.post(Notification(name: .CoBaT_UIDataRestored))
             })

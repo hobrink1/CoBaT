@@ -63,7 +63,10 @@ extension Notification.Name {
     // Event: CommonTabBar did change its content, so the embedded TableView should update as well
     static let CoBaT_CommonTabBarChangedContent = Notification.Name(rawValue: "CoBaT.CommonTabBarChangedContent")
 
-    
+    // Event: FavoriteTabBar did change its content, so the embedded TableView should update as well
+    static let CoBaT_FavoriteTabBarChangedContent = Notification.Name(rawValue: "CoBaT.FavoriteTabBarChangedContent")
+
+
     // ---------------------------------------------------------------------------------------------
     // MARK: -
     // MARK: - Graph
