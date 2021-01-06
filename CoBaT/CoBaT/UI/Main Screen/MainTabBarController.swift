@@ -108,7 +108,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
 //            thirdLabel?.lineBreakMode = .byWordWrapping
 //            thirdLabel?.numberOfLines = 0
 
-            fourthItem?.title = "Auswahl"
+            fourthItem?.title = NSLocalizedString("tabLabelSelection", comment: "Label for the tab Selection")
             fourthItem?.image = nil
             fourthItem?.selectedImage = nil
 //            fourthItem?.image = UIImage(systemName: "heart.fill")

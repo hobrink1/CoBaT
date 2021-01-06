@@ -1335,9 +1335,8 @@
                                                 <constraint firstAttribute="height" constant="20" id="YDj-Ba-dIc"/>
                                             </constraints>
                                         </imageView>
-                                        <button opaque="NO" alpha="0.10000000000000001" contentMode="scaleToFill" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fju-Re-fpk">
+                                        <button opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fju-Re-fpk">
                                             <rect key="frame" x="0.0" y="0.0" width="100" height="68"/>
-                                            <color key="backgroundColor" name="AccentColor"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="100" id="pXp-sF-5Dh"/>
                                             </constraints>
@@ -1345,9 +1344,8 @@
                                                 <action selector="SelectButtonAction:" destination="hpG-M1-LQQ" eventType="touchUpInside" id="6xe-Cv-pjb"/>
                                             </connections>
                                         </button>
-                                        <button opaque="NO" alpha="0.10000000000000001" contentMode="scaleToFill" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5IM-hF-krq">
+                                        <button opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5IM-hF-krq">
                                             <rect key="frame" x="314" y="0.0" width="100" height="68"/>
-                                            <color key="backgroundColor" name="AccentColor"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="100" id="gPc-QL-Ter"/>
                                             </constraints>
@@ -1391,6 +1389,32 @@
                                     <outlet property="SecondCases" destination="RxM-AN-6kU" id="6nk-NP-2V5"/>
                                     <outlet property="SecondIncidences" destination="OzE-pX-65z" id="TKj-wC-dgh"/>
                                     <outlet property="SelectButton" destination="fju-Re-fpk" id="U01-CY-qD5"/>
+                                </connections>
+                            </tableViewCell>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="BrowseRKIDataTableViewCellText" rowHeight="68" id="xFs-dH-wuq" userLabel="BrowseRKIDataTableViewCellText" customClass="BrowseRKIDataTableViewCellText" customModule="CoBaT" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="266" width="414" height="68"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xFs-dH-wuq" id="F4f-sE-bED">
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="68"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I9H-p2-p4a">
+                                            <rect key="frame" x="20" y="11" width="374" height="46"/>
+                                            <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="I9H-p2-p4a" firstAttribute="leading" secondItem="F4f-sE-bED" secondAttribute="leadingMargin" id="F31-hH-ja0"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="I9H-p2-p4a" secondAttribute="trailing" id="Wuq-vC-yy5"/>
+                                        <constraint firstItem="I9H-p2-p4a" firstAttribute="top" secondItem="F4f-sE-bED" secondAttribute="topMargin" id="dK5-bP-Cg1"/>
+                                        <constraint firstItem="I9H-p2-p4a" firstAttribute="bottom" secondItem="F4f-sE-bED" secondAttribute="bottomMargin" id="tWD-ia-esl"/>
+                                    </constraints>
+                                </tableViewCellContentView>
+                                <inset key="separatorInset" minX="2" minY="0.0" maxX="2" maxY="0.0"/>
+                                <connections>
+                                    <outlet property="TextToDisplay" destination="I9H-p2-p4a" id="e02-Yk-8Id"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>

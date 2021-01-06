@@ -41,6 +41,16 @@
 "Never-retrieved-RKI-data" = "Never retrieved RKI Data";
 
 
+/**************************************************************************************************
+ *
+ * class MainTabBarController
+ *
+ **************************************************************************************************/
+
+/* Label for the tab Selection */
+"tabLabelSelection" = "Selection";
+
+
 
 /**************************************************************************************************
  *
@@ -201,6 +211,9 @@ specific public places form 21:00";
 /* Label text for change */
 "label-change" = "Changes:";
 
+
+/* An explanation how to deal with favorites */
+"EmptyFavoritesExplanation" = "At this point you can display federal states, counties or cities that are of particular interest to you.\n\nTo select these, switch to the table with the federal states or counties / cities.\n\nThere, tap on \"Select\".\ n\ nIn the table, select an entry and tap on the right-hand side to open the detail view.\n\nThere you will see a heart symbol in the top right corner.\n\nIf you tap the heart symbol, it changes from ♡ to ♥, and if you tap again back on ♡.\n\nEntries with a filled heart symbol (♥) are listed here.\n\nThe sorting is always alphabetical, whereby the names of the associated federal states are part of the sorting, to keep the entries of a federal state together.";
 
 
 /**************************************************************************************************

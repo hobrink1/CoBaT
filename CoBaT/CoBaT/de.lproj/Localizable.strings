@@ -41,6 +41,16 @@
 "Never-retrieved-RKI-data" = "RKI Daten wurden noch nie abgerufen";
 
 
+/**************************************************************************************************
+ *
+ * class MainTabBarController
+ *
+ **************************************************************************************************/
+
+/* Label for the tab Selection */
+"tabLabelSelection" = "Auswahl";
+
+
 
 /**************************************************************************************************
  *
@@ -201,6 +211,10 @@ bestimmte öffentliche Plätze ab 21:00";
 
 /* Label text for change */
 "label-change" = "Delta:";
+
+
+/* An explanation how to deal with favorites */
+"EmptyFavoritesExplanation" = "An dieser Stelle können sie sich Bundesländer, Landkreise oder Städte die sie besonders interessieren anzeigen lassen.\n\nUm diese auszuwählen, wechseln sie zur Tabelle mit den Bundesländern oder Landkreisen/Städten.\n\nDort tippen sie auf \"Auswahl\".\n\nIn der Tabelle wählen sie einen Eintrag aus und tippen auf die rechte Seite, um die Dateiansicht aufzurufen.\n\nDort sehen sie rechts oben ein Herz-Symbol.\n\nWenn sie auf das Herz-Symbol tippen, wechselt es von ♡ zu ♥, und bei nochmaligen antippen zurück auf ♡ .\n\nEinträge mit einem ausgefüllten Herz-Symbol (♥) werden hier gelistet.\n\nDie Sortierung ist dabei immer alphabetisch, wobei die Namen der zugehörigen Bundesländer mit sortiert werden, um die Einträge eines Bundeslandes zusammen darzustellen.";
 
 
 

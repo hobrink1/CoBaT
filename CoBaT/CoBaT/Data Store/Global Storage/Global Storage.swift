@@ -173,28 +173,32 @@ final class GlobalStorage: NSObject {
                             
                             for indexArea in 0 ..< myRKIData.count {
                                 
-                                for indexDay in 1 ..< myRKIData[indexArea].count {
+                                // check if there are data in that area level (favorites might be empty)
+                                if myRKIData[indexArea].isEmpty == false {
                                     
-                                    for indexMember in 0 ..< myRKIData[indexArea][indexDay].count {
+                                    for indexDay in 1 ..< myRKIData[indexArea].count {
                                         
-                                        if myRKIData[indexArea][indexDay][indexMember].myID == nil {
+                                        for indexMember in 0 ..< myRKIData[indexArea][indexDay].count {
                                             
-                                            weDidChangeSomething = true
-                                            
-                                            let currentMember = myRKIData[indexArea][indexDay][indexMember]
-                                            let memberFromDayBefore = myRKIData[indexArea][indexDay - 1][indexMember]
-                                            
-                                            myRKIData[indexArea][indexDay][indexMember] =
-                                                RKIDataStruct(stateID: currentMember.stateID,
-                                                              myID:                 memberFromDayBefore.myID ?? "",
-                                                              name:                 currentMember.name,
-                                                              kindOf:               currentMember.kindOf,
-                                                              inhabitants:          currentMember.inhabitants,
-                                                              cases:                currentMember.cases,
-                                                              deaths:               currentMember.deaths,
-                                                              casesPer100k:         currentMember.casesPer100k,
-                                                              cases7DaysPer100K:    currentMember.cases7DaysPer100K,
-                                                              timeStamp:            currentMember.timeStamp)
+                                            if myRKIData[indexArea][indexDay][indexMember].myID == nil {
+                                                
+                                                weDidChangeSomething = true
+                                                
+                                                let currentMember = myRKIData[indexArea][indexDay][indexMember]
+                                                let memberFromDayBefore = myRKIData[indexArea][indexDay - 1][indexMember]
+                                                
+                                                myRKIData[indexArea][indexDay][indexMember] =
+                                                    RKIDataStruct(stateID: currentMember.stateID,
+                                                                  myID:                 memberFromDayBefore.myID ?? "",
+                                                                  name:                 currentMember.name,
+                                                                  kindOf:               currentMember.kindOf,
+                                                                  inhabitants:          currentMember.inhabitants,
+                                                                  cases:                currentMember.cases,
+                                                                  deaths:               currentMember.deaths,
+                                                                  casesPer100k:         currentMember.casesPer100k,
+                                                                  cases7DaysPer100K:    currentMember.cases7DaysPer100K,
+                                                                  timeStamp:            currentMember.timeStamp)
+                                            }
                                         }
                                     }
                                 }
