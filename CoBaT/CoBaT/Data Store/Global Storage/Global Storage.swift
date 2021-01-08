@@ -684,25 +684,39 @@ final class GlobalStorage: NSObject {
             } else {
                 
                 // check if there are differences
-                if self.RKIData[kindOf][0].hashValue != newRKIData.hashValue {
+                
+                // take the best timeStamp of new data
+                let oldestTimeStamp = self.RKIDataGetBestTimeStamp(newRKIData)
 
+                // find the right index to insert by the number of the day
+                let dayNumber = self.getDayNumberFromTimeInterval(time: oldestTimeStamp)
+                let indexToUse: Int
+                if let foundIndex = self.RKINumbersOfDays.firstIndex(where: { $0[kindOf] < dayNumber } ) {
+                    indexToUse = foundIndex
+                } else {
+                    indexToUse = 0
+                }
+
+                
+                if self.RKIData[kindOf][indexToUse].hashValue != newRKIData.hashValue {
+                    
                     // yes, there are differences, so check if the day changed
-                    // take the best timeStamp of new data
-                    let oldestTimeStamp = self.RKIDataGetBestTimeStamp(newRKIData)
                     
                     // check if the days are different
-                    let newDate = shortSingleDateFormatterRKI.string(
-                        from: Date(timeIntervalSinceReferenceDate: oldestTimeStamp))
+//                    let newDate = shortSingleDateFormatterRKI.string(
+//                        from: Date(timeIntervalSinceReferenceDate: oldestTimeStamp))
                     
-                    let oldDate = shortSingleDateFormatterRKI.string(
-                        from: Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOf][0]))
-                    
-                    if oldDate == newDate {
+                    let dayNumberOld = self.getDayNumberFromTimeInterval(time: self.RKIDataTimeStamps[kindOf][indexToUse])
+
+//                    let oldDate = shortSingleDateFormatterRKI.string(
+//                        from: Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOf][indexToUse]))
+//
+                    if dayNumber == dayNumberOld {
                     
                         // case 2: There is a difference to the existing data, but from the same day,
                         // so just an update (replaceDataOfToday())
                         #if DEBUG_PRINT_FUNCCALLS
-                        print("refresh_RKIData case 2: oldDate (\(oldDate) == newDate(\(newDate)) -> replaceData0()")
+                        print("refresh_RKIData case 2: oldDate (\(dayNumberOld) == newDate(\(dayNumber)) -> replaceData0()")
                         #endif
 
                         self.replaceDataOfToday(kindOf, newRKIData, oldestTimeStamp)
@@ -711,7 +725,7 @@ final class GlobalStorage: NSObject {
                     
                         // case 3: new item is from a different day (addNewData())
                         #if DEBUG_PRINT_FUNCCALLS
-                        print("refresh_RKIData case 3: oldDate (\(oldDate) != newDate(\(newDate)) -> addNewData()")
+                        print("refresh_RKIData case 3: oldDate (\(dayNumberOld) != newDate(\(dayNumber)) -> addNewData()")
                         #endif
                         
                         self.addNewData(kindOf, newRKIData, oldestTimeStamp)
@@ -1799,6 +1813,7 @@ final class GlobalStorage: NSObject {
         init(errorText: String) {
             self.errorText = errorText
             self.errorTimeStamp = CFAbsoluteTimeGetCurrent()
+
         }
     }
     
