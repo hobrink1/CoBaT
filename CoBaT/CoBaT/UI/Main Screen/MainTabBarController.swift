@@ -206,6 +206,18 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         self.delegate = self
     }
     
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     viewDidAppear()
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    override func viewWillAppear(_ animated: Bool) {
+        super .viewWillAppear(animated)
+        
+    }
     /**
      -----------------------------------------------------------------------------------------------
      

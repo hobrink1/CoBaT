@@ -9,7 +9,7 @@ import UIKit
 import Foundation
 import BackgroundTasks
 
-let VersionLabel: String = "CoBaT V2.0.11"
+let VersionLabel: String = "CoBaT V2.1.0.1"
 
 
 // simple variable to detect if we are in background or not
@@ -47,6 +47,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // build the formatters
         buildAllFormatters()
 
+//        // get the iCloud reference table
+//        iCloudService.unique.getReferences()
+//
         // restore the permanent stored data
         GlobalUIData.unique.restoreSavedUIData()
         GlobalStorage.unique.restoreSavedRKIData()

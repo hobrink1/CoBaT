@@ -62,7 +62,11 @@ final class GlobalStorage: NSObject {
     
     public let RKIIDForBavaria: String = "9"
     
+    // just a flag if the RKI data has missing days (see checkForGaps()). This flag is used by iCloud Services.
+    public var RKIDataHasGaps: Bool = true
+    
     // size of storage
+    // TODO: TODO: Value can be reduced, after iCloud sync is done
     private let maxNumberOfDaysStored: Int = 20
     private let maxNumberOfErrorsStored: Int = 50
     
@@ -92,6 +96,12 @@ final class GlobalStorage: NSObject {
     // flag if we already have restored the data, if so, no need to do it again. This is used in background fetch
     // see startRKIBackgroundFetch()
     public var savedRKIDataRestored: Bool = false
+    
+    // enum of the different data types
+    public enum RKI_DataTypeEnum {
+        case county, state, age
+    }
+
     /**
      -----------------------------------------------------------------------------------------------
      
@@ -220,27 +230,9 @@ final class GlobalStorage: NSObject {
                             
                             self.RKIFavorites = myRKIFavorites
                             
-                            // build the Weekdays array
+                            // build the days arrays
+                            self.rebuildDayArrays()
                             
-                            // reset the array
-                            self.RKIDataWeekdays = []
-                            
-                            // loop over all area levels
-                            for areaIndex in 0 ..< self.RKIDataTimeStamps.count {
-                                
-                                // append an empty array per area level
-                                self.RKIDataWeekdays.append([])
-                                
-                                // loop over all days
-                                for dayIndex in 0 ..< self.RKIDataTimeStamps[areaIndex].count {
-                                    
-                                    // get the day of the week and store it
-                                    let weekday = self.getWeekdayFromTimeInterval(
-                                        time: self.RKIDataTimeStamps[areaIndex][dayIndex])
-                                    self.RKIDataWeekdays[areaIndex].append(weekday)
-                                    
-                                }
-                            }
                             
                             // Start DataCleansing -------------------------------------------------
                             // after the cleansing we save the new
@@ -370,27 +362,8 @@ final class GlobalStorage: NSObject {
                             self.lastErrors = myLastErrors
                             self.RKIFavorites = myRKIFavorites
                             
-                            // build the Weekdays array
-                            
-                            // reset the array
-                            self.RKIDataWeekdays = []
-                            
-                            // loop over all area levels
-                            for areaIndex in 0 ..< self.RKIDataTimeStamps.count {
-                                
-                                // append an empty array per area level
-                                self.RKIDataWeekdays.append([])
-                                
-                                // loop over all days
-                                for dayIndex in 0 ..< self.RKIDataTimeStamps[areaIndex].count {
-                                    
-                                    // get the day of the week and store it
-                                    let weekday = self.getWeekdayFromTimeInterval(
-                                        time: self.RKIDataTimeStamps[areaIndex][dayIndex])
-                                    self.RKIDataWeekdays[areaIndex].append(weekday)
-                                    
-                                }
-                            }
+                            // build the day arrays
+                            self.rebuildDayArrays()
                             
                             // and force a save to secure what we have done
                             self.saveRKIData()
@@ -645,6 +618,7 @@ final class GlobalStorage: NSObject {
     public var RKIDataTimeStamps : [[TimeInterval]] = [[], [], [], []]       // initialise with three empty arrays, so first index level not empty
     
     public var RKIDataWeekdays : [[Int]] = [[], [], [], []]       // initialise with three empty arrays, so first index level not empty
+    public var RKINumbersOfDays: [[Int]] = [[], [], [], []]
     
     // the timeStamp the data was last updated (updates only if data changed)
     public var RKIDataLastUpdated: TimeInterval = 0
@@ -826,6 +800,8 @@ final class GlobalStorage: NSObject {
             self.RKIData[kindOfArea].append(newRKIData)
             self.RKIDataTimeStamps[kindOfArea].append(timeStamp)
             self.RKIDataWeekdays[kindOfArea].append(getWeekdayFromTimeInterval(time: timeStamp))
+            self.RKINumbersOfDays[kindOfArea].append(getDayNumberFromTimeInterval(time: timeStamp))
+
             
         } else {
             
@@ -836,9 +812,18 @@ final class GlobalStorage: NSObject {
                 self.RKIDataWeekdays[kindOfArea].removeLast()
             }
             
-            self.RKIData[kindOfArea].insert(newRKIData, at: 0)
-            self.RKIDataTimeStamps[kindOfArea].insert(timeStamp, at: 0)
-            self.RKIDataWeekdays[kindOfArea].insert(getWeekdayFromTimeInterval(time: timeStamp), at: 0)
+            // find the right index to insert by the number of the day
+            let dayNumber = getDayNumberFromTimeInterval(time: timeStamp)
+            let indexToUse: Int
+            if let foundIndex = RKINumbersOfDays.firstIndex(where: { $0[kindOfArea] < dayNumber } ) {
+                indexToUse = foundIndex
+            } else {
+                indexToUse = 0
+            }
+            self.RKIData[kindOfArea].insert(newRKIData, at: indexToUse)
+            self.RKIDataTimeStamps[kindOfArea].insert(timeStamp, at: indexToUse)
+            self.RKIDataWeekdays[kindOfArea].insert(getWeekdayFromTimeInterval(time: timeStamp), at: indexToUse)
+            self.RKINumbersOfDays[kindOfArea].insert(dayNumber, at: indexToUse)
         }
         
         // check if state data were chenged
@@ -905,19 +890,24 @@ final class GlobalStorage: NSObject {
             
             self.RKIData[kindOfArea].append(newRKIData)
             self.RKIDataTimeStamps[kindOfArea].append(timeStamp)
-            
-            // get the day of the week and store it
-            let weekday = self.getWeekdayFromTimeInterval(time: timeStamp)
-            self.RKIDataWeekdays[kindOfArea].append(weekday)
+            self.RKIDataWeekdays[kindOfArea].append(getWeekdayFromTimeInterval(time: timeStamp))
+            self.RKINumbersOfDays[kindOfArea].append(getDayNumberFromTimeInterval(time: timeStamp))
             
         } else {
             
-            self.RKIData[kindOfArea][0] = newRKIData
-            self.RKIDataTimeStamps[kindOfArea][0] = timeStamp
-            
-            // get the day of the week and store it
-            let weekday = self.getWeekdayFromTimeInterval(time: timeStamp)
-            self.RKIDataWeekdays[kindOfArea][0] = weekday
+            // find the right index to insert by the number of the day
+            let dayNumber = getDayNumberFromTimeInterval(time: timeStamp)
+            let indexToUse: Int
+            if let foundIndex = RKINumbersOfDays.firstIndex(where: { $0[kindOfArea] == dayNumber } ) {
+                indexToUse = foundIndex
+            } else {
+                indexToUse = 0
+            }
+
+            self.RKIData[kindOfArea][indexToUse] = newRKIData
+            self.RKIDataTimeStamps[kindOfArea][indexToUse] = timeStamp
+            self.RKIDataWeekdays[kindOfArea][indexToUse] = self.getWeekdayFromTimeInterval(time: timeStamp)
+            self.RKINumbersOfDays[kindOfArea][indexToUse] = self.getDayNumberFromTimeInterval(time: timeStamp)
         }
         
         // check if state data were chenged
@@ -1036,6 +1026,8 @@ final class GlobalStorage: NSObject {
         // we just copy county and state data as the timestamps for countries and states have the same values
         self.RKIDataTimeStamps[RKIDataCountry] = self.RKIDataTimeStamps[RKIDataState]
         self.RKIDataWeekdays[RKIDataCountry] = self.RKIDataWeekdays[RKIDataState]
+        self.RKINumbersOfDays[RKIDataCountry] = self.RKINumbersOfDays[RKIDataState]
+
     }
     
     
@@ -1205,6 +1197,7 @@ final class GlobalStorage: NSObject {
         } // loop over country, state, county
         
         if kindOf != self.RKIDataFavorites {
+            
             DispatchQueue.main.async(execute: {
                 
                 // local notification to update UI
@@ -1270,6 +1263,10 @@ final class GlobalStorage: NSObject {
             print("rebuildRKIDeltas just posted .CoBaT_NewRKIDataReady")
             #endif
             
+            // As this is the last step of data gathering, we will check if there are gaps in the data (missing days)
+            //self.checkForGaps()
+            
+            
         } else {
             
             #if DEBUG_PRINT_FUNCCALLS
@@ -1316,6 +1313,7 @@ final class GlobalStorage: NSObject {
         self.RKIData[RKIDataFavorites] = []
         self.RKIDataTimeStamps[RKIDataFavorites] = []
         self.RKIDataWeekdays[RKIDataFavorites] = []
+        self.RKINumbersOfDays[RKIDataFavorites] = []
         
         var sortArray: [[String]] = []
 
@@ -1421,7 +1419,8 @@ final class GlobalStorage: NSObject {
         // we just copy county data as the timestamps should be the same
         self.RKIDataTimeStamps[RKIDataFavorites] = self.RKIDataTimeStamps[RKIDataCounty]
         self.RKIDataWeekdays[RKIDataFavorites] = self.RKIDataWeekdays[RKIDataCounty]
-        
+        self.RKINumbersOfDays[RKIDataFavorites] = self.RKINumbersOfDays[RKIDataCounty]
+
         // Finally, report we are done
         DispatchQueue.main.async(execute: {
             NotificationCenter.default.post(Notification(name: .CoBaT_FavoriteTabBarChangedContent))
@@ -1565,6 +1564,182 @@ final class GlobalStorage: NSObject {
                                               from: refDateNoon,
                                               to: ofDateNoon).day ?? -1
     }
+    
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     rebuilds RKIDataWeekdays[] and RKINumbersOfDays[] out of RKIDataTimeStamps[]
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func rebuildDayArrays() {
+        
+        // reset the array
+        self.RKIDataWeekdays = []
+        self.RKINumbersOfDays = []
+        
+        // loop over all area levels
+        for areaIndex in 0 ..< self.RKIDataTimeStamps.count {
+            
+            // append an empty array per area level
+            self.RKIDataWeekdays.append([])
+            self.RKINumbersOfDays.append([])
+            
+            
+            // loop over all days
+            for dayIndex in 0 ..< self.RKIDataTimeStamps[areaIndex].count {
+                
+                // get the day of the week and store it
+                let weekday = self.getWeekdayFromTimeInterval(
+                    time: self.RKIDataTimeStamps[areaIndex][dayIndex])
+                self.RKIDataWeekdays[areaIndex].append(weekday)
+                
+                let numberOfDay = self.getDayNumberFromTimeInterval(
+                    time: self.RKIDataTimeStamps[areaIndex][dayIndex])
+                self.RKINumbersOfDays[areaIndex].append(numberOfDay)
+            }
+        }
+    }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     This func simply set or reset the flag RKIDataHasGaps, if there are gaps (missing days).
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func checkForGaps() {
+        
+        GlobalStorageQueue.async(execute: {
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("checkForGaps() just started")
+            #endif
+            
+            // first check is simply a count. Do we have enough days?
+            if self.RKIData[self.RKIDataState].count < self.maxNumberOfDaysStored {
+                
+                // we do not have enough days on state level
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("checkForGaps() number of days (state) (\(self.RKIData[self.RKIDataState].count)) < \(self.maxNumberOfDaysStored), will set flag RKIDataHasGaps = true")
+                #endif
+                
+                GlobalStorageQueue.async(flags: .barrier, execute: {
+                    self.RKIDataHasGaps = true
+                })
+                
+            } else if self.RKIData[self.RKIDataCountry].count < self.maxNumberOfDaysStored {
+                
+                // we do not have enough days on county level
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("checkForGaps() number of days (County) (\(self.RKIData[self.RKIDataCountry].count)) < \(self.maxNumberOfDaysStored), will set flag RKIDataHasGaps = true")
+                #endif
+                
+                GlobalStorageQueue.async(flags: .barrier, execute: {
+                    self.RKIDataHasGaps = true
+                })
+                
+            } else {
+                
+                // check if the newest data are from today
+                let currentDay = self.getDayNumberFromTimeInterval(time: CFAbsoluteTimeGetCurrent())
+                if self.RKINumbersOfDays[self.RKIDataState][0] != currentDay {
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print("checkForGaps() newest State day (\(self.RKINumbersOfDays[self.RKIDataState][0])) != currentDay (\(currentDay)), will set flag RKIDataHasGaps = true")
+                    #endif
+                    
+                    GlobalStorageQueue.async(flags: .barrier, execute: {
+                        self.RKIDataHasGaps = true
+                    })
+                    
+                } else if self.RKINumbersOfDays[self.RKIDataCounty][0] != currentDay {
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print("checkForGaps() newest County day (\(self.RKINumbersOfDays[self.RKIDataCounty][0])) != currentDay (\(currentDay)), will set flag RKIDataHasGaps = true")
+                    #endif
+                    
+                    GlobalStorageQueue.async(flags: .barrier, execute: {
+                        self.RKIDataHasGaps = true
+                    })
+                    
+                } else {
+                    
+                    // now we check the sequence of the day codes. They should be without gaps, starting with highest number on
+                    var lastDayCode: Int = self.RKINumbersOfDays[self.RKIDataState][0]
+                    var foundGap: Bool = false
+                    
+                    for index in 1 ..< self.RKINumbersOfDays[self.RKIDataState].count {
+                        
+                        // check if the next day is in sequence (decending order)
+                        if self.RKINumbersOfDays[self.RKIDataState][index] == (lastDayCode - 1) {
+                            
+                            // yes, it's in sync, prepare next loop
+                            lastDayCode = self.RKINumbersOfDays[self.RKIDataState][index]
+                            
+                        } else {
+                            
+                            // no, day is out of seqence, report, set flag and break loop
+                            #if DEBUG_PRINT_FUNCCALLS
+                            print("checkForGaps() found gap in state data at index \(index) (\(self.RKINumbersOfDays[self.RKIDataCounty][index])) != lastDayCode - 1 (\(lastDayCode - 1)), will set flag RKIDataHasGaps = true")
+                            #endif
+                            
+                            GlobalStorageQueue.async(flags: .barrier, execute: {
+                                self.RKIDataHasGaps = true
+                            })
+
+                            foundGap = true
+                            break
+                        }
+                    }
+                    
+                    // check if we already found a gap
+                    if foundGap == false {
+                        
+                        // no, so do the same for the county level
+                        lastDayCode = self.RKINumbersOfDays[self.RKIDataCounty][0]
+                        
+                        for index in 1 ..< self.RKINumbersOfDays[self.RKIDataCounty].count {
+                            
+                            // check if the next day is in sequence (decending order)
+                            if self.RKINumbersOfDays[self.RKIDataCounty][index] == (lastDayCode - 1) {
+                                
+                                // yes, it's in sync, prepare next loop
+                                lastDayCode = self.RKINumbersOfDays[self.RKIDataCounty][index]
+                                
+                            } else {
+                                
+                                // no, day is out of seqence, report, set flag and break loop
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print("checkForGaps() found gap in county data at index \(index) (\(self.RKINumbersOfDays[self.RKIDataCounty][index])) != lastDayCode - 1 (\(lastDayCode - 1)), will set flag RKIDataHasGaps = true")
+                                #endif
+                                
+                                GlobalStorageQueue.async(flags: .barrier, execute: {
+                                    self.RKIDataHasGaps = true
+                                })
+                                
+                                foundGap = true
+                                break
+                            }
+                        }
+                        
+                        // if we still did not find a gap, set the flag to false
+                        if foundGap == false {
+                            GlobalStorageQueue.async(flags: .barrier, execute: {
+                                self.RKIDataHasGaps = false
+                            })
+                        }
+                        
+                    } // foundGap
+                } // currentDay
+            } // maxNumberOfDaysStored
+        })
+    }
+    
+    
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Last Errors API

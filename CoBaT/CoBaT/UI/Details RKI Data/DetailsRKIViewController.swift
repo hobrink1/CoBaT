@@ -224,15 +224,6 @@ final class DetailsRKIViewController: UIViewController {
                 // we found a valid index, so store the data locally
                 self.forTitel = RKIDataToUse[indexRKIData].name
 
-//                forLabelKindOf = RKIDataToUse[indexRKIData].kindOf
-//
-//                forValueInhabitants = numberNoFractionFormatter.string(
-//                    from: NSNumber(value: RKIDataToUse[indexRKIData].inhabitants))
-//                    ?? NSLocalizedString("updateLabels-no-index", comment: "Label text that we did not found valid data")
-//
-//                forLabelInhabitants = NSLocalizedString("label-inhabitants",
-//                                                        comment: "Label text for inhabitants")
-
             } else {
 
                 // we did not found a valid index, report and use default values
@@ -240,10 +231,6 @@ final class DetailsRKIViewController: UIViewController {
 
                 self.forTitel = NSLocalizedString("updateLabels-no-index",
                                              comment: "Label text that we did not found valid data")
-//                forLabelKindOf = ""
-//
-//                forValueInhabitants = ""
-
             }
         //})
 

@@ -41,6 +41,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillEnterForeground(_ scene: UIScene) {
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
+        // local notification to update UI
+        DispatchQueue.main.async(execute: {
+            NotificationCenter.default.post(Notification(name: .CoBaT_SceneWillEnterForeground))
+        })
+
         weAreInBackground = false
     }
 

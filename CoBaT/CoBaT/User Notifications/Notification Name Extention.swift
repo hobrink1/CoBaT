@@ -41,7 +41,15 @@ extension Notification.Name {
     // Event: New error was stored (GlobalStorage.storeLastError())
     static let CoBat_NewErrorStored = Notification.Name(rawValue: "CoBaT.NewErrorStored")
 
+    // ---------------------------------------------------------------------------------------------
+    // MARK: -
+    // MARK: - Scene Events
+    // ---------------------------------------------------------------------------------------------
     
+    // Event: Scene will enter foreground
+    static let CoBaT_SceneWillEnterForeground = Notification.Name(rawValue: "CoBaT.SceneWillEnterForeground")
+
+
 
     // ---------------------------------------------------------------------------------------------
     // MARK: -
