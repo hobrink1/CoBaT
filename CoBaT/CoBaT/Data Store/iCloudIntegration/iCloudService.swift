@@ -66,9 +66,15 @@ final class iCloudService: NSObject {
     // --------------------------------------------------------------------
     //static let database = CKContainer.default().publicCloudDatabase
     static let database = CKContainer(identifier: "iCloud.org.hobrink.CoBaT").publicCloudDatabase
+    
     // --------------------------------------------------------------------
     // MARK: - Class Properties
     // --------------------------------------------------------------------
+    
+    // User Account status, we need that for the push..() methodes, the pull methodes will work, as
+    // read operations to public databases are always possible
+    var userIsLoggedIn: Bool = false
+    
     
     // this table holds the reference which days are available in iCloud
     struct ReferenceTableStruct {
@@ -87,23 +93,32 @@ final class iCloudService: NSObject {
     var ReferenceTableState: [ReferenceTableStruct] = []
     var ReferenceTableCounty: [ReferenceTableStruct] = []
     
+    // enum of status for that queue
+    enum sendStatusEnum {
+        case new, markedForSend, dataSend
+    }
+
     // this dataStruct will be used to build a queue of data to send
     struct dataQueueStruct {
         
         let time: TimeInterval
         let data: Data
         let RKIDataType: GlobalStorage.RKI_DataTypeEnum
+        var sendStatus: sendStatusEnum
         
         init(time: TimeInterval, data: Data, RKIDataType: GlobalStorage.RKI_DataTypeEnum) {
             self.time = time
             self.data = data
             self.RKIDataType = RKIDataType
+            self.sendStatus = .new
         }
     }
     
-    // we will try to send these data items
-    var dataQueueArray: [dataQueueStruct] = []
     
+    // we will try to send these data items
+    var dataToSendSCounty: [Int : dataQueueStruct] = [:]
+    var dataToSendState:   [Int : dataQueueStruct] = [:]
+
     // --------------------------------------------------------------------
     // MARK: - RecordTypes and RecordFields
     // --------------------------------------------------------------------
@@ -157,22 +172,125 @@ final class iCloudService: NSObject {
             print( "iCloudService.syncData(): type: \(RKI_DataType), time: \(Date(timeIntervalSinceReferenceDate: time)), size: \(data.count) just started")
             #endif
             
-            // store the data for duture use
-            self.dataQueueArray.append(dataQueueStruct(time: time, data: data, RKIDataType: RKI_DataType))
+            // check the user acoount
+            self.checkUserAccount()
+            
+
+            // get the number of day, we need it as the key for the dictonary
+            let dayNumber = GlobalStorage.unique.getDayNumberFromTimeInterval(time: time)
             
             // start the work queue by calling getReferences()
             switch RKI_DataType {
             
             case .county:
+                
+                // store the data for future use
+                
+                // check if we already have a dictionary element
+                if self.dataToSendSCounty[dayNumber] == nil {
+                    
+                    // no, so just add the data to the dictonary
+                    self.dataToSendSCounty[dayNumber] = dataQueueStruct(time: time, data: data, RKIDataType: RKI_DataType)
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print( "iCloudService.syncData(): just set dataToSendSCounty[\(dayNumber)] to type: \(RKI_DataType), time: \(Date(timeIntervalSinceReferenceDate: time))")
+                    #endif
+
+                } else {
+                    
+                    // yes, we have already data with that dayNumber, so check if this is an update, by hashValues
+                    
+                    let hashData = self.dataToSendSCounty[dayNumber]!.data.hashValue
+                    let hashReference = data.hashValue
+                   
+                    if hashData != hashReference {
+                        
+                        // yes we have newer data, so check if we are early enough to replace the data
+                        if self.dataToSendSCounty[dayNumber]!.sendStatus == .new {
+                            
+                            // yes, it is still new, so just replace it, as we nmight have updated values
+                            self.dataToSendSCounty[dayNumber] = dataQueueStruct(time: time, data: data, RKIDataType: RKI_DataType)
+                            
+                            #if DEBUG_PRINT_FUNCCALLS
+                            print( "iCloudService.syncData(): just replaced dataToSendSCounty[\(dayNumber)] by type: \(RKI_DataType), time: \(Date(timeIntervalSinceReferenceDate: time))")
+                            #endif
+                            
+                        } else {
+                            
+                            #if DEBUG_PRINT_FUNCCALLS
+                            print( "iCloudService.syncData(): dataToSendSCounty[\(dayNumber)]!.sendStatus != .new, do NOT replace by type: \(RKI_DataType), time: \(Date(timeIntervalSinceReferenceDate: time))")
+                            #endif
+                        }
+                        
+                    } else {
+                        
+                        // no, same data, so do nothing
+                        #if DEBUG_PRINT_FUNCCALLS
+                        print( "iCloudService.syncData(): new data \(RKI_DataType), time: \(Date(timeIntervalSinceReferenceDate: time)) already in dataToSendSCounty[\(dayNumber)] and hash values are equal, do nothing")
+                        #endif
+                    }
+                }
+ 
+                // start the workflow by getting the reference data
                 self.getReferencesCounty()
 
+                
+                
             case .state:
+                
+                // store the data for future use
+                
+                // check if we already have a dicinary element
+                if self.dataToSendState[dayNumber] == nil {
+                    
+                    // no, so just add the data to the dictonary
+                    self.dataToSendState[dayNumber] = dataQueueStruct(time: time, data: data, RKIDataType: RKI_DataType)
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print( "iCloudService.syncData(): just set dataToSendState[\(dayNumber)] to type: \(RKI_DataType), time: \(Date(timeIntervalSinceReferenceDate: time))")
+                    #endif
+
+                } else {
+                    
+                    // yes, we have already data with that dayNumber, so check if this is an update, by hashValues
+                    
+                    let hashData = self.dataToSendState[dayNumber]!.data.hashValue
+                    let hashReference = data.hashValue
+                   
+                    if hashData != hashReference {
+                        
+                        // yes we have newer data, so check if we are early enough to replace the data
+                        if self.dataToSendState[dayNumber]!.sendStatus == .new {
+                            
+                            // yes, it is still new, so just replace it, as we nmight have updated values
+                            self.dataToSendState[dayNumber] = dataQueueStruct(time: time, data: data, RKIDataType: RKI_DataType)
+                            
+                            #if DEBUG_PRINT_FUNCCALLS
+                            print( "iCloudService.syncData(): just replaced dataToSendState[\(dayNumber)] by type: \(RKI_DataType), time: \(Date(timeIntervalSinceReferenceDate: time))")
+                            #endif
+                            
+                        } else {
+                            
+                            #if DEBUG_PRINT_FUNCCALLS
+                            print( "iCloudService.syncData(): dataToSendState[\(dayNumber)]!.sendStatus != .new, do NOT replace by type: \(RKI_DataType), time: \(Date(timeIntervalSinceReferenceDate: time))")
+                            #endif
+                        }
+                        
+                    } else {
+                        
+                        // no, same data, so do nothing
+                        #if DEBUG_PRINT_FUNCCALLS
+                        print( "iCloudService.syncData(): new data \(RKI_DataType), time: \(Date(timeIntervalSinceReferenceDate: time)) already in dataToSendState[\(dayNumber)] and hash values are equal, do nothing")
+                        #endif
+                    }
+                }
+
+                // start the workflow by getting the reference data
                 self.getReferencesState()
                 
             default:
                 break
             }
-            
         })
     }
     
@@ -262,13 +380,13 @@ final class iCloudService: NSObject {
                     //                                  Success!
                     // -----------------------------------------------------------------------------
                     #if DEBUG_PRINT_FUNCCALLS
-                    print( "iCloudService.getReferencesState(): success!, got \(recordCounterState) records, will update ReferenceTableState and call getReferencesCounty")
+                    print( "iCloudService.getReferencesState(): success!, got \(recordCounterState) records, will update ReferenceTableState and call pullRKIDataState()")
                     #endif
                     GlobalStorageQueue.async(flags: .barrier, execute: {
                         self.ReferenceTableState = newReferenceTableState
                     })
                     
-                    //self.getReferencesCounty()
+                    self.pullRKIDataState()
                     
                 } else {
                     
@@ -392,13 +510,13 @@ final class iCloudService: NSObject {
                     //                                  Success!
                     // -----------------------------------------------------------------------------
                     #if DEBUG_PRINT_FUNCCALLS
-                    print( "iCloudService.getReferencesCounty(): success!, got \(recordCounterCounty) records, will update ReferenceTableState and call checkStateData")
+                    print( "iCloudService.getReferencesCounty(): success!, got \(recordCounterCounty) records, will update ReferenceTableState and call pullRKIDataState()")
                     #endif
                     GlobalStorageQueue.async(flags: .barrier, execute: {
                         self.ReferenceTableCounty = newReferenceTableCounty
                     })
                     
-                    //self.getReferencesCounty()
+                    self.pullRKIDataState()
                     
                 } else {
                     
@@ -439,6 +557,343 @@ final class iCloudService: NSObject {
         })
     }
     
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     checks if there is data in iCloud which are not yet available on local and if so, pull that data from icloud.
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func pullRKIDataState() {
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("iCloudService.pullRKIDataState(): just started")
+        #endif
+
+        
+        
+        
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("iCloudService.pullRKIDataState(): now call pushRKIDataState()")
+        #endif
+
+        self.pushRKIDataState()
+    }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     checks if there is data in iCloud which are not yet available on local and if so, pull that data from icloud.
+     
+     -----------------------------------------------------------------------------------------------
+     */    private func pullRKIDataCounty() {
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("iCloudService.pullRKIDataCounty(): just started")
+        #endif
+        
+        
+        
+        
+
+        #if DEBUG_PRINT_FUNCCALLS
+        print("iCloudService.pullRKIDataCounty(): now call pushRKIDataCounty()")
+        #endif
+
+        self.pushRKIDataCounty()
+    }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     checks if there is data local is not yet available on iCloud and if so, push that data to icloud.
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func pushRKIDataState() {
+        
+        GlobalStorageQueue.async(flags: .barrier, execute: {
+            
+            if self.userIsLoggedIn == true {
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("iCloudService.pushRKIDataState(): User is logged in, go ahead")
+                #endif
+                
+                for item in self.dataToSendState {
+                    
+                    if item.value.sendStatus == .new {
+                        
+                        if let indexFound = self.ReferenceTableState.firstIndex(where: { $0.DayNumber == item.key } ) {
+                            
+                            // dayNumber is already in reference table, so check if we have the same data
+                            let hashData = item.value.data.hashValue
+                            let hashReference = self.ReferenceTableState[indexFound].DataHashValue
+                            
+                            if hashData != hashReference {
+                                
+                                // local data differ from iCloud data, replace the data in iCloud
+                                
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print("iCloudService.pushRKIDataState(): dayNumber \(item.key) already in Reference table, but hashData (\(hashData)) != hashReference (\(hashReference)), will call sendStateToICloud(\(item.key))")
+                                #endif
+                                
+                                self.dataToSendState[item.key]!.sendStatus = .markedForSend
+                                self.sendStateToICloud(dayNumber: item.key)
+                                
+                            } else {
+                                
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print("iCloudService.pushRKIDataState(): dayNumber \(item.key) already in Reference table, and hashData (\(hashData)) == hashReference (\(hashReference)), will NOT call sendStateToICloud()")
+                                #endif
+                            }
+                            
+                        } else {
+                            
+                            // local data not in reference table, so send it to iCloud
+                            #if DEBUG_PRINT_FUNCCALLS
+                            print("iCloudService.pushRKIDataState(): dayNumber \(item.key) is not in reference table, will call sendStateToICloud(\(item.key))")
+                            #endif
+                            self.dataToSendState[item.key]!.sendStatus = .markedForSend
+                            self.sendStateToICloud(dayNumber: item.key)
+                        }
+                    }
+                }
+                
+            } else {
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("iCloudService.pushRKIDataState(): User is NOT logged in, do nothing")
+                #endif
+            }
+        })
+    }
+    
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     checks if there is data local is not yet available on iCloud and if so, push that data to icloud.
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func pushRKIDataCounty() {
+        
+        GlobalStorageQueue.async(flags: .barrier, execute: {
+            
+            if self.userIsLoggedIn == true {
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("iCloudService.pushRKIDataCounty(): User is logged in, go ahead")
+                #endif
+                
+                for item in self.dataToSendSCounty {
+                    
+                    if item.value.sendStatus == .new {
+                        
+                        if let indexFound = self.ReferenceTableCounty.firstIndex(where: { $0.DayNumber == item.key } ) {
+                            
+                            // dayNumber is already in reference table, so check if we have the same data
+                            let hashData = item.value.data.hashValue
+                            let hashReference = self.ReferenceTableCounty[indexFound].DataHashValue
+                            
+                            if hashData != hashReference {
+                                
+                                // local data differ from iCloud data, replace the data in iCloud
+                                
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print("iCloudService.pushRKIDataCounty(): dayNumber \(item.key) already in Reference table, but hashData (\(hashData)) != hashReference (\(hashReference)), will call sendCountyToICloud(\(item.key))")
+                                #endif
+                                
+                                self.dataToSendSCounty[item.key]!.sendStatus = .markedForSend
+                                self.sendCountyToICloud(dayNumber: item.key)
+                                
+                            } else {
+                                
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print("iCloudService.pushRKIDataCounty(): dayNumber \(item.key) already in Reference table, and hashData (\(hashData)) == hashReference (\(hashReference)), will NOT call sendCountyToICloud()")
+                                #endif
+                            }
+                            
+                        } else {
+                            
+                            // local data not in reference table, so send it to iCloud
+                            #if DEBUG_PRINT_FUNCCALLS
+                            print("iCloudService.pushRKIDataCounty(): dayNumber \(item.key) is not in reference table, will call sendCountyToICloud(\(item.key))")
+                            #endif
+                            
+                            self.dataToSendSCounty[item.key]!.sendStatus = .markedForSend
+                            self.sendCountyToICloud(dayNumber: item.key)
+                        }
+                    }
+                }
+                
+            } else {
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("iCloudService.pushRKIDataCounty(): User is NOT logged in, do nothing")
+                #endif
+            }
+        })
+    }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     
+     
+     -----------------------------------------------------------------------------------------------
+     
+     - Parameters:
+     - :
+     
+     - Returns:
+     
+     */
+    private func sendStateToICloud(dayNumber: Int) {
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("iCloudService.sendStateToICloud(): just started, dayNumber: \(dayNumber)")
+        #endif
+        
+        /*
+        
+        let newLocationRecordID = CKRecord.ID(recordName: currentWISRecordID,
+                                              zoneID: self.WIS_ZoneLocationsZoneId)
+        
+        let newLocationRecord = CKRecord(recordType: self.WIS_Locations_RecordType,
+                                         recordID: newLocationRecordID)
+        
+        // fill the record data
+        newLocationRecord[self.WIS_LocationsDevice_ID_FieldName]  = currentDevice_ID
+        newLocationRecord[self.WIS_LocationsCodeList_FieledName]  = codeList
+        newLocationRecord[self.WIS_LocationsOffsets_FieldName]    = offsetOfCodes
+        newLocationRecord[self.WIS_LocationsLatitudes_FieldName]  = latitudes
+        newLocationRecord[self.WIS_LocationsLongitudes_FieldName] = longitudes
+        
+        // append it to the array of created records
+        self.WIS_OP_PushDataOutLocationRecordArray.append(newLocationRecord)
+        
+
+        
+        
+        
+        
+        // create and prepare the new cloudKit operation
+        let modifyLocationsRecordOperation = CKModifyRecordsOperation()
+        
+        
+        let createdRecords = Array(self.WIS_OP_PushDataOutLocationRecordArray.prefix(Int(numberOfRecordsWeUse)))
+        
+        modifyLocationsRecordOperation.savePolicy = .changedKeys // just save the changed fields
+        modifyLocationsRecordOperation.isAtomic = false // the records are individual, so no need for .atomic
+        modifyLocationsRecordOperation.recordsToSave = createdRecords
+        modifyLocationsRecordOperation.recordIDsToDelete = nil
+        modifyLocationsRecordOperation.qualityOfService = .userInitiated
+        
+        
+        // -----------------------------------------------------------------------------
+        //                                  modifyRecordsCompletionBlock
+        // -----------------------------------------------------------------------------
+        modifyLocationsRecordOperation.modifyRecordsCompletionBlock = {
+            
+            (savedRecords, deletedRecordIDs, error) in
+            
+        }
+        
+        // -----------------------------------------------------------------------------
+        //                                  Fire operation
+        // -----------------------------------------------------------------------------
+        
+        #if DEBUG_NSLOG_ICLOUD
+        NSLog("[Seq-\(chainSequence).\(opStepInChain)] \(WIS.unique.WIS_OpChainArray[opIndexOfChain].name).WIS_OP_PushDataOUTLocation(): prepared the operation, numberOfRecordsWeUse == \(numberOfRecordsWeUse), will call WIS_DataPrivateDB.add(modifyLocationsRecordOperation)")
+        #endif
+        
+        // keep me going
+        WIS.unique.WIS_TimeOfLastTriggerEvent = CFAbsoluteTimeGetCurrent()
+        
+        WIS_DataPrivateDB.add(modifyLocationsRecordOperation)
+        return
+
+ 
+ */
+    }
+    
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     
+     
+     -----------------------------------------------------------------------------------------------
+     
+     - Parameters:
+     - :
+     
+     - Returns:
+     
+     */
+    private func sendCountyToICloud(dayNumber: Int) {
+        
+        #if DEBUG_PRINT_FUNCCALLS
+        print("iCloudService.sendCountyToICloud(): just started, dayNumber: \(dayNumber)")
+        #endif
+        
+        
+
+    }
+    
+
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     Set the flag userIsLoggedIn according to the accountStatus of the default database.
+     
+     This flag is used to determin if this device is able to push data to the iCloud. If it is se to false, the two methodes pushRKIDataState() and pushRKIDataCounty() will do nothing.
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func checkUserAccount() {
+        
+        CKContainer.default().accountStatus {
+            (accountStatus, error) in
+            
+            switch accountStatus {
+            
+            case .available:
+                GlobalStorageQueue.async(flags: .barrier, execute: {
+                    print("iCloudService.checkUserAccount(): iCloud Available, set userIsLoggedIn = true")
+                    self.userIsLoggedIn = true
+                })
+                
+            case .noAccount:
+                GlobalStorageQueue.async(flags: .barrier, execute: {
+                    print("iCloudService.checkUserAccount(): No iCloud account, set userIsLoggedIn = false")
+                    self.userIsLoggedIn = false
+                })
+                
+            case .restricted:
+                GlobalStorageQueue.async(flags: .barrier, execute: {
+                    print("iCloudService.checkUserAccount(): iCloud restricted, set userIsLoggedIn = false")
+                    self.userIsLoggedIn = false
+                })
+                
+            case .couldNotDetermine:
+                GlobalStorageQueue.async(flags: .barrier, execute: {
+                    print("iCloudService.checkUserAccount(): Unable to determine iCloud status, set userIsLoggedIn = false")
+                    self.userIsLoggedIn = false
+                })
+                
+            @unknown default:
+                GlobalStorageQueue.async(flags: .barrier, execute: {
+                    print("iCloudService.checkUserAccount(): @unknown default, set userIsLoggedIn = false")
+                    self.userIsLoggedIn = false
+                })
+            }
+        }
+    }
     
     // --------------------------------------------------------------------
     // MARK: - Error Handling
@@ -580,7 +1035,9 @@ final class iCloudService: NSObject {
             // An error that occurs when the user is unauthenticated.
             
             GlobalStorage.unique.storeLastError(
-                errorText: "iCloudService.CommonErrorHandling(\(from): Error.Code = .notAuthenticated, \(currentError.localizedDescription)")
+                errorText: "iCloudService.CommonErrorHandling(\(from): set userIsLoggedIn = false, Error.Code = .notAuthenticated, \(currentError.localizedDescription)")
+            
+            self.userIsLoggedIn = false
             
             
         case .operationCancelled:

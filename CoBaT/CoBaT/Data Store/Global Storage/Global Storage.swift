@@ -542,6 +542,45 @@ final class GlobalStorage: NSObject {
     }
     
     
+    
+    /**
+    -----------------------------------------------------------------------------------------------
+    
+    get the number of the day of the given timeInterval for timezone "Europe/Berlin" (RKI reference timezone)
+    
+    -----------------------------------------------------------------------------------------------
+    
+    - Parameters:
+       - time: given TimeInterval
+    
+    - Returns:
+       - number of the day since Date() reference date
+    
+    */
+    public func getDayNumberFromTimeInterval(time: TimeInterval) -> Int {
+        
+        // we use the gregorian calender
+        var RKICalendar: Calendar = Calendar(identifier: .gregorian)
+        
+        // we have to use the timeZone of Berlin, if that does not work, use the durrent timezone
+        let RKITimeZone: TimeZone = TimeZone(identifier: "Europe/Berlin") ?? TimeZone.current
+        RKICalendar.timeZone = RKITimeZone
+
+        // this is the reference date (noon)
+        let refDate: Date = Date(timeIntervalSinceReferenceDate: 0)
+        let refDateNoon : Date = RKICalendar.date(bySettingHour: 12, minute: 0, second: 0,
+                                                    of: refDate) ?? refDate
+        // get the noon of the endDate
+        let ofDate: Date = Date(timeIntervalSinceReferenceDate: time)
+        let ofDateNoon : Date = RKICalendar.date(bySettingHour: 12, minute: 0, second: 0,
+                                                  of: ofDate) ?? ofDate
+        
+        
+       return Calendar.current.dateComponents([.day],
+                                              from: refDateNoon,
+                                              to: ofDateNoon).day ?? -1
+    }
+ 
 
     
     // ---------------------------------------------------------------------------------------------
@@ -1202,7 +1241,7 @@ final class GlobalStorage: NSObject {
             } else {
                 
                 #if DEBUG_PRINT_FUNCCALLS
-                print("rebuildRKIDeltas no data available, do nothing")
+                print("rebuildRKIDeltas self.RKIData[\(areaIndex)].count == 0, no data available, do nothing")
                 #endif
                 
                 worthToSendUserNotification = false
@@ -1555,30 +1594,7 @@ final class GlobalStorage: NSObject {
         return RKICalendar.dateComponents(in: RKITimeZone, from: currentDate).weekday ?? 0
     }
     
-    private func getDayNumberFromTimeInterval(time: TimeInterval) -> Int {
-        
-        // we use the gregorian calender
-        var RKICalendar: Calendar = Calendar(identifier: .gregorian)
-        
-        // we have to use the timeZone of Berlin, if that does not work, use the durrent timezone
-        let RKITimeZone: TimeZone = TimeZone(identifier: "Europe/Berlin") ?? TimeZone.current
-        RKICalendar.timeZone = RKITimeZone
-
-        // this is the reference date (noon)
-        let refDate: Date = Date(timeIntervalSinceReferenceDate: 0)
-        let refDateNoon : Date = RKICalendar.date(bySettingHour: 12, minute: 0, second: 0,
-                                                    of: refDate) ?? refDate
-        // get the noon of the endDate
-        let ofDate: Date = Date(timeIntervalSinceReferenceDate: time)
-        let ofDateNoon : Date = RKICalendar.date(bySettingHour: 12, minute: 0, second: 0,
-                                                  of: ofDate) ?? ofDate
-        
-        
-       return Calendar.current.dateComponents([.day],
-                                              from: refDateNoon,
-                                              to: ofDateNoon).day ?? -1
-    }
-    
+   
     
     /**
      -----------------------------------------------------------------------------------------------
@@ -1790,14 +1806,15 @@ final class GlobalStorage: NSObject {
             self.lastErrors.append(lastErrorStruct(errorText: errorText))
              
             self.saveRKIData()
-            // local notification to update UI
-            DispatchQueue.main.async(execute: {
-                NotificationCenter.default.post(Notification(name: .CoBat_NewErrorStored))
-            })
             
-            #if DEBUG_PRINT_FUNCCALLS
-            print("storeLastError: just posted .CoBat_NewErrorStored")
-            #endif
+//            // local notification to update UI
+//            DispatchQueue.main.async(execute: {
+//                NotificationCenter.default.post(Notification(name: .CoBat_NewErrorStored))
+//            })
+//
+//            #if DEBUG_PRINT_FUNCCALLS
+//            print("storeLastError: just posted .CoBat_NewErrorStored")
+//            #endif
         })
     }
     
