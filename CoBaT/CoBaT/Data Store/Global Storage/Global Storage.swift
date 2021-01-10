@@ -582,6 +582,34 @@ final class GlobalStorage: NSObject {
     }
  
 
+    /**
+    -----------------------------------------------------------------------------------------------
+    
+    get the formatted date string from the dayNumber for timezone "Europe/Berlin" (RKI reference timezone)
+    
+    -----------------------------------------------------------------------------------------------
+    
+    - Parameters:
+       - dayNumber: given number of day
+    
+    - Returns:
+       - nformatted sdate string
+    
+    */
+    public func getDateStringFromDayNumber(dayNumber: Int) -> String! {
+         
+        // get the seconds. We add 12 hours to get noon
+        let seconds: TimeInterval = (Double(dayNumber) * 24.0 * 60.0 * 60.0) + (12.0 * 60.0 * 60.0)
+        
+        // get the date
+        let dateToUse: Date = Date(timeIntervalSinceReferenceDate: seconds)
+        
+        // get the string
+        let stringToReturn: String = shortSingleDateFormatterRKI.string(from: dateToUse)
+        
+        //return what we have
+        return stringToReturn
+    }
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - RKI data storage (permanent)

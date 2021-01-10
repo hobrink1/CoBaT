@@ -678,8 +678,6 @@ final class DetailsRKITableViewController: UITableViewController {
                 cell.LabelCases.text = casesTextNew
                 cell.LabelDeaths.text = deathsTextNew
                 cell.LabelIncidences.text = incidencesTextNew
-                
-
             }
             
             

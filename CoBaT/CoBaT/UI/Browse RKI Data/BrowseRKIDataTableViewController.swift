@@ -40,6 +40,7 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
     
     // the id string of the selected item, to highlight the related cell
     private var selectedItemID: String = ""
+    private var highlightSelectedItem: Bool = true
 
     // ----------------------------------------------------------------------------------
     // MARK: - Delegate for select button
@@ -602,15 +603,19 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
         switch GlobalUIData.unique.UIBrowserRKIAreaLevel {
    
         case GlobalStorage.unique.RKIDataCountry:
+            highlightSelectedItem = false
             break
             
         case GlobalStorage.unique.RKIDataState:
+            highlightSelectedItem = true
             self.selectedItemID = GlobalUIData.unique.UIBrowserRKISelectedStateID
             
         case GlobalStorage.unique.RKIDataCounty:
+            highlightSelectedItem = true
             self.selectedItemID = GlobalUIData.unique.UIBrowserRKISelectedCountyID
             
         default:
+            highlightSelectedItem = false
             break
       }
 
@@ -776,16 +781,25 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
             let myData = localDataArray[index]
             
             // get color schema for 7 day average caces per 100 K people
-            let (backgroundColor, textColorToUse, _, _) = CovidRating.unique.getColorsForValue(myData.cases7DaysPer100K)
+            let (backgroundColor, textColorToUse, textColorLower, _) = CovidRating.unique.getColorsForValue(myData.cases7DaysPer100K)
             
             // set the background of the cell
             cell.contentView.backgroundColor = backgroundColor
             
-            // set the border color, so the selected cell will be highlighted
-            if myData.myID == self.selectedItemID {
-                cell.layer.borderColor = textColorToUse.cgColor
+            // check if we highlight the selcted cell
+            if highlightSelectedItem == true {
+                
+                // yes, so set the border color, so the selected cell will be highlighted
+                if myData.myID == self.selectedItemID {
+                    cell.layer.borderColor = textColorToUse.cgColor
+                } else {
+                    cell.layer.borderColor = backgroundColor.cgColor
+                }
+                
             } else {
-                cell.layer.borderColor = backgroundColor.cgColor
+                
+                // no, so just set a neutral bordercolor
+                cell.layer.borderColor = textColorLower.cgColor
             }
             
             // color the two chevrons
