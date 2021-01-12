@@ -426,6 +426,9 @@ final class DetailsRKITableViewController: UITableViewController {
         super .viewDidAppear(animated)
         
         // add observer to recognise if user selcted new state
+        if let observer = newRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         newRKIDataReadyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_NewRKIDataReady,
             object: nil,
@@ -440,6 +443,9 @@ final class DetailsRKITableViewController: UITableViewController {
             })
         
         // add observer to recognise if user selcted other tab
+        if let observer = commonTabBarChangedContentObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         commonTabBarChangedContentObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_CommonTabBarChangedContent,
             object: nil,
@@ -454,6 +460,9 @@ final class DetailsRKITableViewController: UITableViewController {
             })
         
         // we have new graphs available
+        if let observer = newGraphReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         newGraphReadyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_Graph_NewGraphAvailable,
             object: nil,
@@ -493,11 +502,33 @@ final class DetailsRKITableViewController: UITableViewController {
         if let observer = newGraphReadyObserver {
             NotificationCenter.default.removeObserver(observer)
         }
+   }
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     deinit
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    deinit {
+
+        // remove the observer if set
+        if let observer = newRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         
+        // remove the observer if set
+        if let observer = commonTabBarChangedContentObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = newGraphReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
-    
 
     
     // ---------------------------------------------------------------------------------------------

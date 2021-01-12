@@ -303,7 +303,7 @@ final class RKIDataDownload: NSObject {
                     GlobalStorage.unique.refresh_RKICountyData(newRKICountyData: newDataArray)
                     
                     // save it to iCloud
-                    iCloudService.unique.syncNewRKIData(RKI_DataType: RKI_DataType,
+                    iCloudService.unique.saveRKIData(RKI_DataType: RKI_DataType,
                                                         time: updateDate.timeIntervalSinceReferenceDate,
                                                         data: data)
 
@@ -370,7 +370,7 @@ final class RKIDataDownload: NSObject {
                     GlobalStorage.unique.refresh_RKIStateData(newRKIStateData: newDataArray)
 
                     // save it to iCloud
-                    iCloudService.unique.syncNewRKIData(RKI_DataType: RKI_DataType,
+                    iCloudService.unique.saveRKIData(RKI_DataType: RKI_DataType,
                                                         time: lastUpdateTimeInterval,
                                                         data: data)
 

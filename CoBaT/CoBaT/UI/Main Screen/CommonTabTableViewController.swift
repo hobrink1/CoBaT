@@ -167,6 +167,9 @@ final class CommonTabTableViewController: UITableViewController {
         // Do any additional setup after loading the view.
         
         // add observer to recognise if user selcted new state
+        if let observer = CommonTabBarChangedContentObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         CommonTabBarChangedContentObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_CommonTabBarChangedContent,
             object: nil,
@@ -205,6 +208,20 @@ final class CommonTabTableViewController: UITableViewController {
     }
 
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     deinit
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    deinit {
+
+        // remove the observer if set
+        if let observer = CommonTabBarChangedContentObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Table view data source

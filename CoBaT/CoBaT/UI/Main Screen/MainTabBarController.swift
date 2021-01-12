@@ -230,6 +230,9 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         // Do any additional setup after loading the view.
         
         // add observer to recognise if user selcted new state
+        if let observer = userSelectedStateObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         userSelectedStateObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UserDidSelectState,
             object: nil,
@@ -245,6 +248,9 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
             })
         
         // add observer to recognise if user selcted new state
+        if let observer = userSelectedStateObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         userSelectedStateObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UserDidSelectCounty,
             object: nil,
@@ -260,7 +266,10 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
             })
         
         // add observer to recognise if user selcted new state
-         UIDataRestoredObserver = NotificationCenter.default.addObserver(
+        if let observer = UIDataRestoredObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        UIDataRestoredObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UIDataRestored,
             object: nil,
             queue: OperationQueue.main,
@@ -310,6 +319,30 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         
     }
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     deinit
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    deinit {
+        
+        // remove the observer if set
+        if let observer = userSelectedStateObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = userSelectedCountyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = UIDataRestoredObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
 
     /*
     // MARK: - Navigation

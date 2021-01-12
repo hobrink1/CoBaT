@@ -139,7 +139,7 @@ final class GlobalStorage: NSObject {
                     // got the data, try to decode it
                     do {
                         
-                        var myRKIData = try JSONDecoder().decode([[[RKIDataStruct]]].self,
+                        let myRKIData = try JSONDecoder().decode([[[RKIDataStruct]]].self,
                                                                  from: (loadedRKIData as? Data)!)
                         
                         let myRKIDataTimeStamps = try JSONDecoder().decode([[TimeInterval]].self,
@@ -173,48 +173,48 @@ final class GlobalStorage: NSObject {
                         // check the version
                         if currentVersionOfPermanentStorage == self.VersionOfPermanentStorage {
                             
-                            // Start DataCleansing -------------------------------------------------
-                            // As we had a problem in the early development, we lost some "myID" Strings
-                            // so we restore them with the following loop.
-                            // Can be wiped out, after all data migrated (mid Dezember 2020)
-                            // TODO: TODO: Remove data cleansing
-                            
-                            var weDidChangeSomething: Bool = false
-                            
-                            for indexArea in 0 ..< myRKIData.count {
-                                
-                                // check if there are data in that area level (favorites might be empty)
-                                if myRKIData[indexArea].isEmpty == false {
-                                    
-                                    for indexDay in 1 ..< myRKIData[indexArea].count {
-                                        
-                                        for indexMember in 0 ..< myRKIData[indexArea][indexDay].count {
-                                            
-                                            if myRKIData[indexArea][indexDay][indexMember].myID == nil {
-                                                
-                                                weDidChangeSomething = true
-                                                
-                                                let currentMember = myRKIData[indexArea][indexDay][indexMember]
-                                                let memberFromDayBefore = myRKIData[indexArea][indexDay - 1][indexMember]
-                                                
-                                                myRKIData[indexArea][indexDay][indexMember] =
-                                                    RKIDataStruct(stateID: currentMember.stateID,
-                                                                  myID:                 memberFromDayBefore.myID ?? "",
-                                                                  name:                 currentMember.name,
-                                                                  kindOf:               currentMember.kindOf,
-                                                                  inhabitants:          currentMember.inhabitants,
-                                                                  cases:                currentMember.cases,
-                                                                  deaths:               currentMember.deaths,
-                                                                  casesPer100k:         currentMember.casesPer100k,
-                                                                  cases7DaysPer100K:    currentMember.cases7DaysPer100K,
-                                                                  timeStamp:            currentMember.timeStamp)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            // End DataCleansing ---------------------------------------------------
+//                            // Start DataCleansing -------------------------------------------------
+//                            // As we had a problem in the early development, we lost some "myID" Strings
+//                            // so we restore them with the following loop.
+//                            // Can be wiped out, after all data migrated (mid Dezember 2020)
+//                            // TODO: TODO: Remove data cleansing
+//
+//                            var weDidChangeSomething: Bool = false
+//
+//                            for indexArea in 0 ..< myRKIData.count {
+//
+//                                // check if there are data in that area level (favorites might be empty)
+//                                if myRKIData[indexArea].isEmpty == false {
+//
+//                                    for indexDay in 1 ..< myRKIData[indexArea].count {
+//
+//                                        for indexMember in 0 ..< myRKIData[indexArea][indexDay].count {
+//
+//                                            if myRKIData[indexArea][indexDay][indexMember].myID == nil {
+//
+//                                                weDidChangeSomething = true
+//
+//                                                let currentMember = myRKIData[indexArea][indexDay][indexMember]
+//                                                let memberFromDayBefore = myRKIData[indexArea][indexDay - 1][indexMember]
+//
+//                                                myRKIData[indexArea][indexDay][indexMember] =
+//                                                    RKIDataStruct(stateID: currentMember.stateID,
+//                                                                  myID:                 memberFromDayBefore.myID ?? "",
+//                                                                  name:                 currentMember.name,
+//                                                                  kindOf:               currentMember.kindOf,
+//                                                                  inhabitants:          currentMember.inhabitants,
+//                                                                  cases:                currentMember.cases,
+//                                                                  deaths:               currentMember.deaths,
+//                                                                  casesPer100k:         currentMember.casesPer100k,
+//                                                                  cases7DaysPer100K:    currentMember.cases7DaysPer100K,
+//                                                                  timeStamp:            currentMember.timeStamp)
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//
+//                            // End DataCleansing ---------------------------------------------------
                             
                             
                             // we have the current version, so restore the date
@@ -234,15 +234,15 @@ final class GlobalStorage: NSObject {
                             self.rebuildDayArrays()
                             
                             
-                            // Start DataCleansing -------------------------------------------------
-                            // after the cleansing we save the new
-                            // TODO: TODO: Remove data cleansing
-                            
-                            if weDidChangeSomething == true {
-                                self.saveRKIData()
-                            }
-                            
-                            // End DataCleansing ---------------------------------------------------
+//                             Start DataCleansing -------------------------------------------------
+//                             after the cleansing we save the new
+//                             TODO: TODO: Remove data cleansing
+//
+//                            if weDidChangeSomething == true {
+//                                self.saveRKIData()
+//                            }
+//
+//                             End DataCleansing ---------------------------------------------------
                             
                             // rebuild the delta values
                             // but to not set the flags
@@ -366,7 +366,7 @@ final class GlobalStorage: NSObject {
                             self.rebuildDayArrays()
                             
                             // and force a save to secure what we have done
-                            self.saveRKIData()
+                            self.saveRKIData(from: "restoreSavedRKIData")
                             
                             // rebuild the delta values
                             self.rebuildRKIDeltas(kindOf: -1, newData: false)
@@ -472,7 +472,7 @@ final class GlobalStorage: NSObject {
                 self.rebuildFavorites()
                 
                 // make it permanant
-                self.saveRKIData()
+                self.saveRKIData(from: "saveNewFavorite")
                 
                 // rebuild the delta values
                 self.rebuildRKIDeltas(kindOf: self.RKIDataFavorites, newData: false)
@@ -527,7 +527,7 @@ final class GlobalStorage: NSObject {
                 self.rebuildFavorites()
                 
                 // make it permanant
-                self.saveRKIData()
+                self.saveRKIData(from: "removeFavorite")
                 
                 // rebuild the delta values
                 self.rebuildRKIDeltas(kindOf: self.RKIDataFavorites, newData: false)
@@ -747,6 +747,8 @@ final class GlobalStorage: NSObject {
                 
                 // and add the new values
                 self.addNewData(kindOf, newRKIData, oldestTimeStamp)
+                iCloudService.unique.startCoBaTWorkQueue(kindOf)
+                
                 
             } else {
                 
@@ -757,8 +759,9 @@ final class GlobalStorage: NSObject {
 
                 // find the right index to insert by the number of the day
                 let dayNumber = self.getDayNumberFromTimeInterval(time: oldestTimeStamp)
+                
                 let indexToUse: Int
-                if let foundIndex = self.RKINumbersOfDays.firstIndex(where: { $0[kindOf] < dayNumber } ) {
+                if let foundIndex = self.RKINumbersOfDays[kindOf].firstIndex(where: { $0 <= dayNumber } ) {
                     indexToUse = foundIndex
                 } else {
                     indexToUse = 0
@@ -787,6 +790,7 @@ final class GlobalStorage: NSObject {
                         #endif
 
                         self.replaceDataOfToday(kindOf, newRKIData, oldestTimeStamp)
+                        iCloudService.unique.startCoBaTWorkQueue(kindOf)
 
                     } else {
                     
@@ -796,16 +800,19 @@ final class GlobalStorage: NSObject {
                         #endif
                         
                         self.addNewData(kindOf, newRKIData, oldestTimeStamp)
+                        iCloudService.unique.startCoBaTWorkQueue(kindOf)
                     }
                     
                 } else {
                     
                     // case 4: data are the same, so ignore it
                     #if DEBUG_PRINT_FUNCCALLS
-                    print ("refresh_RKIData case 4: data sets are equal, so do not update")
+                    print ("refresh_RKIData case 4: data sets are equal, so do not update, but call iCloudService.startCoBaTWorkQueue(\(kindOf))")
                     #endif
                     
-                    // check if we have to inform the background service
+                    iCloudService.unique.startCoBaTWorkQueue(kindOf)
+                    
+                   // check if we have to inform the background service
                     if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
                         
                         // check what kind of data we got
@@ -822,7 +829,7 @@ final class GlobalStorage: NSObject {
                             // yes both parts are done, so close the task
                             //#if DEBUG_PRINT_FUNCCALLS
                             GlobalStorage.unique.storeLastError(
-                                errorText:"newRKIDataArrived: kindOf: \(kindOf), (didRecieveStateData == \(self.didRecieveStateData)) && (didRecieveCountyData == \(self.didRecieveCountyData)), call closeBackgroundTask()")
+                                errorText:"refresh_RKIData case 4: kindOf: \(kindOf), (didRecieveStateData == \(self.didRecieveStateData)) && (didRecieveCountyData == \(self.didRecieveCountyData)), call closeBackgroundTask()")
                             //#endif
                          
                             CoBaTBackgroundService.unique.closeBackgroundTask()
@@ -831,7 +838,7 @@ final class GlobalStorage: NSObject {
                             
                             //#if DEBUG_PRINT_FUNCCALLS
                             GlobalStorage.unique.storeLastError(
-                                errorText:"newRKIDataArrived: kindOf: \(kindOf), didRecieveStateData == \(self.didRecieveStateData), didRecieveCountyData == \(self.didRecieveCountyData), DO NOT close background task")
+                                errorText:"refresh_RKIData case 4: kindOf: \(kindOf), didRecieveStateData == \(self.didRecieveStateData), didRecieveCountyData == \(self.didRecieveCountyData), DO NOT close background task")
                             //#endif
 
                         }
@@ -891,12 +898,13 @@ final class GlobalStorage: NSObject {
                 self.RKIData[kindOfArea].removeLast()
                 self.RKIDataTimeStamps[kindOfArea].removeLast()
                 self.RKIDataWeekdays[kindOfArea].removeLast()
+                self.RKINumbersOfDays[kindOfArea].removeLast()
             }
             
             // find the right index to insert by the number of the day
             let dayNumber = getDayNumberFromTimeInterval(time: timeStamp)
             let indexToUse: Int
-            if let foundIndex = RKINumbersOfDays.firstIndex(where: { $0[kindOfArea] < dayNumber } ) {
+            if let foundIndex = RKINumbersOfDays[kindOfArea].firstIndex(where: { $0 < dayNumber } ) {
                 indexToUse = foundIndex
             } else {
                 indexToUse = 0
@@ -924,7 +932,7 @@ final class GlobalStorage: NSObject {
         self.rebuildFavorites()
         
         // make it permanant
-        self.saveRKIData()
+        self.saveRKIData(from: "addNewData")
         
         // rebuild the delta values
         self.rebuildRKIDeltas(kindOf: kindOfArea, newData: true)
@@ -1008,7 +1016,7 @@ final class GlobalStorage: NSObject {
         self.rebuildFavorites()
         
         // make it permanant
-        self.saveRKIData()
+        self.saveRKIData(from: "replaceDataOfToday")
         
         // rebuild the delta values
         self.rebuildRKIDeltas(kindOf: kindOfArea, newData: true)
@@ -1390,6 +1398,11 @@ final class GlobalStorage: NSObject {
             self.RKIDataWeekdays.append([])
         }
 
+        if self.RKINumbersOfDays.count < (RKIDataFavorites + 1) {
+            // clean level for favorites data
+            self.RKINumbersOfDays.append([])
+        }
+
         // clean level for favorites data
         self.RKIData[RKIDataFavorites] = []
         self.RKIDataTimeStamps[RKIDataFavorites] = []
@@ -1517,13 +1530,13 @@ final class GlobalStorage: NSObject {
      
      -----------------------------------------------------------------------------------------------
      */
-    private func saveRKIData() {
+    private func saveRKIData(from: String) {
         
         // make sure we have consistent data
         //GlobalStorageQueue.async(execute: {
             
             #if DEBUG_PRINT_FUNCCALLS
-            print("saveRKIData just started")
+            print("saveRKIData(\(from)) just started")
             #endif
             
             // make it permamnent, by encode it to JSON and store it
@@ -1553,7 +1566,7 @@ final class GlobalStorage: NSObject {
             } catch let error as NSError {
                 
                 // encode did fail, log the message
-                self.storeLastError(errorText: "CoBaT.GlobalStorage.saveRKIData: Error: JSON encoder could not encode RKIData: error: \"\(error.description)\"")
+                self.storeLastError(errorText: "CoBaT.GlobalStorage.saveRKIData(\(from)): Error: JSON encoder could not encode RKIData: error: \"\(error.description)\"")
             }
             
    
@@ -1833,7 +1846,7 @@ final class GlobalStorage: NSObject {
             // append the new error
             self.lastErrors.append(lastErrorStruct(errorText: errorText))
              
-            self.saveRKIData()
+            self.saveRKIData(from: "storeLastError")
             
 //            // local notification to update UI
 //            DispatchQueue.main.async(execute: {

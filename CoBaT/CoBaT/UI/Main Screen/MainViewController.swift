@@ -308,8 +308,43 @@ final class MainViewController: UIViewController {
         if let observer = SceneWillEnterForegroundObserver {
             NotificationCenter.default.removeObserver(observer)
         }
-
     }
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     deinit
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    deinit {
+        // remove the observer if set
+        if let observer = userSelectedStateObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = userSelectedCountyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = RKIDataRetrievedObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = NewRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = SceneWillEnterForegroundObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+
+    }
+    
+    
  }
 

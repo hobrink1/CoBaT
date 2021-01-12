@@ -127,6 +127,9 @@ final class DetailsRKIViewController: UIViewController {
         
         
         // add observer to recognise if new data did araived. just in case the name was changed by RKI
+        if let observer = newRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         newRKIDataReadyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_NewRKIDataReady,
             object: nil,
@@ -186,6 +189,23 @@ final class DetailsRKIViewController: UIViewController {
 
     }
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     deinit
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    deinit {
+        
+        // remove the observer if set
+        if let observer = newRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        if let observer = newGraphReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
     
     
     // ---------------------------------------------------------------------------------------------

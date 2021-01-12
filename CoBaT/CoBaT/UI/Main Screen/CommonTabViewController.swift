@@ -357,6 +357,9 @@ final class CommonTabViewControllerV2: UIViewController {
         super .viewDidAppear(animated)
         
         // add observer to recognise if user selcted new state
+        if let observer = userSelectedStateObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         userSelectedStateObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UserDidSelectState,
             object: nil,
@@ -371,6 +374,9 @@ final class CommonTabViewControllerV2: UIViewController {
             })
         
         // add observer to recognise if user selcted new state
+        if let observer = userSelectedStateObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         userSelectedStateObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UserDidSelectCounty,
             object: nil,
@@ -386,6 +392,9 @@ final class CommonTabViewControllerV2: UIViewController {
         
         
         // add observer to recognise a new retrieved status
+        if let observer = RKIDataRetrievedObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         RKIDataRetrievedObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_RKIDataRetrieved,
             object: nil,
@@ -400,6 +409,9 @@ final class CommonTabViewControllerV2: UIViewController {
             })
         
         // add observer to recognise if new data are available
+        if let observer = NewRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         NewRKIDataReadyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_NewRKIDataReady,
             object: nil,
@@ -425,6 +437,36 @@ final class CommonTabViewControllerV2: UIViewController {
      */
     override func viewDidDisappear(_ animated: Bool) {
         super .viewDidDisappear(animated)
+        
+        // remove the observer if set
+        if let observer = userSelectedStateObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = userSelectedCountyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = RKIDataRetrievedObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = NewRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     deinit
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    deinit {
         
         // remove the observer if set
         if let observer = userSelectedStateObserver {

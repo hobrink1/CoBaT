@@ -634,6 +634,9 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
         super .viewDidAppear(animated)
         
         // add observer to recognise if user selcted new sort strategy
+        if let observer = userDidSelectSortObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         userDidSelectSortObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UserDidSelectSort,
             object: nil,
@@ -648,6 +651,9 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
             })
         
         // add observer to recognise if user selcted new state
+        if let observer = newRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         newRKIDataReadyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_NewRKIDataReady,
             object: nil,
@@ -662,6 +668,9 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
             })
 
         // add observer to recognise if user selcted new state
+        if let observer = favoriteTabBarChangedContentObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         favoriteTabBarChangedContentObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_FavoriteTabBarChangedContent,
             object: nil,
@@ -706,7 +715,29 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
         }
     }
 
-    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     deinit
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    deinit {
+
+        // remove the observer if set
+        if let observer = userDidSelectSortObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        // remove the observer if set
+        if let observer = newRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = favoriteTabBarChangedContentObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
 
     
     // ---------------------------------------------------------------------------------------------
