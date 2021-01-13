@@ -14,8 +14,8 @@
             filePath = "CoBaT/Data Store/iCloudIntegration/iCloudService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "182"
-            endingLineNumber = "182"
+            startingLineNumber = "183"
+            endingLineNumber = "183"
             landmarkName = "saveRKIData(RKI_DataType:time:data:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -32,8 +32,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1536"
             endingLineNumber = "1536"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "getRKIReferencesState()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -48,8 +48,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1730"
             endingLineNumber = "1730"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "getRKIReferencesCounty()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -64,8 +64,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1694"
             endingLineNumber = "1694"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "getRKIReferencesCounty()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -80,8 +80,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1673"
             endingLineNumber = "1673"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "getRKIReferencesCounty()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -96,8 +96,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1600"
             endingLineNumber = "1600"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "getRKIReferencesState()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -112,8 +112,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1564"
             endingLineNumber = "1564"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "getRKIReferencesState()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -128,8 +128,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1543"
             endingLineNumber = "1543"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "getRKIReferencesState()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -142,10 +142,10 @@
             filePath = "CoBaT/Data Store/iCloudIntegration/iCloudService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2359"
-            endingLineNumber = "2359"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            startingLineNumber = "2360"
+            endingLineNumber = "2360"
+            landmarkName = "CommonErrorHandling(_:from:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -158,10 +158,10 @@
             filePath = "CoBaT/Data Store/iCloudIntegration/iCloudService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2309"
-            endingLineNumber = "2309"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            startingLineNumber = "2310"
+            endingLineNumber = "2310"
+            landmarkName = "checkUserAccount()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -174,10 +174,10 @@
             filePath = "CoBaT/Data Store/iCloudIntegration/iCloudService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1989"
-            endingLineNumber = "1989"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            startingLineNumber = "1990"
+            endingLineNumber = "1990"
+            landmarkName = "sendRKIStateToICloud(dayNumber:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -190,8 +190,8 @@
             filePath = "CoBaT/Data Store/Global Storage/Global Storage.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "608"
-            endingLineNumber = "608"
+            startingLineNumber = "705"
+            endingLineNumber = "705"
             landmarkName = "getDateStringFromDayNumber(dayNumber:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -206,8 +206,8 @@
             filePath = "CoBaT/Data Store/Global Storage/Global Storage.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "771"
-            endingLineNumber = "771"
+            startingLineNumber = "866"
+            endingLineNumber = "866"
             landmarkName = "refresh_RKIData(_:_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -216,14 +216,14 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "CD6F557B-9809-447F-A6B8-C99E2072DF2A"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "CoBaT/Data Store/Global Storage/Global Storage.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "779"
-            endingLineNumber = "779"
+            startingLineNumber = "874"
+            endingLineNumber = "874"
             landmarkName = "refresh_RKIData(_:_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -254,8 +254,8 @@
             filePath = "CoBaT/Data Store/Global Storage/Global Storage.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1543"
-            endingLineNumber = "1543"
+            startingLineNumber = "1640"
+            endingLineNumber = "1640"
             landmarkName = "saveRKIData(from:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -286,9 +286,73 @@
             filePath = "CoBaT/Data Store/Global Storage/Global Storage.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "761"
-            endingLineNumber = "761"
+            startingLineNumber = "856"
+            endingLineNumber = "856"
             landmarkName = "refresh_RKIData(_:_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F9696846-4967-447F-A98E-1AC91AC47BB9"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "CoBaT/Data Store/iCloudIntegration/iCloudService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "555"
+            endingLineNumber = "555"
+            landmarkName = "getCoBaTReferencesState()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "747EAAB8-6001-4585-9791-AACF3A84DCE2"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "CoBaT/Data Store/iCloudIntegration/iCloudService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "595"
+            endingLineNumber = "595"
+            landmarkName = "getCoBaTReferencesState()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "AB59FD68-4822-4AAF-BB36-DEF6C00BD703"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "CoBaT/Data Store/Global Storage/Global Storage.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "345"
+            endingLineNumber = "345"
+            landmarkName = "restoreSavedRKIData()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D33AC2D6-DF40-46A2-BF25-55CC128985DC"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "CoBaT/Data Store/Global Storage/Global Storage.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "348"
+            endingLineNumber = "348"
+            landmarkName = "restoreSavedRKIData()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

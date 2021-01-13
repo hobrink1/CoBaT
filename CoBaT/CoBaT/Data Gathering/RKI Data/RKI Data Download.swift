@@ -284,6 +284,7 @@ final class RKIDataDownload: NSObject {
 //
                         //print("State Update Date: \(shortSingleDateTimeFormatter.string(from: updateDate)), RKI:\(shortSingleDateFormatterRKI.string(from: updateDate))")
                         
+                        let noonTime = GlobalStorage.unique.getNoonTimeInterval(time: updateDate.timeIntervalSinceReferenceDate)
                         // append the new data
                         newDataArray.append(GlobalStorage.RKIDataStruct(
                                                 stateID: singleItem.attributes.blid,
@@ -295,7 +296,7 @@ final class RKIDataDownload: NSObject {
                                                 deaths: singleItem.attributes.deaths,
                                                 casesPer100k: singleItem.attributes.casesPer100K,
                                                 cases7DaysPer100K: singleItem.attributes.cases7Per100K,
-                                                timeStamp: updateDate.timeIntervalSinceReferenceDate))
+                                                timeStamp: noonTime))
                     }
                     
 
@@ -341,7 +342,8 @@ final class RKIDataDownload: NSObject {
                     let secondsSince1970: TimeInterval = TimeInterval(Double(firstItem.attributes.aktualisierung) / 1_000)
                     let lastUpdateRKI: Date = Date(timeIntervalSince1970: secondsSince1970)
                     let lastUpdateTimeInterval: TimeInterval = lastUpdateRKI.timeIntervalSinceReferenceDate
-
+                    let noonTime = GlobalStorage.unique.getNoonTimeInterval(time: lastUpdateTimeInterval)
+                    
                     // we will provide an array of converted values
                     var newDataArray: [GlobalStorage.RKIDataStruct] = []
                     
@@ -362,7 +364,7 @@ final class RKIDataDownload: NSObject {
                                                 deaths: singleItem.attributes.death,
                                                 casesPer100k: singleItem.attributes.faelle100000_ew,
                                                 cases7DaysPer100K: singleItem.attributes.cases7BlPer100K,
-                                                timeStamp: lastUpdateTimeInterval))
+                                                timeStamp: noonTime))
                         
                     }
                     

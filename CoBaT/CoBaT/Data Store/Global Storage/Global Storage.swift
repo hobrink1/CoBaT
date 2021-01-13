@@ -71,7 +71,7 @@ final class GlobalStorage: NSObject {
     private let maxNumberOfErrorsStored: Int = 50
     
     // Version of permanent storage
-    private let VersionOfPermanentStorage: Int = 2
+    private let VersionOfPermanentStorage: Int = 3
 
     
     // Calender
@@ -337,13 +337,74 @@ final class GlobalStorage: NSObject {
                                     self.storeLastError(errorText: "CoBaT.GlobalStorage.restoreSavedRKIData: just migrated the stored data from version 1 to version 2")
                                     break
                                     
+   
+                                    
+                                case 2: // migrate the timeStamps to noon. We need that to make sure we have a reliable hash value
+                                    
+                                    // we have to reset the timestamps to noon
+                                    self.storeLastError(errorText: "CoBaT.GlobalStorage.restoreSavedRKIData: version of permanent storage (\(currentVersionOfPermanentStorage)) is below \(self.VersionOfPermanentStorage), migrate timeStamps")
+                                    
+                                    // loop over stored areas
+                                    for areaIndex in 0 ..< migratedRKIData.count {
+                                        
+                                        // loop over stored days
+                                        for dayIndex in 0 ..< migratedRKIData[areaIndex].count {
+                                            
+                                            // loop over stored items
+                                            for itemIndex in 0 ..< migratedRKIData[areaIndex][dayIndex].count {
+                                                
+                                                // Exchange the old item by a new item.
+                                                // The new item is just a copy of the old item, except the timeCode
+                                                
+                                                // get the old values
+                                                let oldItem = migratedRKIData[areaIndex][dayIndex][itemIndex]
+                                                
+                                                // put all values (except the timeStamp) to new item
+                                                let newItem = RKIDataStruct(
+                                                    stateID: oldItem.stateID,
+                                                    myID: oldItem.myID!,
+                                                    name: oldItem.name,
+                                                    kindOf: oldItem.kindOf,
+                                                    inhabitants: oldItem.inhabitants,
+                                                    cases: oldItem.cases,
+                                                    deaths: oldItem.deaths,
+                                                    casesPer100k: oldItem.casesPer100k,
+                                                    cases7DaysPer100K: oldItem.cases7DaysPer100K,
+                                                    
+                                                    // migrate the timeStamp
+                                                    timeStamp: self.getNoonTimeInterval(time: oldItem.timeStamp))
+                                                
+                                                // replace the old item by the new item
+                                                migratedRKIData[areaIndex][dayIndex][itemIndex] = newItem
+                                            }
+                                        }
+                                    }
+
+                                    // now the timeStamps
+                                    
+                                    // loop over areas
+                                    for areaIndex in 0 ..< migratedRKIDataTimeStamps.count {
+                                        
+                                        // loop over days
+                                        for dayIndex in 0 ..< migratedRKIDataTimeStamps[areaIndex].count {
+                                            
+                                            // migrate timeStamps
+                                            migratedRKIDataTimeStamps[areaIndex][dayIndex] =
+                                                self.getNoonTimeInterval(time: migratedRKIDataTimeStamps[areaIndex][dayIndex])
+                                        }
+                                    }
+                                    
+                                    // set the new version
+                                    currentVersionOfPermanentStorage = 3
+
+                                    break
+
                                     
                                 default:
                                     
                                     // unknown version, just report nd do not restore the date
                                     self.storeLastError(errorText: "CoBaT.GlobalStorage.restoreSavedRKIData: Error: version of permanent storage (\(currentVersionOfPermanentStorage)) is unknown, current version is: \(self.VersionOfPermanentStorage), do not restore data, as it might be not usefull")
                                     
-                                    break
                                     
                                 } // case
                                 
@@ -581,6 +642,42 @@ final class GlobalStorage: NSObject {
                                               to: ofDateNoon).day ?? -1
     }
  
+    /**
+    -----------------------------------------------------------------------------------------------
+    
+     This methode gives the timeInterval of noon for the given timeinterval
+     
+     We need this to normalize the timeIntervals and have reliable hash values
+    
+    -----------------------------------------------------------------------------------------------
+    
+    - Parameters:
+       - time: given TimeInterval
+    
+    - Returns:
+       - number of the day since Date() reference date
+    
+    */
+    public func getNoonTimeInterval(time: TimeInterval) -> TimeInterval {
+        
+        // we use the gregorian calender
+        var RKICalendar: Calendar = Calendar(identifier: .gregorian)
+        
+        // we have to use the timeZone of Berlin, if that does not work, use the durrent timezone
+        let RKITimeZone: TimeZone = TimeZone(identifier: "Europe/Berlin") ?? TimeZone.current
+        RKICalendar.timeZone = RKITimeZone
+
+        // get the noon of the endDate
+        let ofDate: Date = Date(timeIntervalSinceReferenceDate: time)
+        let ofDateNoon : Date = RKICalendar.date(bySettingHour: 12, minute: 0, second: 0,
+                                                  of: ofDate) ?? ofDate
+        
+        // return the timeInterval
+        return ofDateNoon.timeIntervalSinceReferenceDate
+    }
+ 
+
+
 
     /**
     -----------------------------------------------------------------------------------------------
@@ -747,8 +844,6 @@ final class GlobalStorage: NSObject {
                 
                 // and add the new values
                 self.addNewData(kindOf, newRKIData, oldestTimeStamp)
-                iCloudService.unique.startCoBaTWorkQueue(kindOf)
-                
                 
             } else {
                 
@@ -790,7 +885,6 @@ final class GlobalStorage: NSObject {
                         #endif
 
                         self.replaceDataOfToday(kindOf, newRKIData, oldestTimeStamp)
-                        iCloudService.unique.startCoBaTWorkQueue(kindOf)
 
                     } else {
                     
@@ -800,7 +894,6 @@ final class GlobalStorage: NSObject {
                         #endif
                         
                         self.addNewData(kindOf, newRKIData, oldestTimeStamp)
-                        iCloudService.unique.startCoBaTWorkQueue(kindOf)
                     }
                     
                 } else {
@@ -840,7 +933,6 @@ final class GlobalStorage: NSObject {
                             GlobalStorage.unique.storeLastError(
                                 errorText:"refresh_RKIData case 4: kindOf: \(kindOf), didRecieveStateData == \(self.didRecieveStateData), didRecieveCountyData == \(self.didRecieveCountyData), DO NOT close background task")
                             //#endif
-
                         }
                     }
                 }
@@ -1348,6 +1440,11 @@ final class GlobalStorage: NSObject {
                 //#endif
             }
             
+            // if this was caused by new data, check iCloud
+            if newData == true {
+                iCloudService.unique.startCoBaTWorkQueue(kindOf)
+            }
+
             #if DEBUG_PRINT_FUNCCALLS
             print("rebuildRKIDeltas just posted .CoBaT_NewRKIDataReady")
             #endif

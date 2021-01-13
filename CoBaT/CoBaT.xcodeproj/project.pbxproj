@@ -34,6 +34,7 @@
 		F2AD3064256D043900FDDE4B /* JSON RKI Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD3063256D043900FDDE4B /* JSON RKI Helpers.swift */; };
 		F2AD306C256D0AD900FDDE4B /* Global Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD306B256D0AD900FDDE4B /* Global Storage.swift */; };
 		F2AD3072256D10D400FDDE4B /* RKI Data Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD3071256D10D400FDDE4B /* RKI Data Download.swift */; };
+		F2B2F1D425AFA0B200A03CB4 /* Hash.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B2F1D325AFA0B200A03CB4 /* Hash.swift */; };
 		F2DB33712577817400C47972 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB33702577817400C47972 /* MainViewController.swift */; };
 		F2DB3376257781CB00C47972 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB3375257781CB00C47972 /* MainTabBarController.swift */; };
 		F2DB337B2577825900C47972 /* CountryTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DB337A2577825900C47972 /* CountryTabViewController.swift */; };
@@ -107,6 +108,7 @@
 		F2AD3063256D043900FDDE4B /* JSON RKI Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSON RKI Helpers.swift"; sourceTree = "<group>"; };
 		F2AD306B256D0AD900FDDE4B /* Global Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Global Storage.swift"; sourceTree = "<group>"; };
 		F2AD3071256D10D400FDDE4B /* RKI Data Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RKI Data Download.swift"; sourceTree = "<group>"; };
+		F2B2F1D325AFA0B200A03CB4 /* Hash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hash.swift; sourceTree = "<group>"; };
 		F2DB33702577817400C47972 /* MainViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		F2DB3375257781CB00C47972 /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		F2DB337A2577825900C47972 /* CountryTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryTabViewController.swift; sourceTree = "<group>"; };
@@ -261,6 +263,7 @@
 			isa = PBXGroup;
 			children = (
 				F2ED1097256DAFDE003E2C41 /* Formatters.swift */,
+				F2B2F1D325AFA0B200A03CB4 /* Hash.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -540,6 +543,7 @@
 				F2AD3072256D10D400FDDE4B /* RKI Data Download.swift in Sources */,
 				F2DB3376257781CB00C47972 /* MainTabBarController.swift in Sources */,
 				F2ED108B256D9806003E2C41 /* BrowseRKIDataTableViewCell.swift in Sources */,
+				F2B2F1D425AFA0B200A03CB4 /* Hash.swift in Sources */,
 				F2DB337B2577825900C47972 /* CountryTabViewController.swift in Sources */,
 				F2DB338A257782C000C47972 /* CommonTabViewController.swift in Sources */,
 				F2ED1098256DAFDE003E2C41 /* Formatters.swift in Sources */,
