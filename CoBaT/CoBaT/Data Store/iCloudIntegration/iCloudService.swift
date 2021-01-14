@@ -538,7 +538,7 @@ final class iCloudService: NSObject {
             queryState.sortDescriptors = [NSSortDescriptor(key: self.RF_DayNumber, ascending: false)]
             
             let operationState = CKQueryOperation(query: queryState)
-            operationState.resultsLimit = 16
+            operationState.resultsLimit = GlobalStorage.unique.maxNumberOfDaysStored
             
             
             // -------------------------------------------------------------------------------------
@@ -666,7 +666,7 @@ final class iCloudService: NSObject {
             queryCounty.sortDescriptors = [NSSortDescriptor(key: self.RF_DayNumber, ascending: false)]
             
             let operationCounty = CKQueryOperation(query: queryCounty)
-            operationCounty.resultsLimit = 16
+            operationCounty.resultsLimit = GlobalStorage.unique.maxNumberOfDaysStored
             
             
             // -------------------------------------------------------------------------------------
@@ -869,7 +869,7 @@ final class iCloudService: NSObject {
                                         #if DEBUG_PRINT_FUNCCALLS
                                         print("iCloudService.checkCoBaTStateData(): dayNumber \(currentDayCode) already in Reference table but also in SendQueue, but hashSendQueue (\(hashSendQueue)) != hashReference (\(hashReference)), will send data to iCloud")
                                         #endif
-                                        self.CoBaTDataToSendCounty[currentDayCode] = dataQueueStruct(
+                                        self.CoBaTDataToSendState[currentDayCode] = dataQueueStruct(
                                             time: GlobalStorage.unique.RKIDataTimeStamps[areaLevel][dayCodeIndex],
                                             data: data, RKIDataType: .state)
                                         
@@ -1035,54 +1035,57 @@ final class iCloudService: NSObject {
                     
                     // dayNumber is already in reference table, so check if we have the same data
                     // we need the hashValue later on
-                    let hashData = areaData[dayCodeIndex].hashValue
-                    let hashReference = self.CoBaTReferenceTableCounty[indexFound].DataHashValue
                     
-                    // check if we have that data in the send queue
-                    // we always asume, tha the iCloud data is "better" than the local ones
-                    // but if we have something to send from the same day, we asume, our data is the better one
-                    if self.CoBaTDataToSendCounty[currentDayCode] == nil {
+                    do {
                         
-                        // no nothing to send, so just check if we should overwrite our own data
-                        // dayNumber is already in reference table, so check if we have the same data
-                        if hashData != hashReference {
+                        // try to encode the local data and the timeStamps
+                        let data = try JSONEncoder().encode(areaData[dayCodeIndex])
+                        
+                        let hashLocal = CoBaTHash(data: data)
+                        let hashReference = self.CoBaTReferenceTableCounty[indexFound].DataHashValue
+                        
+                        // check if we have that data in the send queue
+                        // we always asume, tha the iCloud data is "better" than the local ones
+                        // but if we have something to send from the same day, we asume, our data is the better one
+                        if self.CoBaTDataToSendCounty[currentDayCode] == nil {
                             
-                            // local data differ from iCloud data, replace the data by iCloud
-                            // we always asume, tha the iCloud data is "better" than the local ones
-                            #if DEBUG_PRINT_FUNCCALLS
-                            print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table, but hashData (\(hashData)) != hashReference (\(hashReference)), will pull data from iCloud and replace the local data")
-                            #endif
-                            
-                            self.replaceCoBaTCountyData(dayNumber: currentDayCode)
-                            
-                            // one step after the other, so return if we did something here
-                            return
-                            
+                            // no nothing to send, so just check if we should overwrite our own data
+                            // dayNumber is already in reference table, so check if we have the same data
+                            if hashLocal != hashReference {
+                                
+                                // local data differ from iCloud data, replace the data by iCloud
+                                // we always asume, tha the iCloud data is "better" than the local ones
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table, but hashLocal (\(hashLocal)) != hashReference (\(hashReference)), will pull data from iCloud and replace the local data")
+                                #endif
+                                
+                                self.replaceCoBaTCountyData(dayNumber: currentDayCode)
+                                
+                                // one step after the other, so return if we did something here
+                                return
+                                
+                            } else {
+                                
+                                // we already have that data, so skip the record
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table, and hashLocal (\(hashLocal)) == hashReference (\(hashReference)), will skip item")
+                                #endif
+                            }
                             
                         } else {
                             
-                            // we already have that data, so skip the record
-                            #if DEBUG_PRINT_FUNCCALLS
-                            print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table, and hashData (\(hashData)) == hashReference (\(hashReference)), will skip item")
-                            #endif
-                        }
-                        
-                    } else {
-                        
-                        // we have something to send for the same day, so further checks needed
-                        
-                        // first: Check if the data to send still ".new"
-                        if self.CoBaTDataToSendCounty[currentDayCode]!.sendStatus == .new {
+                            // we have something to send for the same day, so further checks needed
                             
-                            //let data: Data
-                            do {
+                            // first: Check if the data to send still ".new"
+                            if self.CoBaTDataToSendCounty[currentDayCode]!.sendStatus == .new {
+                                
+                                //let data: Data
                                 
                                 // found .new data in send queue, but also already in reference table,check hash value
-
-                                // try to encode the county data and the timeStamps
-                                let data = try JSONEncoder().encode(areaData[dayCodeIndex])
                                 
-                                let hashSendQueue = data.hashValue
+                                // try to encode the county data and the timeStamps
+                                // shortcut for the hash value
+                                let hashSendQueue = CoBaTHash(data: self.CoBaTDataToSendCounty[currentDayCode]!.data)
                                 
                                 // check data
                                 if hashSendQueue != hashReference {
@@ -1095,7 +1098,7 @@ final class iCloudService: NSObject {
                                         // yes, user is logged in and can send data to iCloud
                                         
                                         #if DEBUG_PRINT_FUNCCALLS
-                                        print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table but also in SendQueue, but hashData (\(hashData)) != hashReference (\(hashReference)), will send data to iCloud")
+                                        print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table but also in SendQueue, but hashLocal (\(hashLocal)) != hashReference (\(hashReference)), will send data to iCloud")
                                         #endif
                                         self.CoBaTDataToSendCounty[currentDayCode] = dataQueueStruct(
                                             time: GlobalStorage.unique.RKIDataTimeStamps[areaLevel][dayCodeIndex],
@@ -1111,7 +1114,7 @@ final class iCloudService: NSObject {
                                         
                                         // not logged in
                                         #if DEBUG_PRINT_FUNCCALLS
-                                        print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table and also in SendQueue, but hashData (\(hashData)) != hashReference (\(hashReference)), would send data to iCloud, but user is not logged in, so skip that")
+                                        print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table and also in SendQueue, but hashLocal (\(hashLocal)) != hashReference (\(hashReference)), would send data to iCloud, but user is not logged in, so skip that")
                                         #endif
                                     }
                                     
@@ -1124,21 +1127,20 @@ final class iCloudService: NSObject {
                                     self.CoBaTDataToSendCounty.removeValue(forKey: currentDayCode)
                                 }
                                 
+                            } else {
                                 
-                            } catch let error as NSError {
-                                
-                                // encode did fail, log the message and return
-                                GlobalStorage.unique.storeLastError(errorText: "iCloudService.checkCoBaTCountyData(): Error: JSON encoder could not encode newRKIData: error: \"\(error.description)\", do nothing and break the loop")
-                                
-                                break
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table and also in send queue, sendStatus: \(self.CoBaTDataToSendCounty[currentDayCode]!.sendStatus), will skip that record")
+                                #endif
                             }
-                            
-                        } else {
-                            
-                            #if DEBUG_PRINT_FUNCCALLS
-                            print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table and also in send queue, sendStatus: \(self.CoBaTDataToSendCounty[currentDayCode]!.sendStatus), will skip that record")
-                            #endif
                         }
+                        
+                    } catch let error as NSError {
+                        
+                        // encode did fail, log the message and return
+                        GlobalStorage.unique.storeLastError(errorText: "iCloudService.checkCoBaTCountyData(): Error: JSON encoder could not encode newRKIData: error: \"\(error.description)\", do nothing and break the loop")
+                        
+                        break
                     }
                     
                 } else {
@@ -1235,9 +1237,156 @@ final class iCloudService: NSObject {
      */
     private func pullCoBaTStateData(dayNumber: Int) {
         
-        #if DEBUG_PRINT_FUNCCALLS
-        print("iCloudService.pullCoBaTStateData(\(dayNumber)): just started")
-        #endif
+        
+        GlobalStorageQueue.async(execute: {
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print( "iCloudService.pullCoBaTStateData(\(dayNumber)): just started")
+            #endif
+            
+            // -------------------------------------------------------------------------------------
+            // Preperation
+            // -------------------------------------------------------------------------------------
+            
+            var newCoBaTDataState: [GlobalStorage.RKIDataStruct] = []
+            var recordCounterState: Int = 0
+            
+            
+            // -------------------------------------------------------------------------------------
+            // Build the query
+            // -------------------------------------------------------------------------------------
+            let queryPredicate = NSPredicate(format: "DayNumber = \(dayNumber)")
+            
+            let queryState = CKQuery(recordType: self.RT_CoBaTStateData,
+                                     predicate: queryPredicate)
+            //queryState.sortDescriptors = [NSSortDescriptor(key: IS_CK_modifiedAt_FieldName, ascending: false)]
+            
+            let operationState = CKQueryOperation(query: queryState)
+            operationState.resultsLimit = 1
+            
+            
+//            // -----------------------------------------------------------------------------
+//            //                                  Prepare operation
+//            // -----------------------------------------------------------------------------
+//            // Initialize Query
+//            let myDeviceID_Predicate = NSPredicate(format: "Locations_ZoneTimeStamp_Device_ID = \(WIS.unique.WIS_DeviceID)")
+//            let query = CKQuery(recordType: WIS_RT_Locations_ZoneTimeStamp, predicate: myDeviceID_Predicate)
+//
+//            // We want the result sorted by modified date
+//            query.sortDescriptors = [NSSortDescriptor(key: WIS_CK_modifiedAt_FieldName, ascending: true)]
+            
+            
+            
+            // -------------------------------------------------------------------------------------
+            // Record Fetch Block
+            // -------------------------------------------------------------------------------------
+            operationState.recordFetchedBlock = {
+                record in
+                
+                // read the data
+                if let dataRead = record[self.RF_CoBaTData] as? Data {
+                    if let dayNumberRead = record[self.RF_DayNumber] as? Int {
+                          
+                        // check if we have the right dayCode
+                        if dayNumberRead == dayNumber {
+                            
+                            // try to decode the data
+                            do {
+                                
+                                let RKIDataRead = try JSONDecoder().decode([GlobalStorage.RKIDataStruct].self,
+                                                                           from: (dataRead))
+                                
+                                // as we reach here, we got all we need, so call refresh_RKIStateData
+                                
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print( "iCloudService.pullCoBaTStateData(\(dayNumber)): success!, got record \"\(record.recordID.recordName)\", will call GlobalStorage.unique.refresh_RKIStateData()")
+                                #endif
+
+                                GlobalStorage.unique.refresh_RKIStateData(newRKIStateData: RKIDataRead)
+                                
+                                // count the good record
+                                recordCounterState += 1
+                                
+                            } catch let error as NSError {
+                                
+                                // encode did fail, log the message
+                                GlobalStorage.unique.storeLastError(errorText: "iCloudService.pullCoBaTStateData(\(dayNumber)): got record \"\(record.recordID.recordName)\", Error: JSON decoder could not decode RKIData: error: \"\(error.description)\"")
+                            }
+                            
+                        } else {
+                            
+                            // did not get the requested day Number
+                            // encode did fail, log the message
+                            GlobalStorage.unique.storeLastError(errorText: "iCloudService.pullCoBaTStateData(\(dayNumber)): got record \"\(record.recordID.recordName)\", dayNumber in record (\(dayNumberRead) != requested dayNumber (\(dayNumber)), ignore record")
+                        }
+                       
+                    } else {
+                        
+                        GlobalStorage.unique.storeLastError(
+                            errorText: "iCloudService.pullCoBaTStateData(\(dayNumber)): could not read dayNumber from record \(record.recordID.recordName), ignore record")
+                    }
+                    
+                } else {
+                    
+                    GlobalStorage.unique.storeLastError(
+                        errorText: "iCloudService.pullCoBaTStateData(\(dayNumber)): could not read data from record \(record.recordID.recordName), ignore record")
+                }
+            } // recordFetchBlock
+            
+            
+            // -------------------------------------------------------------------------------------
+            // Query Completion Block
+            // -------------------------------------------------------------------------------------
+            operationState.queryCompletionBlock = {
+                (cursor, error) in
+                
+                if error == nil {
+                    
+                    // -----------------------------------------------------------------------------
+                    //                                  Success!
+                    // -----------------------------------------------------------------------------
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print( "iCloudService.pullCoBaTStateData(\(dayNumber)): success!, got \(recordCounterState) good records, will call checkCoBaTStateData()")
+                    #endif
+                        self.checkCoBaTStateData()
+                    
+                    
+                } else {
+                    // -----------------------------------------------------------------------------
+                    // -----------------------------------------------------------------------------
+                    //                                  Error!
+                    // -----------------------------------------------------------------------------
+                    // -----------------------------------------------------------------------------
+                    
+                    // check for errors
+                    if let currentError = error as? CKError {
+                        
+                        // call the common error routine to print out error and do the usual error handling
+                        self.CommonErrorHandling( currentError, from: "iCloudService.pullCoBaTStateData(\(dayNumber))")
+                        
+                        //                        // if neccessary use this
+                        //                        switch currentError.code {
+                        //
+                        //                        default:
+                        //                        break
+                        //                        }
+                        
+                    } else {
+                        
+                        GlobalStorage.unique.storeLastError(
+                            errorText: "iCloudService.pullCoBaTStateData(\(dayNumber)): Error occured, but could not get the error code")
+                    }
+                }
+            }
+            
+            
+            // -------------------------------------------------------------------------------------
+            // Start the query
+            // -------------------------------------------------------------------------------------
+            iCloudService.database.add(operationState)
+            
+        })
+
     }
 
     /**
@@ -1321,13 +1470,9 @@ final class iCloudService: NSObject {
      
      */
     private var sendCoBaTStateToICloudCounter: Int = 0
-
     private func sendCoBaTStateToICloud(dayNumber: Int) {
         
-        
-        
-            
-        GlobalStorageQueue.async(execute: {
+          GlobalStorageQueue.async(execute: {
             
             #if DEBUG_PRINT_FUNCCALLS
             print("iCloudService.sendCoBaTStateToICloud(\(dayNumber)): just started, counter: \(self.sendRKIStateToICloudCounter)")
@@ -1509,15 +1654,176 @@ final class iCloudService: NSObject {
      - Returns:
      
      */
+    private var sendCoBaTCountyToICloudCounter: Int = 0
     private func sendCoBaTCountyToICloud(dayNumber: Int) {
         
-        #if DEBUG_PRINT_FUNCCALLS
-        print("iCloudService.sendCoBaTCountyToICloud(\(dayNumber)): just started")
-        #endif
-
-        
+        GlobalStorageQueue.async(execute: {
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("iCloudService.sendCoBaTCountyToICloud(\(dayNumber)): just started, counter: \(self.sendRKICountyToICloudCounter)")
+            #endif
+            
+            // build the CoBaT record
+            let newCoBaTRecordID = CKRecord.ID(recordName: "CoBaTCountyData\(dayNumber)")
+            let newCoBaTRecord = CKRecord(recordType: self.RT_CoBaTCountyData, recordID: newCoBaTRecordID)
+            
+            newCoBaTRecord[self.RF_DayNumber]  = dayNumber
+            newCoBaTRecord[self.RF_Time]       = self.CoBaTDataToSendCounty[dayNumber]!.time
+            newCoBaTRecord[self.RF_CoBaTData]  = self.CoBaTDataToSendCounty[dayNumber]!.data
+            
+            
+            // build the CoBaTReference Record
+            let newCoBaTReferenceRecordID = CKRecord.ID(recordName: "CoBaTCountyReference\(dayNumber)")
+            let newCoBaTReferenceRecord = CKRecord(recordType: self.RT_CoBaTCountyReference, recordID: newCoBaTReferenceRecordID)
+            
+            newCoBaTReferenceRecord[self.RF_DayNumber]  = dayNumber
+            newCoBaTReferenceRecord[self.RF_Date]  = GlobalStorage.unique.getDateStringFromDayNumber(dayNumber: dayNumber)
+            newCoBaTReferenceRecord[self.RF_DataHashValue] = CoBaTHash(data: self.CoBaTDataToSendCounty[dayNumber]!.data)
+            
+            // create and prepare the new cloudKit operation
+            let modifyRecordOperation = CKModifyRecordsOperation()
+            modifyRecordOperation.savePolicy = .allKeys // save all keys (replace the record completly)
+            modifyRecordOperation.isAtomic = true // the records are individual, so no need for .atomic
+            modifyRecordOperation.recordsToSave = [newCoBaTRecord, newCoBaTReferenceRecord]
+            modifyRecordOperation.recordIDsToDelete = nil
+            modifyRecordOperation.qualityOfService = .background
+            
+            
+            // -----------------------------------------------------------------------------
+            //                                  modifyRecordsCompletionBlock
+            // -----------------------------------------------------------------------------
+            modifyRecordOperation.modifyRecordsCompletionBlock = {
+                
+                (savedRecords, deletedRecordIDs, error) in
+                
+                if error == nil {
+                    
+                    // -----------------------------------------------------------------------------
+                    //                                  Success!
+                    // -----------------------------------------------------------------------------
+                    
+                    if savedRecords != nil {
+                        
+                        // as we have success, we wait some seconds to give iCloud time to process
+                        GlobalStorageQueue.asyncAfter(deadline: .now() + .seconds(3),
+                                                      flags: .barrier, execute: {
+                                                        
+                                                        #if DEBUG_PRINT_FUNCCALLS
+                                                        print( "iCloudService.sendCoBaTCountyToICloud(\(dayNumber)): success!, got \(savedRecords!.count) records,")
+                                                        #endif
+                                                        
+                                                        // check by looping over saved records if both records are saved and set flags
+                                                        
+                                                        // this are the flags
+                                                        var dataSend: Bool = false
+                                                        var referenceSend: Bool = false
+                                                        
+                                                        // this is the loop
+                                                        for item in savedRecords! {
+                                                            
+                                                            // if current record has same recordID, set flag to true
+                                                            if item.recordID == newCoBaTReferenceRecordID {
+                                                                dataSend = true
+                                                                
+                                                            } else if item.recordID == newCoBaTRecordID {
+                                                                referenceSend = true
+                                                            }
+                                                        }
+                                                        
+                                                        // now check if we found bpth record IDs
+                                                        if (dataSend == true) && (referenceSend == true) {
+                                                            
+                                                            // yes, we found both record IDs, so remove the data from the dictonary
+                                                            self.CoBaTDataToSendCounty.removeValue(forKey: dayNumber)
+                                                            
+                                                            // reset the counter
+                                                            self.sendCoBaTCountyToICloudCounter = 0
+                                                            
+                                                            GlobalStorage.unique.storeLastError(
+                                                                errorText: "iCloudService.sendCoBaTCountyToICloud(\(dayNumber)): success!, found both records, removed data from queue, will call getCoBaTReferencesCounty()")
+                                                            
+                                                            // restart the work chain
+                                                            self.getCoBaTReferencesCounty()
+                                                            
+                                                        } else {
+                                                            
+                                                            // reset the status of the data record in dictionary
+                                                            self.RKIDataToSendCounty[dayNumber]?.sendStatus = .new
+                                                            
+                                                            // if we have less than 3 tries in a row, retry again
+                                                            self.sendCoBaTCountyToICloudCounter += 1
+                                                            if self.sendRKICountyToICloudCounter < 3 {
+                                                                
+                                                                #if DEBUG_PRINT_FUNCCALLS
+                                                                print( "iCloudService.sendCoBaTCountyToICloud(\(dayNumber)): success!, but dataSend == \(dataSend), referenceSend == \(referenceSend), sendCoBaTCountyToICloudCounter (\(self.sendCoBaTCountyToICloudCounter)) < 3, will call getCoBaTReferencesCounty()")
+                                                                #endif
+                                                                // restart the work chain
+                                                                self.getCoBaTReferencesCounty()
+                                                                
+                                                            } else {
+                                                                
+                                                                GlobalStorage.unique.storeLastError(
+                                                                    errorText: "iCloudService.sendCoBaTCountyToICloud(\(dayNumber)): success!, but dataSend == \(dataSend), referenceSend == \(referenceSend), sendCoBaTCountyToICloudCounter (\(self.sendCoBaTCountyToICloudCounter)) >= 3, will NOT call getReferencesState(), reset counter")
+                                                                
+                                                                self.sendCoBaTCountyToICloudCounter = 0
+                                                            }
+                                                        }
+                                                      })
+                        
+                    } else {
+                        
+                        // safed records nil
+                        GlobalStorage.unique.storeLastError(
+                            errorText: "iCloudService.sendCoBaTCountyToICloud(\(dayNumber)): success!, but savedRecords == nil, do nothing")
+                        
+                        
+                        // reset the counter
+                        self.sendCoBaTCountyToICloudCounter = 0
+                    }
+                    
+                } else {
+                    // -----------------------------------------------------------------------------
+                    // -----------------------------------------------------------------------------
+                    //                                  Error!
+                    // -----------------------------------------------------------------------------
+                    // -----------------------------------------------------------------------------
+                    
+                    // check for errors
+                    if let currentError = error as? CKError {
+                        
+                        // call the common error routine to print out error and do the usual error handling
+                        self.CommonErrorHandling( currentError, from: "iCloudService.sendCoBaTCountyToICloud(\(dayNumber))")
+                        
+                        //                        // if neccessary use this
+                        //                        switch currentError.code {
+                        //
+                        //                        default:
+                        //                        break
+                        //                        }
+                        
+                    } else {
+                        
+                        GlobalStorage.unique.storeLastError(
+                            errorText: "iCloudService.sendCoBaTCountyToICloud(\(dayNumber)): Error occured, but could not get the error code")
+                    }
+                    
+                    // reset the counter
+                    self.sendRKICountyToICloudCounter = 0
+                }
+            }
+            
+            // -----------------------------------------------------------------------------
+            //                                  Fire operation
+            // -----------------------------------------------------------------------------
+            
+            iCloudService.database.add(modifyRecordOperation)
+            return
+        })
         
     }
+    
+    
+    
     // --------------------------------------------------------------------
     // MARK: - RKI Work Queue
     // --------------------------------------------------------------------
@@ -1552,7 +1858,7 @@ final class iCloudService: NSObject {
             queryState.sortDescriptors = [NSSortDescriptor(key: self.RF_DayNumber, ascending: false)]
             
             let operationState = CKQueryOperation(query: queryState)
-            operationState.resultsLimit = 16
+            operationState.resultsLimit = GlobalStorage.unique.maxNumberOfDaysStored
             
             
             // -------------------------------------------------------------------------------------
@@ -1682,7 +1988,7 @@ final class iCloudService: NSObject {
             queryCounty.sortDescriptors = [NSSortDescriptor(key: self.RF_DayNumber, ascending: false)]
             
             let operationCounty = CKQueryOperation(query: queryCounty)
-            operationCounty.resultsLimit = 16
+            operationCounty.resultsLimit = GlobalStorage.unique.maxNumberOfDaysStored
             
             
             // -------------------------------------------------------------------------------------
@@ -1770,8 +2076,6 @@ final class iCloudService: NSObject {
                 }
             }
             
-            
-            
             // -------------------------------------------------------------------------------------
             // Start the query
             // -------------------------------------------------------------------------------------
@@ -1803,36 +2107,36 @@ final class iCloudService: NSObject {
                     
                     if item.value.sendStatus == .new {
                         
-                        if let _ = self.RKIReferenceTableState.firstIndex(where: { $0.DayNumber == item.key } ) {
+                        //if let _ = self.RKIReferenceTableState.firstIndex(where: { $0.DayNumber == item.key } ) {
+                        
+                        if let indexFound = self.RKIReferenceTableState.firstIndex(where: { $0.DayNumber == item.key } ) {
                             
-//                            if let indexFound = self.RKIReferenceTableState.firstIndex(where: { $0.DayNumber == item.key } ) {
+                            // dayNumber is already in reference table, so check if we have the same data
+                            let hashData =  CoBaTHash(data: item.value.data)
+                            let hashReference = self.RKIReferenceTableState[indexFound].DataHashValue
+                            
+                            if hashData != hashReference {
                                 
-//                            // dayNumber is already in reference table, so check if we have the same data
-//                            let hashData = item.value.data.hashValue
-//                            let hashReference = self.RKIReferenceTableState[indexFound].DataHashValue
-//
-//                            if hashData != hashReference {
-//
-//                                // local data differ from iCloud data, replace the data in iCloud
-//
-//                                #if DEBUG_PRINT_FUNCCALLS
-//                                print("iCloudService.pushRKIDataState(): dayNumber \(item.key) already in Reference table, but hashData (\(hashData)) != hashReference (\(hashReference)), will call sendRKIStateToICloud(\(item.key))")
-//                                #endif
-//
-//                                self.RKIDataToSendState[item.key]!.sendStatus = .markedForSend
-//                                self.sendRKIStateToICloud(dayNumber: item.key)
-//
-//                            } else {
-//
-//                                #if DEBUG_PRINT_FUNCCALLS
-//                                print("iCloudService.pushRKIDataState(): dayNumber \(item.key) already in Reference table, and hashData (\(hashData)) == hashReference (\(hashReference)), will NOT call sendRKIStateToICloud()")
-//                                #endif
-//                            }
+                                // local data differ from iCloud data, replace the data in iCloud
+                                
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print("iCloudService.pushRKIDataState(): dayNumber \(item.key) already in Reference table, but hashData (\(hashData)) != hashReference (\(hashReference)), will call sendRKIStateToICloud(\(item.key))")
+                                #endif
+                                
+                                self.RKIDataToSendState[item.key]!.sendStatus = .markedForSend
+                                self.sendRKIStateToICloud(dayNumber: item.key)
+                                
+                            } else {
+                                
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print("iCloudService.pushRKIDataState(): dayNumber \(item.key) already in Reference table, and hashData (\(hashData)) == hashReference (\(hashReference)), will NOT call sendRKIStateToICloud()")
+                                #endif
+                            }
                             
                             #if DEBUG_PRINT_FUNCCALLS
                             print("iCloudService.pushRKIDataState(): dayNumber \(item.key) already in Reference table, will NOT call sendStateToICloud()")
                             #endif
-
+                            
                         } else {
                             
                             // local data not in reference table, so send it to iCloud
@@ -1846,9 +2150,9 @@ final class iCloudService: NSObject {
                             // one step after the other, so return if we did something here
                             return
                         }
-                    }
-                }
-                
+                        //}
+                    } // if .new
+                } // for item
             } else {
                 
                 #if DEBUG_PRINT_FUNCCALLS
@@ -1880,35 +2184,35 @@ final class iCloudService: NSObject {
                     
                     if item.value.sendStatus == .new {
                         
-                        if let _ = self.RKIReferenceTableCounty.firstIndex(where: { $0.DayNumber == item.key } ) {
-//                            if let indexFound = self.RKIReferenceTableCounty.firstIndex(where: { $0.DayNumber == item.key } ) {
-//
-//                            // dayNumber is already in reference table, so check if we have the same data
-//                            let hashData = item.value.data.hashValue
-//                            let hashReference = self.RKIReferenceTableCounty[indexFound].DataHashValue
-//
-//                            if hashData != hashReference {
-//
-//                                // local data differ from iCloud data, replace the data in iCloud
-//
-//                                #if DEBUG_PRINT_FUNCCALLS
-//                                print("iCloudService.pushRKIDataCounty(): dayNumber \(item.key) already in Reference table, but hashData (\(hashData)) != hashReference (\(hashReference)), will call sendRKICountyToICloud(\(item.key))")
-//                                #endif
-//
-//                                self.RKIDataToSendCounty[item.key]!.sendStatus = .markedForSend
-//                                self.sendRKICountyToICloud(dayNumber: item.key)
-//
-//                            } else {
-//
-//                                #if DEBUG_PRINT_FUNCCALLS
-//                                print("iCloudService.pushRKIDataCounty(): dayNumber \(item.key) already in Reference table, and hashData (\(hashData)) == hashReference (\(hashReference)), will NOT call sendRKICountyToICloud()")
-//                                #endif
-//                            }
-   
+                        //if let _ = self.RKIReferenceTableCounty.firstIndex(where: { $0.DayNumber == item.key } ) {
+                        if let indexFound = self.RKIReferenceTableCounty.firstIndex(where: { $0.DayNumber == item.key } ) {
+                            
+                            // dayNumber is already in reference table, so check if we have the same data
+                            let hashData = CoBaTHash(data: item.value.data)
+                            let hashReference = self.RKIReferenceTableCounty[indexFound].DataHashValue
+                            
+                            if hashData != hashReference {
+                                
+                                // local data differ from iCloud data, replace the data in iCloud
+                                
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print("iCloudService.pushRKIDataCounty(): dayNumber \(item.key) already in Reference table, but hashData (\(hashData)) != hashReference (\(hashReference)), will call sendRKICountyToICloud(\(item.key))")
+                                #endif
+                                
+                                self.RKIDataToSendCounty[item.key]!.sendStatus = .markedForSend
+                                self.sendRKICountyToICloud(dayNumber: item.key)
+                                
+                            } else {
+                                
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print("iCloudService.pushRKIDataCounty(): dayNumber \(item.key) already in Reference table, and hashData (\(hashData)) == hashReference (\(hashReference)), will NOT call sendRKICountyToICloud()")
+                                #endif
+                            }
+                            
                             #if DEBUG_PRINT_FUNCCALLS
                             print("iCloudService.pushRKIDataCounty(): dayNumber \(item.key) already in Reference table, will NOT call sendCountyToICloud()")
                             #endif
-
+                            
                         } else {
                             
                             // local data not in reference table, so send it to iCloud
@@ -1994,8 +2298,9 @@ final class iCloudService: NSObject {
                     // -----------------------------------------------------------------------------
                     
                     if savedRecords != nil {
-                        GlobalStorageQueue.async(flags: .barrier, execute: {
-                            
+                        GlobalStorageQueue.asyncAfter(deadline: .now() + .seconds(3),
+                                                      flags: .barrier, execute: {
+                                                        
                             #if DEBUG_PRINT_FUNCCALLS
                             print( "iCloudService.sendRKIStateToICloud(\(dayNumber)): success!, got \(savedRecords!.count) records,")
                             #endif
@@ -2173,7 +2478,8 @@ final class iCloudService: NSObject {
                     // -----------------------------------------------------------------------------
                     
                     if savedRecords != nil {
-                        GlobalStorageQueue.async(flags: .barrier, execute: {
+                        GlobalStorageQueue.asyncAfter(deadline: .now() + .seconds(3),
+                                                      flags: .barrier, execute: {
                             
                             #if DEBUG_PRINT_FUNCCALLS
                             print( "iCloudService.sendRKICountyToICloud(\(dayNumber)): success!, got \(savedRecords!.count) records,")

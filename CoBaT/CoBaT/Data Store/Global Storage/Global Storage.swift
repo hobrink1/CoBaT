@@ -67,7 +67,7 @@ final class GlobalStorage: NSObject {
     
     // size of storage
     // TODO: TODO: Value can be reduced, after iCloud sync is done
-    private let maxNumberOfDaysStored: Int = 20
+    public let maxNumberOfDaysStored: Int = 20
     private let maxNumberOfErrorsStored: Int = 50
     
     // Version of permanent storage
