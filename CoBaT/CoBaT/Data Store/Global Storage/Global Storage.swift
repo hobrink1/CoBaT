@@ -67,7 +67,7 @@ final class GlobalStorage: NSObject {
     
     // size of storage
     // TODO: TODO: Value can be reduced, after iCloud sync is done
-    public let maxNumberOfDaysStored: Int = 20
+    public let maxNumberOfDaysStored: Int = 22
     private let maxNumberOfErrorsStored: Int = 50
     
     // Version of permanent storage
@@ -163,7 +163,6 @@ final class GlobalStorage: NSObject {
                         
                         // if we got to here, no errors encountered
                         
-                        
                         // now we have to check if we probably have to migrate data
                         // V1: Initial version
                         // V2: added country level
@@ -172,50 +171,6 @@ final class GlobalStorage: NSObject {
                         
                         // check the version
                         if currentVersionOfPermanentStorage == self.VersionOfPermanentStorage {
-                            
-//                            // Start DataCleansing -------------------------------------------------
-//                            // As we had a problem in the early development, we lost some "myID" Strings
-//                            // so we restore them with the following loop.
-//                            // Can be wiped out, after all data migrated (mid Dezember 2020)
-//                            // TODO: TODO: Remove data cleansing
-//
-//                            var weDidChangeSomething: Bool = false
-//
-//                            for indexArea in 0 ..< myRKIData.count {
-//
-//                                // check if there are data in that area level (favorites might be empty)
-//                                if myRKIData[indexArea].isEmpty == false {
-//
-//                                    for indexDay in 1 ..< myRKIData[indexArea].count {
-//
-//                                        for indexMember in 0 ..< myRKIData[indexArea][indexDay].count {
-//
-//                                            if myRKIData[indexArea][indexDay][indexMember].myID == nil {
-//
-//                                                weDidChangeSomething = true
-//
-//                                                let currentMember = myRKIData[indexArea][indexDay][indexMember]
-//                                                let memberFromDayBefore = myRKIData[indexArea][indexDay - 1][indexMember]
-//
-//                                                myRKIData[indexArea][indexDay][indexMember] =
-//                                                    RKIDataStruct(stateID: currentMember.stateID,
-//                                                                  myID:                 memberFromDayBefore.myID ?? "",
-//                                                                  name:                 currentMember.name,
-//                                                                  kindOf:               currentMember.kindOf,
-//                                                                  inhabitants:          currentMember.inhabitants,
-//                                                                  cases:                currentMember.cases,
-//                                                                  deaths:               currentMember.deaths,
-//                                                                  casesPer100k:         currentMember.casesPer100k,
-//                                                                  cases7DaysPer100K:    currentMember.cases7DaysPer100K,
-//                                                                  timeStamp:            currentMember.timeStamp)
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//
-//                            // End DataCleansing ---------------------------------------------------
-                            
                             
                             // we have the current version, so restore the date
                             self.RKIData = myRKIData
@@ -232,17 +187,6 @@ final class GlobalStorage: NSObject {
                             
                             // build the days arrays
                             self.rebuildDayArrays()
-                            
-                            
-//                             Start DataCleansing -------------------------------------------------
-//                             after the cleansing we save the new
-//                             TODO: TODO: Remove data cleansing
-//
-//                            if weDidChangeSomething == true {
-//                                self.saveRKIData()
-//                            }
-//
-//                             End DataCleansing ---------------------------------------------------
                             
                             // rebuild the delta values
                             // but to not set the flags
@@ -821,6 +765,7 @@ final class GlobalStorage: NSObject {
         // case 2: There is a difference to the existing data, but from the same day, so an update (replaceDataOfToday())
         // case 3: new item is from a different day (addNewData())
         // case 4: data are the same, so ignore it
+        // case 5: DayNumber not in list of dayNumbers, new day (addNewData())
         
         GlobalStorageQueue.async(flags: .barrier, execute: {
             
@@ -855,87 +800,94 @@ final class GlobalStorage: NSObject {
                 // find the right index to insert by the number of the day
                 let dayNumber = self.getDayNumberFromTimeInterval(time: oldestTimeStamp)
                 
-                let indexToUse: Int
                 if let foundIndex = self.RKINumbersOfDays[kindOf].firstIndex(where: { $0 <= dayNumber } ) {
-                    indexToUse = foundIndex
-                } else {
-                    indexToUse = 0
-                }
-
-                
-                if self.RKIData[kindOf][indexToUse].hashValue != newRKIData.hashValue {
                     
-                    // yes, there are differences, so check if the day changed
-                    
-                    // check if the days are different
-//                    let newDate = shortSingleDateFormatterRKI.string(
-//                        from: Date(timeIntervalSinceReferenceDate: oldestTimeStamp))
-                    
-                    let dayNumberOld = self.getDayNumberFromTimeInterval(time: self.RKIDataTimeStamps[kindOf][indexToUse])
-
-//                    let oldDate = shortSingleDateFormatterRKI.string(
-//                        from: Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOf][indexToUse]))
-//
-                    if dayNumber == dayNumberOld {
-                    
-                        // case 2: There is a difference to the existing data, but from the same day,
-                        // so just an update (replaceDataOfToday())
-                        #if DEBUG_PRINT_FUNCCALLS
-                        print("refresh_RKIData case 2: oldDate (\(dayNumberOld) == newDate(\(dayNumber)) -> replaceData0()")
-                        #endif
-
-                        self.replaceDataOfToday(kindOf, newRKIData, oldestTimeStamp)
-
-                    } else {
-                    
-                        // case 3: new item is from a different day (addNewData())
-                        #if DEBUG_PRINT_FUNCCALLS
-                        print("refresh_RKIData case 3: oldDate (\(dayNumberOld) != newDate(\(dayNumber)) -> addNewData()")
-                        #endif
+                    // we found that record, check it
+                    if self.RKIData[kindOf][foundIndex].hashValue != newRKIData.hashValue {
                         
-                        self.addNewData(kindOf, newRKIData, oldestTimeStamp)
-                    }
-                    
-                } else {
-                    
-                    // case 4: data are the same, so ignore it
-                    #if DEBUG_PRINT_FUNCCALLS
-                    print ("refresh_RKIData case 4: data sets are equal, so do not update, but call iCloudService.startCoBaTWorkQueue(\(kindOf))")
-                    #endif
-                    
-                    iCloudService.unique.startCoBaTWorkQueue(kindOf)
-                    
-                   // check if we have to inform the background service
-                    if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                        // yes, there are differences, so check if the day changed
                         
-                        // check what kind of data we got
-                        if kindOf == self.RKIDataState {
-                            self.didRecieveStateData = true
-                        } else if kindOf == self.RKIDataCounty {
-                            self.didRecieveCountyData = true
-                        }
-
-                        // if we have both parts, close the background task
-                        if (self.didRecieveStateData == true)
-                            && (self.didRecieveCountyData == true) {
+                        // check if the days are different
+                        //                    let newDate = shortSingleDateFormatterRKI.string(
+                        //                        from: Date(timeIntervalSinceReferenceDate: oldestTimeStamp))
+                        
+                        let dayNumberOld = self.getDayNumberFromTimeInterval(time: self.RKIDataTimeStamps[kindOf][foundIndex])
+                        
+                        //                    let oldDate = shortSingleDateFormatterRKI.string(
+                        //                        from: Date(timeIntervalSinceReferenceDate: self.RKIDataTimeStamps[kindOf][indexToUse]))
+                        //
+                        if dayNumber == dayNumberOld {
                             
-                            // yes both parts are done, so close the task
-                            //#if DEBUG_PRINT_FUNCCALLS
-                            GlobalStorage.unique.storeLastError(
-                                errorText:"refresh_RKIData case 4: kindOf: \(kindOf), (didRecieveStateData == \(self.didRecieveStateData)) && (didRecieveCountyData == \(self.didRecieveCountyData)), call closeBackgroundTask()")
-                            //#endif
-                         
-                            CoBaTBackgroundService.unique.closeBackgroundTask()
+                            // case 2: There is a difference to the existing data, but from the same day,
+                            // so just an update (replaceDataOfToday())
+                            #if DEBUG_PRINT_FUNCCALLS
+                            print("refresh_RKIData case 2: oldDate (\(dayNumberOld) == newDate(\(dayNumber)) -> replaceData0()")
+                            #endif
+                            
+                            self.replaceDataOfToday(kindOf, newRKIData, oldestTimeStamp)
                             
                         } else {
                             
-                            //#if DEBUG_PRINT_FUNCCALLS
-                            GlobalStorage.unique.storeLastError(
-                                errorText:"refresh_RKIData case 4: kindOf: \(kindOf), didRecieveStateData == \(self.didRecieveStateData), didRecieveCountyData == \(self.didRecieveCountyData), DO NOT close background task")
-                            //#endif
+                            // case 3: new item is from a different day (addNewData())
+                            #if DEBUG_PRINT_FUNCCALLS
+                            print("refresh_RKIData case 3: oldDate (\(dayNumberOld) != newDate(\(dayNumber)) -> addNewData()")
+                            #endif
+                            
+                            self.addNewData(kindOf, newRKIData, oldestTimeStamp)
+                        }
+                        
+                    } else {
+                        
+                        // case 4: data are the same, so ignore it
+                        #if DEBUG_PRINT_FUNCCALLS
+                        print ("refresh_RKIData case 4: data sets are equal, so do not update, but call iCloudService.startCoBaTWorkQueue(\(kindOf))")
+                        #endif
+                        
+                        iCloudService.unique.startCoBaTWorkQueue(kindOf)
+                        
+                        // check if we have to inform the background service
+                        if CoBaTBackgroundService.unique.RKIBackgroundFetchIsOngoingFlag == true {
+                            
+                            // check what kind of data we got
+                            if kindOf == self.RKIDataState {
+                                self.didRecieveStateData = true
+                            } else if kindOf == self.RKIDataCounty {
+                                self.didRecieveCountyData = true
+                            }
+                            
+                            // if we have both parts, close the background task
+                            if (self.didRecieveStateData == true)
+                                && (self.didRecieveCountyData == true) {
+                                
+                                // yes both parts are done, so close the task
+                                //#if DEBUG_PRINT_FUNCCALLS
+                                GlobalStorage.unique.storeLastError(
+                                    errorText:"refresh_RKIData case 4: kindOf: \(kindOf), (didRecieveStateData == \(self.didRecieveStateData)) && (didRecieveCountyData == \(self.didRecieveCountyData)), call closeBackgroundTask()")
+                                //#endif
+                                
+                                CoBaTBackgroundService.unique.closeBackgroundTask()
+                                
+                            } else {
+                                
+                                //#if DEBUG_PRINT_FUNCCALLS
+                                GlobalStorage.unique.storeLastError(
+                                    errorText:"refresh_RKIData case 4: kindOf: \(kindOf), didRecieveStateData == \(self.didRecieveStateData), didRecieveCountyData == \(self.didRecieveCountyData), DO NOT close background task")
+                                //#endif
+                            }
                         }
                     }
+                    
+                } else {
+                    
+                    // case 5: new item is from a different day (addNewData())
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print("refresh_RKIData case 5: did not found dayNumber (\(dayNumber) in List of dayNumbers) -> addNewData()")
+                    #endif
+                    
+                    self.addNewData(kindOf, newRKIData, oldestTimeStamp)
+
                 }
+
             }
             
 
@@ -985,26 +937,39 @@ final class GlobalStorage: NSObject {
             
         } else {
             
+            // we do this per array, as they might be differnt (happened during tests)
             while self.RKIData[kindOfArea].count > self.maxNumberOfDaysStored {
-                
                 self.RKIData[kindOfArea].removeLast()
+            }
+            while self.RKIData[kindOfArea].count > self.maxNumberOfDaysStored {
                 self.RKIDataTimeStamps[kindOfArea].removeLast()
+            }
+            while self.RKIData[kindOfArea].count > self.maxNumberOfDaysStored {
                 self.RKIDataWeekdays[kindOfArea].removeLast()
+            }
+            while self.RKIData[kindOfArea].count > self.maxNumberOfDaysStored {
                 self.RKINumbersOfDays[kindOfArea].removeLast()
             }
             
             // find the right index to insert by the number of the day
             let dayNumber = getDayNumberFromTimeInterval(time: timeStamp)
-            let indexToUse: Int
+            //let indexToUse: Int
             if let foundIndex = RKINumbersOfDays[kindOfArea].firstIndex(where: { $0 < dayNumber } ) {
-                indexToUse = foundIndex
+                
+                // we found a place somewere
+                self.RKIData[kindOfArea].insert(newRKIData, at: foundIndex)
+                self.RKIDataTimeStamps[kindOfArea].insert(timeStamp, at: foundIndex)
+                self.RKIDataWeekdays[kindOfArea].insert(getWeekdayFromTimeInterval(time: timeStamp), at: foundIndex)
+                self.RKINumbersOfDays[kindOfArea].insert(dayNumber, at: foundIndex)
+                
             } else {
-                indexToUse = 0
+                
+                // we do not found a smaller on, so we are the smallest, append it
+                self.RKIData[kindOfArea].append(newRKIData)
+                self.RKIDataTimeStamps[kindOfArea].append(timeStamp)
+                self.RKIDataWeekdays[kindOfArea].append(getWeekdayFromTimeInterval(time: timeStamp))
+                self.RKINumbersOfDays[kindOfArea].append(getDayNumberFromTimeInterval(time: timeStamp))
             }
-            self.RKIData[kindOfArea].insert(newRKIData, at: indexToUse)
-            self.RKIDataTimeStamps[kindOfArea].insert(timeStamp, at: indexToUse)
-            self.RKIDataWeekdays[kindOfArea].insert(getWeekdayFromTimeInterval(time: timeStamp), at: indexToUse)
-            self.RKINumbersOfDays[kindOfArea].insert(dayNumber, at: indexToUse)
         }
         
         // check if state data were chenged
@@ -1078,17 +1043,22 @@ final class GlobalStorage: NSObject {
             
             // find the right index to insert by the number of the day
             let dayNumber = getDayNumberFromTimeInterval(time: timeStamp)
-            let indexToUse: Int
-            if let foundIndex = RKINumbersOfDays.firstIndex(where: { $0[kindOfArea] == dayNumber } ) {
-                indexToUse = foundIndex
-            } else {
-                indexToUse = 0
-            }
 
-            self.RKIData[kindOfArea][indexToUse] = newRKIData
-            self.RKIDataTimeStamps[kindOfArea][indexToUse] = timeStamp
-            self.RKIDataWeekdays[kindOfArea][indexToUse] = self.getWeekdayFromTimeInterval(time: timeStamp)
-            self.RKINumbersOfDays[kindOfArea][indexToUse] = self.getDayNumberFromTimeInterval(time: timeStamp)
+            if let foundIndex = RKINumbersOfDays[kindOfArea].firstIndex(where: { $0 == dayNumber } ) {
+               
+                self.RKIData[kindOfArea][foundIndex] = newRKIData
+                self.RKIDataTimeStamps[kindOfArea][foundIndex] = timeStamp
+                self.RKIDataWeekdays[kindOfArea][foundIndex] = self.getWeekdayFromTimeInterval(time: timeStamp)
+                self.RKINumbersOfDays[kindOfArea][foundIndex] = self.getDayNumberFromTimeInterval(time: timeStamp)
+
+            } else {
+                
+                self.RKIData[kindOfArea].append(newRKIData)
+                self.RKIDataTimeStamps[kindOfArea].append(timeStamp)
+                self.RKIDataWeekdays[kindOfArea].append(getWeekdayFromTimeInterval(time: timeStamp))
+                self.RKINumbersOfDays[kindOfArea].append(getDayNumberFromTimeInterval(time: timeStamp))
+
+            }
         }
         
         // check if state data were chenged
@@ -1533,7 +1503,7 @@ final class GlobalStorage: NSObject {
                     } else {
                         
                         // we did not found a valid index, report it and ignore the record
-                        GlobalStorage.unique.storeLastError(errorText: "GlobalStorage.rebuildFavorites: Error: RKIData: did not found valid record for day \(dayIndex) of ID \"\(currentMyID)/” of area level \"\(levelIndex)\", ignore record")
+                        GlobalStorage.unique.storeLastError(errorText: "GlobalStorage.rebuildFavorites: Error: RKIData: did not found valid record for day \(dayIndex) of ID \"\(currentMyID)\" of area level \"\(levelIndex)\", ignore record")
                     }
                 }
                 

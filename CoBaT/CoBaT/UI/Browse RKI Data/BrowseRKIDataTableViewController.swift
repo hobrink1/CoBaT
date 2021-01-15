@@ -92,7 +92,7 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
             
             // local notification to update UI
             DispatchQueue.main.async(execute: {
-            NotificationCenter.default.post(Notification(name: .CoBaT_UserDidSelectState))
+                NotificationCenter.default.post(Notification(name: .CoBaT_UserDidSelectState))
             })
             
             #if DEBUG_PRINT_FUNCCALLS
@@ -308,6 +308,29 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
         #if DEBUG_PRINT_FUNCCALLS
         print("RefreshLocalData just started, ID: \(GlobalUIData.unique.UIBrowserRKISelectedStateID)")
         #endif
+        
+        
+        // set the id of the selected item
+        switch GlobalUIData.unique.UIBrowserRKIAreaLevel {
+   
+        case GlobalStorage.unique.RKIDataCountry:
+            highlightSelectedItem = false
+            break
+            
+        case GlobalStorage.unique.RKIDataState:
+            highlightSelectedItem = true
+            self.selectedItemID = GlobalUIData.unique.UIBrowserRKISelectedStateID
+            
+        case GlobalStorage.unique.RKIDataCounty:
+            highlightSelectedItem = true
+            self.selectedItemID = GlobalUIData.unique.UIBrowserRKISelectedCountyID
+            
+        default:
+            highlightSelectedItem = false
+            break
+      }
+
+        
         
         var localDataArrayUnsorted: [GlobalStorage.RKIDataStruct] = []
         var localDataArrayDelta1Unsorted: [GlobalStorage.RKIDataStruct] = []
@@ -599,26 +622,7 @@ final class BrowseRKIDataTableViewController: UITableViewController, BrowseRKIDa
         self.tableView.rowHeight = UITableView.automaticDimension
         self.tableView.estimatedRowHeight = 64
         
-        // set the id of the selected item
-        switch GlobalUIData.unique.UIBrowserRKIAreaLevel {
-   
-        case GlobalStorage.unique.RKIDataCountry:
-            highlightSelectedItem = false
-            break
-            
-        case GlobalStorage.unique.RKIDataState:
-            highlightSelectedItem = true
-            self.selectedItemID = GlobalUIData.unique.UIBrowserRKISelectedStateID
-            
-        case GlobalStorage.unique.RKIDataCounty:
-            highlightSelectedItem = true
-            self.selectedItemID = GlobalUIData.unique.UIBrowserRKISelectedCountyID
-            
-        default:
-            highlightSelectedItem = false
-            break
-      }
-
+  
         // refresh the data
         self.RefreshLocalData()
     }

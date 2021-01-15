@@ -185,7 +185,7 @@ final class DetailsRKITableViewController: UITableViewController {
                 } else {
                     
                     // we did not found a valid index, report and use default values
-                    GlobalStorage.unique.storeLastError(errorText: "DetailsRKITableViewController.refreshLocalData: Error: RKIData: did not found valid record for day \(dayIndex) of ID \"\(selectedMyID)/” of area level \"\(selectedAreaLevel)\", ignore record")
+                    GlobalStorage.unique.storeLastError(errorText: "DetailsRKITableViewController.refreshLocalData: Error: RKIData: did not found valid record for day \(dayIndex) of ID \"\(selectedMyID)\" of area level \"\(selectedAreaLevel)\", ignore record")
                 }
             }
             

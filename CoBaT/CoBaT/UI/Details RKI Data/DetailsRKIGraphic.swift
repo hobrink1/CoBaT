@@ -530,12 +530,17 @@ final class DetailsRKIGraphic: NSObject {
             // so walk over the data and calculate the diff values
             for index in 0 ..< numberOfDays - 1 {
                 
-                // calculate the delta
-                let delta = selectedData[index][selectedIDIndex].cases
-                    - selectedData[index + 1][selectedIDIndex].cases
-                
-                // and append
-                valuesToDraw.append(delta)
+                if (selectedData[index].count > selectedIDIndex)
+                    && (selectedData[index + 1].count > selectedIDIndex) {
+                    // calculate the delta
+                    let delta = selectedData[index][selectedIDIndex].cases
+                        - selectedData[index + 1][selectedIDIndex].cases
+                    
+                    // and append
+                    valuesToDraw.append(delta)
+                } else {
+                    print ("error: selectedData[index].count (\(selectedData[index].count)) > selectedIDIndex (\(selectedIDIndex))")
+                }
             }
         }
         
@@ -766,11 +771,15 @@ final class DetailsRKIGraphic: NSObject {
             for index in 0 ..< numberOfDays - 1 {
                 
                 // calculate the delta
-                let delta = selectedData[index][selectedIDIndex].deaths
-                    - selectedData[index + 1][selectedIDIndex].deaths
-                
-                // and append
-                valuesToDraw.append(delta)
+                if (selectedData[index].count > selectedIDIndex)
+                    && (selectedData[index + 1].count > selectedIDIndex) {
+                    
+                    let delta = selectedData[index][selectedIDIndex].deaths
+                        - selectedData[index + 1][selectedIDIndex].deaths
+                    
+                    // and append
+                    valuesToDraw.append(delta)
+                }
             }
         }
         
@@ -995,7 +1004,10 @@ final class DetailsRKIGraphic: NSObject {
         
         for index in 0 ..< numberOfDays {
             
-             valuesToDraw.append(selectedData[index][selectedIDIndex].cases7DaysPer100K)
+            if (selectedData[index].count > selectedIDIndex) {
+                
+                valuesToDraw.append(selectedData[index][selectedIDIndex].cases7DaysPer100K)
+            }
         }
 
         
@@ -1079,10 +1091,10 @@ final class DetailsRKIGraphic: NSObject {
             context.setFillColor(graphBarNormalCGColor)
             
             // walk over the values
-            for index in 0 ..< (numberOfDays) {
+            for currentValue in valuesToDraw {
                 
                 // shortcuts for the values we need
-                let currentValue = CGFloat(valuesToDraw[index])
+                //let currentValue = CGFloat(valuesToDraw[index])
                 //let currentWeekday = selectedWeekdays[index]
                 
                 // start the path
@@ -1095,13 +1107,13 @@ final class DetailsRKIGraphic: NSObject {
                 context.addRect(CGRect(x: nextStartOfBar.x,
                                        y: nextStartOfBar.y,
                                        width: self.barWidth,
-                                       height: currentValue * valuePerUnit))
+                                       height: CGFloat(currentValue) * valuePerUnit))
                 
                     
                     // as we change the color we have to push sthe state
                     context.saveGState()
                     
-                let (covidColor, _, _, _) = CovidRating.unique.getColorsForValue(valuesToDraw[index])
+                let (covidColor, _, _, _) = CovidRating.unique.getColorsForValue(currentValue)
                     // change the color
                 context.setFillColor(covidColor.cgColor)
                     

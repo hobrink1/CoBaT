@@ -538,7 +538,7 @@ final class iCloudService: NSObject {
             queryState.sortDescriptors = [NSSortDescriptor(key: self.RF_DayNumber, ascending: false)]
             
             let operationState = CKQueryOperation(query: queryState)
-            operationState.resultsLimit = GlobalStorage.unique.maxNumberOfDaysStored
+            operationState.resultsLimit = (GlobalStorage.unique.maxNumberOfDaysStored * 2)
             
             
             // -------------------------------------------------------------------------------------
@@ -666,7 +666,7 @@ final class iCloudService: NSObject {
             queryCounty.sortDescriptors = [NSSortDescriptor(key: self.RF_DayNumber, ascending: false)]
             
             let operationCounty = CKQueryOperation(query: queryCounty)
-            operationCounty.resultsLimit = GlobalStorage.unique.maxNumberOfDaysStored
+            operationCounty.resultsLimit = (GlobalStorage.unique.maxNumberOfDaysStored * 2)
             
             
             // -------------------------------------------------------------------------------------
@@ -722,10 +722,8 @@ final class iCloudService: NSObject {
                     #endif
                     GlobalStorageQueue.async(flags: .barrier, execute: {
                         self.CoBaTReferenceTableCounty = newReferenceTableCounty
+                        self.checkCoBaTCountyData()
                     })
-                    
-                    self.checkCoBaTCountyData()
- 
                     
                 } else {
                     // -----------------------------------------------------------------------------
@@ -802,7 +800,9 @@ final class iCloudService: NSObject {
             let areaData = GlobalStorage.unique.RKIData[areaLevel]
             
             // walk over the dayNumbers and compare with the reference table
-            for dayCodeIndex in 0 ..< GlobalStorage.unique.RKINumbersOfDays[areaLevel].count {
+            let maxCount = min(GlobalStorage.unique.RKINumbersOfDays[areaLevel].count,
+                               GlobalStorage.unique.maxNumberOfDaysStored)
+            for dayCodeIndex in 0 ..< maxCount {
                 
                 let currentDayCode = GlobalStorage.unique.RKINumbersOfDays[areaLevel][dayCodeIndex]
                 if let indexFound = self.CoBaTReferenceTableState.firstIndex(where: { $0.DayNumber == currentDayCode } ) {
@@ -830,11 +830,11 @@ final class iCloudService: NSObject {
                                 // local data differ from iCloud data, replace the data by iCloud
                                 // we always asume, tha the iCloud data is "better" than the local ones
                                 #if DEBUG_PRINT_FUNCCALLS
-                                print("iCloudService.checkCoBaTStateData(): dayNumber \(currentDayCode) already in Reference table, but hashLocal (\(hashLocal)) != hashReference (\(hashReference)), will pull data from iCloud and replace the local data")
+                                print("iCloudService.checkCoBaTStateData(): dayNumber \(currentDayCode) already in Reference table, but hashLocal (\(hashLocal)) != hashReference (\(hashReference)), will pull data from iCloud")
                                 #endif
                                 
-                                self.replaceCoBaTStateData(dayNumber: currentDayCode)
-                                
+                                self.pullCoBaTStateData(dayNumber: currentDayCode)
+
                                 // one step after the other, so return if we did something here
                                 return
                                 
@@ -972,8 +972,9 @@ final class iCloudService: NSObject {
             // if we reach here, all local data are available in iCloud, with the right hash value
             
             // second step, check if there is data in iCloud we do not have
-            
-            for index in 0 ..< self.CoBaTReferenceTableState.count {
+            let maxCount2 = min(self.CoBaTReferenceTableState.count,
+                               GlobalStorage.unique.maxNumberOfDaysStored)
+            for index in 0 ..< maxCount2 {
                 
                 let currentDayNumber = self.CoBaTReferenceTableState[index].DayNumber
                 
@@ -986,6 +987,9 @@ final class iCloudService: NSObject {
                     #endif
                     
                     self.pullCoBaTStateData(dayNumber: currentDayNumber)
+                    
+                    // one step after the other, so return, if we did something here
+                    return
                 }
             }
         })
@@ -1028,7 +1032,9 @@ final class iCloudService: NSObject {
             let areaData = GlobalStorage.unique.RKIData[areaLevel]
             
             // walk over the dayNumbers and compare with the reference table
-            for dayCodeIndex in 0 ..< GlobalStorage.unique.RKINumbersOfDays[areaLevel].count {
+            let maxCount = min(GlobalStorage.unique.RKINumbersOfDays[areaLevel].count ,
+                               GlobalStorage.unique.maxNumberOfDaysStored)
+            for dayCodeIndex in 0 ..< maxCount {
                 
                 let currentDayCode = GlobalStorage.unique.RKINumbersOfDays[areaLevel][dayCodeIndex]
                 if let indexFound = self.CoBaTReferenceTableCounty.firstIndex(where: { $0.DayNumber == currentDayCode } ) {
@@ -1055,14 +1061,24 @@ final class iCloudService: NSObject {
                                 
                                 // local data differ from iCloud data, replace the data by iCloud
                                 // we always asume, tha the iCloud data is "better" than the local ones
-                                #if DEBUG_PRINT_FUNCCALLS
-                                print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table, but hashLocal (\(hashLocal)) != hashReference (\(hashReference)), will pull data from iCloud and replace the local data")
-                                #endif
                                 
-                                self.replaceCoBaTCountyData(dayNumber: currentDayCode)
-                                
-                                // one step after the other, so return if we did something here
-                                return
+                                if self.pullCoBaTCountyDataLastDayNumber != currentDayCode {
+                                    
+                                    #if DEBUG_PRINT_FUNCCALLS
+                                    print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table, but hashLocal (\(hashLocal)) != hashReference (\(hashReference)), will pull data from iCloud")
+                                    #endif
+                                    
+                                    self.pullCoBaTCountyData(dayNumber: currentDayCode)
+                                    
+                                    // one step after the other, so return if we did something here
+                                    return
+                                    
+                                } else {
+                                    
+                                    #if DEBUG_PRINT_FUNCCALLS
+                                    print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) already in Reference table, but hashLocal (\(hashLocal)) != hashReference (\(hashReference)), but pullCoBaTCountyDataLastDayNumber has same dayNumber, asume endless loop and skip record")
+                                    #endif
+                                }
                                 
                             } else {
                                 
@@ -1203,7 +1219,8 @@ final class iCloudService: NSObject {
             // if we reach here, all local data are available in iCloud, with the right hash value
             
             // second step, check if there is data in iCloud we do not have
-            
+            let maxCount2 = min(self.CoBaTReferenceTableCounty.count,
+                               GlobalStorage.unique.maxNumberOfDaysStored)
             for index in 0 ..< self.CoBaTReferenceTableCounty.count {
                 
                 let currentDayNumber = self.CoBaTReferenceTableCounty[index].DayNumber
@@ -1217,6 +1234,9 @@ final class iCloudService: NSObject {
                     #endif
                     
                     self.pullCoBaTCountyData(dayNumber: currentDayNumber)
+                    
+                    // one step after the other, so return if we did something here
+                    return
                 }
             }
         })
@@ -1248,7 +1268,6 @@ final class iCloudService: NSObject {
             // Preperation
             // -------------------------------------------------------------------------------------
             
-            var newCoBaTDataState: [GlobalStorage.RKIDataStruct] = []
             var recordCounterState: Int = 0
             
             
@@ -1264,19 +1283,7 @@ final class iCloudService: NSObject {
             let operationState = CKQueryOperation(query: queryState)
             operationState.resultsLimit = 1
             
-            
-//            // -----------------------------------------------------------------------------
-//            //                                  Prepare operation
-//            // -----------------------------------------------------------------------------
-//            // Initialize Query
-//            let myDeviceID_Predicate = NSPredicate(format: "Locations_ZoneTimeStamp_Device_ID = \(WIS.unique.WIS_DeviceID)")
-//            let query = CKQuery(recordType: WIS_RT_Locations_ZoneTimeStamp, predicate: myDeviceID_Predicate)
-//
-//            // We want the result sorted by modified date
-//            query.sortDescriptors = [NSSortDescriptor(key: WIS_CK_modifiedAt_FieldName, ascending: true)]
-            
-            
-            
+             
             // -------------------------------------------------------------------------------------
             // Record Fetch Block
             // -------------------------------------------------------------------------------------
@@ -1346,9 +1353,11 @@ final class iCloudService: NSObject {
                     //                                  Success!
                     // -----------------------------------------------------------------------------
                     #if DEBUG_PRINT_FUNCCALLS
-                    print( "iCloudService.pullCoBaTStateData(\(dayNumber)): success!, got \(recordCounterState) good records, will call checkCoBaTStateData()")
+                    print( "iCloudService.pullCoBaTStateData(\(dayNumber)): success!, got \(recordCounterState) good records, return")
                     #endif
-                        self.checkCoBaTStateData()
+                    
+                    // the new data will later request a "startCoBaTWorkQueue()"
+                    return
                     
                     
                 } else {
@@ -1386,7 +1395,6 @@ final class iCloudService: NSObject {
             iCloudService.database.add(operationState)
             
         })
-
     }
 
     /**
@@ -1402,11 +1410,149 @@ final class iCloudService: NSObject {
      - Returns:
      
      */
+    // we do not want to read same record again and again
+    private var pullCoBaTCountyDataLastDayNumber: Int = 0
     private func pullCoBaTCountyData(dayNumber: Int) {
         
-        #if DEBUG_PRINT_FUNCCALLS
-        print("iCloudService.pullCoBaTCountyData(\(dayNumber)): just started")
-        #endif
+        
+        GlobalStorageQueue.async(execute: {
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print( "iCloudService.pullCoBaTCountyData(\(dayNumber)): just started")
+            #endif
+            
+            self.pullCoBaTCountyDataLastDayNumber = dayNumber
+            // -------------------------------------------------------------------------------------
+            // Preperation
+            // -------------------------------------------------------------------------------------
+            
+            var recordCounterCounty: Int = 0
+            
+            
+            // -------------------------------------------------------------------------------------
+            // Build the query
+            // -------------------------------------------------------------------------------------
+            let queryPredicate = NSPredicate(format: "DayNumber = \(dayNumber)")
+            
+            let queryState = CKQuery(recordType: self.RT_CoBaTCountyData,
+                                     predicate: queryPredicate)
+            //queryState.sortDescriptors = [NSSortDescriptor(key: IS_CK_modifiedAt_FieldName, ascending: false)]
+            
+            let operationState = CKQueryOperation(query: queryState)
+            operationState.resultsLimit = 1
+            
+             
+            // -------------------------------------------------------------------------------------
+            // Record Fetch Block
+            // -------------------------------------------------------------------------------------
+            operationState.recordFetchedBlock = {
+                record in
+                
+                // read the data
+                if let dataRead = record[self.RF_CoBaTData] as? Data {
+                    if let dayNumberRead = record[self.RF_DayNumber] as? Int {
+                          
+                        // check if we have the right dayCode
+                        if dayNumberRead == dayNumber {
+                            
+                            // try to decode the data
+                            do {
+                                
+                                let RKIDataRead = try JSONDecoder().decode([GlobalStorage.RKIDataStruct].self,
+                                                                           from: (dataRead))
+                                
+                                // as we reach here, we got all we need, so call refresh_RKIStateData
+                                
+                                #if DEBUG_PRINT_FUNCCALLS
+                                print( "iCloudService.pullCoBaTCountyData(\(dayNumber)): success!, got record \"\(record.recordID.recordName)\", will call GlobalStorage.unique.refresh_RKIStateData()")
+                                #endif
+
+                                GlobalStorage.unique.refresh_RKICountyData(newRKICountyData: RKIDataRead)
+                                
+                                // count the good record
+                                recordCounterCounty += 1
+                                
+                            } catch let error as NSError {
+                                
+                                // encode did fail, log the message
+                                GlobalStorage.unique.storeLastError(errorText: "iCloudService.pullCoBaTCountyData(\(dayNumber)): got record \"\(record.recordID.recordName)\", Error: JSON decoder could not decode RKIData: error: \"\(error.description)\"")
+                            }
+                            
+                        } else {
+                            
+                            // did not get the requested day Number
+                            // encode did fail, log the message
+                            GlobalStorage.unique.storeLastError(errorText: "iCloudService.pullCoBaTCountyData(\(dayNumber)): got record \"\(record.recordID.recordName)\", dayNumber in record (\(dayNumberRead) != requested dayNumber (\(dayNumber)), ignore record")
+                        }
+                       
+                    } else {
+                        
+                        GlobalStorage.unique.storeLastError(
+                            errorText: "iCloudService.pullCoBaTCountyData(\(dayNumber)): could not read dayNumber from record \(record.recordID.recordName), ignore record")
+                    }
+                    
+                } else {
+                    
+                    GlobalStorage.unique.storeLastError(
+                        errorText: "iCloudService.pullCoBaTCountyData(\(dayNumber)): could not read data from record \(record.recordID.recordName), ignore record")
+                }
+            } // recordFetchBlock
+            
+            
+            // -------------------------------------------------------------------------------------
+            // Query Completion Block
+            // -------------------------------------------------------------------------------------
+            operationState.queryCompletionBlock = {
+                (cursor, error) in
+                
+                if error == nil {
+                    
+                    // -----------------------------------------------------------------------------
+                    //                                  Success!
+                    // -----------------------------------------------------------------------------
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print( "iCloudService.pullCoBaTCountyData(\(dayNumber)): success!, got \(recordCounterCounty) good records, return")
+                    #endif
+                    
+                    // the new data will later request a "startCoBaTWorkQueue()"
+                    return
+                    
+                    
+                } else {
+                    // -----------------------------------------------------------------------------
+                    // -----------------------------------------------------------------------------
+                    //                                  Error!
+                    // -----------------------------------------------------------------------------
+                    // -----------------------------------------------------------------------------
+                    
+                    // check for errors
+                    if let currentError = error as? CKError {
+                        
+                        // call the common error routine to print out error and do the usual error handling
+                        self.CommonErrorHandling( currentError, from: "iCloudService.pullCoBaTCountyData(\(dayNumber))")
+                        
+                        //                        // if neccessary use this
+                        //                        switch currentError.code {
+                        //
+                        //                        default:
+                        //                        break
+                        //                        }
+                        
+                    } else {
+                        
+                        GlobalStorage.unique.storeLastError(
+                            errorText: "iCloudService.pullCoBaTCountyData(\(dayNumber)): Error occured, but could not get the error code")
+                    }
+                }
+            }
+            
+            
+            // -------------------------------------------------------------------------------------
+            // Start the query
+            // -------------------------------------------------------------------------------------
+            iCloudService.database.add(operationState)
+            
+        })
     }
 
     /**
@@ -1858,7 +2004,7 @@ final class iCloudService: NSObject {
             queryState.sortDescriptors = [NSSortDescriptor(key: self.RF_DayNumber, ascending: false)]
             
             let operationState = CKQueryOperation(query: queryState)
-            operationState.resultsLimit = GlobalStorage.unique.maxNumberOfDaysStored
+            operationState.resultsLimit = (GlobalStorage.unique.maxNumberOfDaysStored + 1)
             
             
             // -------------------------------------------------------------------------------------
@@ -1914,10 +2060,8 @@ final class iCloudService: NSObject {
                     #endif
                     GlobalStorageQueue.async(flags: .barrier, execute: {
                         self.RKIReferenceTableState = newReferenceTableState
+                        self.pushRKIDataState()
                     })
-                    
-                    self.pushRKIDataState()
-                    
                     
                 } else {
                     // -----------------------------------------------------------------------------
@@ -1988,7 +2132,7 @@ final class iCloudService: NSObject {
             queryCounty.sortDescriptors = [NSSortDescriptor(key: self.RF_DayNumber, ascending: false)]
             
             let operationCounty = CKQueryOperation(query: queryCounty)
-            operationCounty.resultsLimit = GlobalStorage.unique.maxNumberOfDaysStored
+            operationCounty.resultsLimit = (GlobalStorage.unique.maxNumberOfDaysStored + 1)
             
             
             // -------------------------------------------------------------------------------------
@@ -2044,9 +2188,9 @@ final class iCloudService: NSObject {
                     #endif
                     GlobalStorageQueue.async(flags: .barrier, execute: {
                         self.RKIReferenceTableCounty = newReferenceTableCounty
+                        self.pushRKIDataCounty()
                     })
-                    
-                    self.pushRKIDataCounty()
+
                     
                 } else {
                     // -----------------------------------------------------------------------------
