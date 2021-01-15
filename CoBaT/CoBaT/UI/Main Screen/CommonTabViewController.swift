@@ -374,10 +374,10 @@ final class CommonTabViewControllerV2: UIViewController {
             })
         
         // add observer to recognise if user selcted new state
-        if let observer = userSelectedStateObserver {
+        if let observer = userSelectedCountyObserver {
             NotificationCenter.default.removeObserver(observer)
         }
-        userSelectedStateObserver = NotificationCenter.default.addObserver(
+        userSelectedCountyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UserDidSelectCounty,
             object: nil,
             queue: OperationQueue.main,
