@@ -1221,7 +1221,7 @@ final class iCloudService: NSObject {
             // second step, check if there is data in iCloud we do not have
             let maxCount2 = min(self.CoBaTReferenceTableCounty.count,
                                GlobalStorage.unique.maxNumberOfDaysStored)
-            for index in 0 ..< self.CoBaTReferenceTableCounty.count {
+            for index in 0 ..< maxCount2 {
                 
                 let currentDayNumber = self.CoBaTReferenceTableCounty[index].DayNumber
                 

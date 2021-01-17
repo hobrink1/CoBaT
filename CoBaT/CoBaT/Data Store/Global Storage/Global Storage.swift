@@ -71,7 +71,7 @@ final class GlobalStorage: NSObject {
     private let maxNumberOfErrorsStored: Int = 50
     
     // Version of permanent storage
-    private let VersionOfPermanentStorage: Int = 3
+    private let VersionOfPermanentStorage: Int = 4
 
     
     // Calender
@@ -283,7 +283,7 @@ final class GlobalStorage: NSObject {
                                     
    
                                     
-                                case 2: // migrate the timeStamps to noon. We need that to make sure we have a reliable hash value
+                                case 2, 3: // migrate the timeStamps to noon. We need that to make sure we have a reliable hash value
                                     
                                     // we have to reset the timestamps to noon
                                     self.storeLastError(errorText: "CoBaT.GlobalStorage.restoreSavedRKIData: version of permanent storage (\(currentVersionOfPermanentStorage)) is below \(self.VersionOfPermanentStorage), migrate timeStamps")
@@ -316,7 +316,7 @@ final class GlobalStorage: NSObject {
                                                     cases7DaysPer100K: oldItem.cases7DaysPer100K,
                                                     
                                                     // migrate the timeStamp
-                                                    timeStamp: self.getNoonTimeInterval(time: oldItem.timeStamp))
+                                                    timeStamp: self.getMidnightTimeInterval(time: oldItem.timeStamp))
                                                 
                                                 // replace the old item by the new item
                                                 migratedRKIData[areaIndex][dayIndex][itemIndex] = newItem
@@ -334,12 +334,12 @@ final class GlobalStorage: NSObject {
                                             
                                             // migrate timeStamps
                                             migratedRKIDataTimeStamps[areaIndex][dayIndex] =
-                                                self.getNoonTimeInterval(time: migratedRKIDataTimeStamps[areaIndex][dayIndex])
+                                                self.getMidnightTimeInterval(time: migratedRKIDataTimeStamps[areaIndex][dayIndex])
                                         }
                                     }
                                     
                                     // set the new version
-                                    currentVersionOfPermanentStorage = 3
+                                    currentVersionOfPermanentStorage += 1
 
                                     break
 
@@ -602,7 +602,7 @@ final class GlobalStorage: NSObject {
        - number of the day since Date() reference date
     
     */
-    public func getNoonTimeInterval(time: TimeInterval) -> TimeInterval {
+    public func getMidnightTimeInterval(time: TimeInterval) -> TimeInterval {
         
         // we use the gregorian calender
         var RKICalendar: Calendar = Calendar(identifier: .gregorian)
@@ -613,7 +613,7 @@ final class GlobalStorage: NSObject {
 
         // get the noon of the endDate
         let ofDate: Date = Date(timeIntervalSinceReferenceDate: time)
-        let ofDateNoon : Date = RKICalendar.date(bySettingHour: 12, minute: 0, second: 0,
+        let ofDateNoon : Date = RKICalendar.date(bySettingHour: 0, minute: 0, second: 0,
                                                   of: ofDate) ?? ofDate
         
         // return the timeInterval
@@ -938,16 +938,16 @@ final class GlobalStorage: NSObject {
         } else {
             
             // we do this per array, as they might be differnt (happened during tests)
-            while self.RKIData[kindOfArea].count > self.maxNumberOfDaysStored {
+            while self.RKIData[kindOfArea].count > (self.maxNumberOfDaysStored + 1) {
                 self.RKIData[kindOfArea].removeLast()
             }
-            while self.RKIData[kindOfArea].count > self.maxNumberOfDaysStored {
+            while self.RKIDataTimeStamps[kindOfArea].count > (self.maxNumberOfDaysStored + 1) {
                 self.RKIDataTimeStamps[kindOfArea].removeLast()
             }
-            while self.RKIData[kindOfArea].count > self.maxNumberOfDaysStored {
+            while self.RKIDataWeekdays[kindOfArea].count > (self.maxNumberOfDaysStored + 1) {
                 self.RKIDataWeekdays[kindOfArea].removeLast()
             }
-            while self.RKIData[kindOfArea].count > self.maxNumberOfDaysStored {
+            while self.RKINumbersOfDays[kindOfArea].count > (self.maxNumberOfDaysStored + 1) {
                 self.RKINumbersOfDays[kindOfArea].removeLast()
             }
             

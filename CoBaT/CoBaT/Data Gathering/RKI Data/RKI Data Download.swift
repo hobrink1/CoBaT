@@ -284,7 +284,7 @@ final class RKIDataDownload: NSObject {
 //
                         //print("State Update Date: \(shortSingleDateTimeFormatter.string(from: updateDate)), RKI:\(shortSingleDateFormatterRKI.string(from: updateDate))")
                         
-                        let noonTime = GlobalStorage.unique.getNoonTimeInterval(time: updateDate.timeIntervalSinceReferenceDate)
+                        let noonTime = GlobalStorage.unique.getMidnightTimeInterval(time: updateDate.timeIntervalSinceReferenceDate)
                         // append the new data
                         newDataArray.append(GlobalStorage.RKIDataStruct(
                                                 stateID: singleItem.attributes.blid,
@@ -342,7 +342,7 @@ final class RKIDataDownload: NSObject {
                     let secondsSince1970: TimeInterval = TimeInterval(Double(firstItem.attributes.aktualisierung) / 1_000)
                     let lastUpdateRKI: Date = Date(timeIntervalSince1970: secondsSince1970)
                     let lastUpdateTimeInterval: TimeInterval = lastUpdateRKI.timeIntervalSinceReferenceDate
-                    let noonTime = GlobalStorage.unique.getNoonTimeInterval(time: lastUpdateTimeInterval)
+                    let noonTime = GlobalStorage.unique.getMidnightTimeInterval(time: lastUpdateTimeInterval)
                     
                     // we will provide an array of converted values
                     var newDataArray: [GlobalStorage.RKIDataStruct] = []
