@@ -44,8 +44,41 @@ final class HelpTableViewController: UITableViewController {
     // .errorMessage will never translated
     let AboutTexts: [localDataStruct] = [
         
-        localDataStruct(dataType: .version, label1: "", label2: ""),
-        localDataStruct(dataType: .singleString, label1: "RKI-Disclaimer", label2: ""),
+        localDataStruct(dataType: .version,
+                        label1: "", label2: ""),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Instructions-Main-Header", label2: ""),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Instructions-1-Header", label2: "Instructions-1"),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Instructions-2-Header", label2: "Instructions-2"),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Instructions-3-Header", label2: "Instructions-3"),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Instructions-4-Header", label2: "Instructions-4"),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Instructions-5-Header", label2: "Instructions-5"),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "", label2: ""),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Data-Privacy-Header", label2: "Data-Privacy"),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "", label2: ""),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "RKI-Disclaimer-Header", label2: "RKI-Disclaimer"),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "", label2: ""),
 
     ]
 
@@ -76,8 +109,8 @@ final class HelpTableViewController: UITableViewController {
                 // append a new record
                 localDataBuild.append(localDataStruct(
                                         dataType: item.localDataType,
-                                        label1: VersionLabel,
-                                        label2: ""))
+                                        label1: "",
+                                        label2: "\(VersionLabel) © 2021 Hartwig Hopfenzitz"))
                 
                 
                 
@@ -157,8 +190,8 @@ final class HelpTableViewController: UITableViewController {
                 // append a new record
                 localDataBuild.append(localDataStruct(
                                         dataType: .singleString,
-                                        label1: label1Text,
-                                        label2: ""))
+                                        label1: "",
+                                        label2: label1Text))
             }
             
             
@@ -235,6 +268,35 @@ final class HelpTableViewController: UITableViewController {
         return self.localData.count
     }
 
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     willSelectRowAt:
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        
+        // we want the effect, that error messages could be selected, to have some kind of a bookmark, but we do not want that effect in the instructions.
+        let row = indexPath.row
+        let numberOfInstructions = self.AboutTexts.count
+        
+        // check if this is a errormessage
+        if row > numberOfInstructions {
+            
+            // yes, it's an error message so allow theselection
+            return indexPath
+            
+        } else {
+            
+            // no it's not an error message, so do not allow this
+            return nil
+        }
+    }
+    
+    
+    
     /**
      -----------------------------------------------------------------------------------------------
      

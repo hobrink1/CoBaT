@@ -138,15 +138,50 @@ specific public places form 21:00";
  *
  **************************************************************************************************/
 
+/* Instructions for the user */
+"Instructions-Main-Header" = "Instructions:";
+
+/* Instructions for the user 1 */
+"Instructions-1-Header" = "On main page:";
+"Instructions-1" = "\n\"About\" calls this page\n\n\"New Data\" downloads the data again from the RKI server.\n\nAt the bottom of the page there are four \"tabs\" available. These represent the different information levels (federal level, state level and county or city level).\n\nAdditionally, a personal selection can be made in the 4th tab. Elements of the state Level and county / city level can be mixed on that tab.";
+
+
+/* Instructions for the user 2 */
+"Instructions-2-Header" = "Selection of a federal state:";
+"Instructions-2" = "\nActivate the second tab.\n\nTap on \"Select\". The list of the available federal states is displayed.\n\nThis list can be sorted with the button on the top right corner of the page (alphabetically or ascending by incidence or descending by incidence).\n\nTap on the right side of an entry, the details of the entry are shown.\n\nTap on the left side of an entry, this entry is selected as the new federal state.";
+
+
+/* Instructions for the user 3 */
+"Instructions-3-Header" = "Selection of a county or a city:";
+"Instructions-3" = "\nActivate the third tab..\n\nTap on \"Select\" The list of available counties / cities in the federal state (selected in the second tab) is displayed.\n\nThis list can be sorted with the button on the top right corner of the page (alphabetically or ascending by incidence or descending by incidence).\n\nTap on the right side of an entry, the details of the entry are shown.\n\nTap on the left side of an entry, this entry is selected as the new federal state.";
+
+
+/* Instructions for the user 4 */
+"Instructions-4-Header" = "Personal selection:";
+"Instructions-4" = "\nThe fourth tab shows the data of the personal selection..\n\nAt this point you can display federal states, counties or cities that are of particular interest to you.\n\nTo select these, switch to the table with the federal states or counties / cities.\n\nThere, tap on \"Select\".\n\nIn the table, select an entry and tap on the right-hand side to open the detail view.\n\nThere you will see a heart symbol in the top right corner.\n\nIf you tap the heart symbol, it changes from ♡ to ♥, and if you tap again back on ♡.\n\nEntries with a filled heart symbol (♥) will be listed here.\n\nThe sorting is always alphabetical, whereby the names of the associated federal states are part of the sorting, to keep the entries of a federal state together.";
+
+
+/* Instructions for the user 5 */
+"Instructions-5-Header" = "Use of iCloud";
+"Instructions-5" = "\nThe iCloud offers a protected area for each app (as well for CoBaT) in which the users of an app can share data with each other.\n\nWe use this very helpful option to provide all users with historical data right from the start. This is necessary because the RKI only provides the data from \"Yesterday\". Everyone has to build the history by himself.\n\nCoBaT uses a \"Crowd Source\" approach. The first user who downloads the data from RKI in the morning uploads it automatically in this shared area.\n\nThe use of the iCloud happens automatically in the background. This means that the history is seamless, without any additional effort or a special \"house keeper\".";
+
+
+
+/* Data Privacy */
+"Data-Privacy-Header" = "Data Privacy Statement";
+"Data-Privacy" = "\nWe are committed to data privacy!\n\nOur business is software - not data!\n\nBecause of that: \nWE DO NOT WANT YOU DATA\n\nWe will not copy, move, transfer, send, sell, exchange or what ever your data.\nWe don't need it!\nWe don't want it!\nWe don't take it!\n\nAnd you do not have to register to any website.\nWe don't need that ...\nas we do not want your data!\n\nIn this app we only use standard IOS functions and our own code.\n\nNo third party software or other code modules are used.\n\nBy that, we can ensure you, that there is no \"backdoor\" or such to your data either.";
+
+
 /* Copyright from RKI Website */
-"RKI-Disclaimer" = "Die Daten sind die \"Fallzahlen in Deutschland\" des Robert Koch-Institut (RKI) und stehen unter der Open Data Datenlizenz Deutschland – Namensnennung – Version 2.0 zur Verfügung. (www.govdata.de/dl-de/by-2-0))\n\nQuellenvermerk: Robert Koch-Institut (RKI)\n\nHaftungsausschluss: \"Die Inhalte, die über die Internetseiten des Robert Koch-Instituts zur Verfügung gestellt werden, dienen ausschließlich der allgemeinen Information der Öffentlichkeit, vorrangig der Fachöffentlichkeit\"";
+"RKI-Disclaimer-Header" = "Source note:";
+"RKI-Disclaimer" = "\nRobert Koch Institute (RKI)\n\nThe data are the \"number of cases in Germany\" of the Robert Koch Institute (RKI) and are available under the Open Data Data License Germany - Attribution - Version 2.0. (www.govdata.de/dl-de/by-2-0))\n\nAccess by calling:\n\nnpgeo-corona-npgeo-de.hub.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0 \nand\nnpgeo-corona-npgeo-de.hub.arcgis.com/datasets/ef4b445a53c1406892257fe63129a8ea_0\n\nLiability disclaimer: \"The content that is available on the Robert Koch Institute's website are provided, serve exclusively the general information of the public, primarily the professional public\"";
 
 
 /* List of current error messages */
-"Explanation-Error-Messages" = "List of current error messages";
+"Explanation-Error-Messages" = "List of last error messages:";
 
 /* no error messages */
-"Explanation-No-Error-Messages" = "Currently no errors listed";
+"Explanation-No-Error-Messages" = "Currently no errors listed!";
 
 
 

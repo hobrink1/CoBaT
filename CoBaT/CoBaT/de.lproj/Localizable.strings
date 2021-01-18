@@ -132,20 +132,53 @@ bestimmte öffentliche Plätze ab 21:00";
 
 
 
-
 /**************************************************************************************************
  *
  * class HelpTableViewController
  *
  **************************************************************************************************/
 
+/* Instructions for the user */
+"Instructions-Main-Header" = "Bedienungshinweise:";
+
+/* Instructions for the user 1 */
+"Instructions-1-Header" = "Auf der Hauptseite:";
+"Instructions-1" = "\n\"Hinweise\" ruft diese Seite auf\n\n\"Daten Neu\" ruft die Daten erneut vom RKI Server ab.\n\nUnten stehen auf der Seite vier \"Reiter\" zur Verfügung. Diese stellen die unterschiedlichen Informations-Ebenen (Bundes-Ebene, Landes-Ebene und Landkreis- bzw. Stadt-Ebene) dar.\n\nZusätzlich kann im 4. Reiter eine persönliche Auswahl abgelegt werden. Dabei können Elemente der Landes-Ebene und Landkreis-/Stadt-Ebene gemischt werden.";
+
+/* Instructions for the user 2 */
+"Instructions-2-Header" = "Auswahl eines Bundeslandes:";
+"Instructions-2" = "\nDen zweiten Reiter aktivieren.\n\nAuf \"Auswahl\" tippen. Es wird die Liste der verfügbaren Bundesländer angezeigt.\n\nDiese Liste kann mit dem Schalter rechts open auf der Seite sortiert werden (alphabetisch oder aufsteigend nach Inzidenz oder absteigend nach Inzidenz).\n\nTippt man auf die rechte Seite eines Eintrags, werden die Details des Eintrags gezeigt.\n\nTippt man auf die linke Seite eines Eintrags, wird dieser Eintrag als neues Bundesland ausgewählt.";
+
+/* Instructions for the user 3 */
+"Instructions-3-Header" = "Auswahl eines Landkreises oder einer Stadt:";
+"Instructions-3" = "\nDen dritten Reiter aktivieren.\n\nAuf \"Auswahl\" tippen. Es wird die Liste der verfügbaren Landkreise/Städte in dem (im zweiten Reiter ausgewählten) Bundesland angezeigt.\n\nDiese Liste kann mit dem Schalter rechts open auf der Seite sortiert werden (alphabetisch oder aufsteigend nach Inzidenz oder absteigend nach Inzidenz).\n\nTippt man auf die rechte Seite eines Eintrags, werden die Details des Eintrags gezeigt.\n\nTippt man auf die linke Seite eines Eintrags, wird dieser Eintrag als neuer Landkreis bzw. Stadt ausgewählt.";
+
+/* Instructions for the user 4 */
+"Instructions-4-Header" = "Persönliche Auswahl:";
+"Instructions-4" = "\nIm vierten Reiter werden die Daten der persönlichen Auswahl angezeigt.\n\nAn dieser Stelle können sie sich Bundesländer, Landkreise oder Städte die sie besonders interessieren anzeigen lassen.\n\nUm diese auszuwählen, wechseln sie zum Reiter mit den Bundesländern oder Landkreisen/Städten.\n\nDort tippen sie auf \"Auswahl\".\n\nIn der Tabelle wählen sie einen Eintrag aus und tippen auf die rechte Seite, um die Dateiansicht aufzurufen.\n\nDort sehen sie rechts oben ein Herz-Symbol.\n\nWenn sie auf das Herz-Symbol tippen, wechselt es von ♡ zu ♥, und bei nochmaligen antippen zurück auf ♡ .\n\nEinträge mit einem ausgefüllten Herz-Symbol (♥) werden hier gelistet.\n\nDie Sortierung ist dabei immer alphabetisch, wobei die Namen der zugehörigen Bundesländer mit sortiert werden, um die Einträge eines Bundeslandes zusammen darzustellen.";
+
+
+/* Instructions for the user 5 */
+"Instructions-5-Header" = "Nutzung der iCloud:";
+"Instructions-5" = "\nDie iCloud bietet für jede App (also auch für CoBaT) einen geschützten Bereich in dem die Benutzer einer App untereinander Daten teilen können.\n\nDieser Mechanismus wird genutzt um die historischen Daten zur Verfügung zu stellen.\n\nDies ist Notwendig, weil das RKI nur die Daten von \"Gestern\" zur Verfügung stellt. Die Historie muß sich jeder selbst aufbauen.\n\nCoBaT nutzt dazu einen \"Crowd Source\" Ansatz. Der erste Benutzer / die erst Benutzerin, die morgens die Daten von RKI lädt, stellt sie automatisch in diesen gemeinsamen Bereich.\n\nDie Nutzung der iCloud findet vollkommen automatisch im Hintergrund statt. Damit ist die Historie lückenlos, ohne zusätzlichen Verwaltungsaufwand oder einen speziellen \"Kümmerer\".";
+
+/* Data Privacy */
+"Data-Privacy-Header" = "Datenschutzerklärung";
+"Data-Privacy" = "\nWir sind Datenschutz Fans!\n\nWir schreiben Software -\nwir handeln nicht mit Daten!\n\nund darum:\n\nWIR WOLLEN DEINE DATEN NICHT!\n\nKeinerlei persönliche Daten werden jemals kopiert, transferiert, gesendet, verkauft, ausgetauscht oder was auch immer\nWir brauchen das nicht!\nWir wollen das nicht!\nWir tun das nicht!\n\nUnd wir verlangen auch nicht, dass du dich auf irgendeiner Website als Benutzer anmeldest.\nWir brauchen das nicht ...\nweil wir deine Daten nicht wollen!\n\nWir benutzen außerdem nur Standard IOS Funktionen und unseren eigenen Code.\n\n- keine Software von Drittanbietern\n- keine fremden Programmodule.\n\nDadurch können wir dir versichern, dass es keine \"Hintertür\" oder ähnliches zu deinen Daten gibt.";
+
+
 /* Copyright from RKI Website */
-"RKI-Disclaimer" = "Die Daten sind die \"Fallzahlen in Deutschland\" des Robert Koch-Institut (RKI) und stehen unter der Open Data Datenlizenz Deutschland – Namensnennung – Version 2.0 zur Verfügung. (www.govdata.de/dl-de/by-2-0))\n\nQuellenvermerk: Robert Koch-Institut (RKI)\n\nHaftungsausschluss: \"Die Inhalte, die über die Internetseiten des Robert Koch-Instituts zur Verfügung gestellt werden, dienen ausschließlich der allgemeinen Information der Öffentlichkeit, vorrangig der Fachöffentlichkeit\"";
+"RKI-Disclaimer-Header" = "Quellenvermerk:";
+"RKI-Disclaimer" = "\nRobert Koch Institute (RKI)\n\nThe data are the \"number of cases in Germany\" of the Robert Koch Institute (RKI) and are available under the Open Data Data License Germany - Attribution - Version 2.0. (www.govdata.de/dl-de/by-2-0))\n\nAccess by calling:\n\nnpgeo-corona-npgeo-de.hub.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0 \nand\nnpgeo-corona-npgeo-de.hub.arcgis.com/datasets/ef4b445a53c1406892257fe63129a8ea_0\n\nLiability disclaimer: \"The content that is available on the Robert Koch Institute's website are provided, serve exclusively the general information of the public, primarily the professional public\"";
+
+/* Copyright from RKI Website */
+"RKI-Disclaimer-Header" = "Quellenvermerk:";
+"RKI-Disclaimer" = "\nRobert Koch-Institut (RKI)\n\nDie Daten sind die \"Fallzahlen in Deutschland\" des Robert Koch-Institut (RKI) und stehen unter der Open Data Datenlizenz Deutschland – Namensnennung – Version 2.0 zur Verfügung. (www.govdata.de/dl-de/by-2-0))\n\nDaten sind verfügbar durch:\n\nnpgeo-corona-npgeo-de.hub.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0\nund\nnpgeo-corona-npgeo-de.hub.arcgis.com/datasets/ef4b445a53c1406892257fe63129a8ea_0\n\nHaftungsausschluss: \"Die Inhalte, die über die Internetseiten des Robert Koch-Instituts zur Verfügung gestellt werden, dienen ausschließlich der allgemeinen Information der Öffentlichkeit, vorrangig der Fachöffentlichkeit\"";
 
 
 
 /* List of current error messages */
-"Explanation-Error-Messages" = "Liste der aktuellen Fehlermeldungen";
+"Explanation-Error-Messages" = "Liste der letzten Fehlermeldungen";
 
 /* no error messages */
 "Explanation-No-Error-Messages" = "Momentan sind keine Fehlermeldungen vorhanden";

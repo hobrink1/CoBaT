@@ -341,7 +341,7 @@ final class DetailsRKITableViewController: UITableViewController {
                     self.rightImage = DetailsRKIGraphic.unique.GraphRight
                 })
 
-                self.tableView.reloadRows(at: [IndexPath(row: self.rowNumberForGraphCells, section: 0)], with: .fade)
+                self.tableView.reloadRows(at: [IndexPath(row: self.rowNumberForGraphCells, section: 0)], with: .none)
                 
             } else {
                

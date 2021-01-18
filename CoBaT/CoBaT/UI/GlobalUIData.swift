@@ -27,7 +27,7 @@ final class GlobalUIData: NSObject {
 
     // The DetailsRKITableViewController uses this data to build local data out of the global Storage
     public var UIDetailsRKIAreaLevel: Int = GlobalStorage.unique.RKIDataCounty
-    public var UIDetailsRKISelectedMyID: String = "9"
+    public var UIDetailsRKISelectedMyID: String = "7"
     
     // the details screen is called in two differnt scenarios: First form main screen and
     // in rki browser. to make sure that the right graph will be shown when user gets back
@@ -36,7 +36,7 @@ final class GlobalUIData: NSObject {
     // we do that by saving the two values in BrowseRKIDataTableViewController.detailsButtonTapped()
     // and restore it in DetailsRKIViewController.viewDidDisappear()
     public var UIDetailsRKIAreaLevelSaved: Int = GlobalStorage.unique.RKIDataCounty
-    public var UIDetailsRKISelectedMyIDSaved: String = "9"
+    public var UIDetailsRKISelectedMyIDSaved: String = "7"
 
 
 
@@ -75,16 +75,16 @@ final class GlobalUIData: NSObject {
     // ---------------------------------------------------------------------------------------------
     public var UIBrowserRKIAreaLevel: Int = GlobalStorage.unique.RKIDataCounty
     
-    public var UIBrowserRKITitelString: String = "Bayern"
+    public var UIBrowserRKITitelString: String = "Rheinland-Pfalz"
     
-    public var UIBrowserRKISelectedStateName: String = "Bayern"
-    public var UIBrowserRKISelectedStateID: String = "9"
+    public var UIBrowserRKISelectedStateName: String = "Rheinland-Pfalz"
+    public var UIBrowserRKISelectedStateID: String = "7"
     
-    public var UIBrowserRKISelectedCountyName: String = "Regensburg"
-    public var UIBrowserRKISelectedCountyID: String = "259"
+    public var UIBrowserRKISelectedCountyName: String = "Mayen-Koblenz"
+    public var UIBrowserRKISelectedCountyID: String = "149"
 
     // in this dictionary we store the selected County ID per State
-    public var UIBrowserCountyIDPerStateID: [String : String] = ["9" : "259"]
+    public var UIBrowserCountyIDPerStateID: [String : String] = ["7" : "149"]
     
     public enum UIBrowserRKISortEnum: Int {
         case alphabetically = 0, incidencesAscending = 1, incidencesDescending = 2
