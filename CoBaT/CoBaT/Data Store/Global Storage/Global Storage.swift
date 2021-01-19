@@ -937,20 +937,7 @@ final class GlobalStorage: NSObject {
             
         } else {
             
-            // we do this per array, as they might be differnt (happened during tests)
-            while self.RKIData[kindOfArea].count > (self.maxNumberOfDaysStored + 1) {
-                self.RKIData[kindOfArea].removeLast()
-            }
-            while self.RKIDataTimeStamps[kindOfArea].count > (self.maxNumberOfDaysStored + 1) {
-                self.RKIDataTimeStamps[kindOfArea].removeLast()
-            }
-            while self.RKIDataWeekdays[kindOfArea].count > (self.maxNumberOfDaysStored + 1) {
-                self.RKIDataWeekdays[kindOfArea].removeLast()
-            }
-            while self.RKINumbersOfDays[kindOfArea].count > (self.maxNumberOfDaysStored + 1) {
-                self.RKINumbersOfDays[kindOfArea].removeLast()
-            }
-            
+             
             // find the right index to insert by the number of the day
             let dayNumber = getDayNumberFromTimeInterval(time: timeStamp)
             //let indexToUse: Int
@@ -970,6 +957,21 @@ final class GlobalStorage: NSObject {
                 self.RKIDataWeekdays[kindOfArea].append(getWeekdayFromTimeInterval(time: timeStamp))
                 self.RKINumbersOfDays[kindOfArea].append(getDayNumberFromTimeInterval(time: timeStamp))
             }
+            
+            // we do this per array, as they might be differnt (happened during tests)
+            while self.RKIData[kindOfArea].count > (self.maxNumberOfDaysStored + 1) {
+                self.RKIData[kindOfArea].removeLast()
+            }
+            while self.RKIDataTimeStamps[kindOfArea].count > (self.maxNumberOfDaysStored + 1) {
+                self.RKIDataTimeStamps[kindOfArea].removeLast()
+            }
+            while self.RKIDataWeekdays[kindOfArea].count > (self.maxNumberOfDaysStored + 1) {
+                self.RKIDataWeekdays[kindOfArea].removeLast()
+            }
+            while self.RKINumbersOfDays[kindOfArea].count > (self.maxNumberOfDaysStored + 1) {
+                self.RKINumbersOfDays[kindOfArea].removeLast()
+            }
+  
         }
         
         // check if state data were chenged

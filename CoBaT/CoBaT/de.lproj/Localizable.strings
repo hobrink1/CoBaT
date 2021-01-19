@@ -151,7 +151,7 @@ bestimmte öffentliche Plätze ab 21:00";
 
 /* Instructions for the user 3 */
 "Instructions-3-Header" = "Auswahl eines Landkreises oder einer Stadt:";
-"Instructions-3" = "\nDen dritten Reiter aktivieren.\n\nAuf \"Auswahl\" tippen. Es wird die Liste der verfügbaren Landkreise/Städte in dem (im zweiten Reiter ausgewählten) Bundesland angezeigt.\n\nDiese Liste kann mit dem Schalter rechts open auf der Seite sortiert werden (alphabetisch oder aufsteigend nach Inzidenz oder absteigend nach Inzidenz).\n\nTippt man auf die rechte Seite eines Eintrags, werden die Details des Eintrags gezeigt.\n\nTippt man auf die linke Seite eines Eintrags, wird dieser Eintrag als neuer Landkreis bzw. Stadt ausgewählt.";
+"Instructions-3" = "\nZunächst das betreffende Bundesland im zweiten Reiter auswählen, dann den dritten Reiter aktivieren.\n\nAuf \"Auswahl\" tippen. Es wird die Liste der verfügbaren Landkreise/Städte in dem (im zweiten Reiter ausgewählten) Bundesland angezeigt.\n\nDiese Liste kann mit dem Schalter rechts open auf der Seite sortiert werden (alphabetisch oder aufsteigend nach Inzidenz oder absteigend nach Inzidenz).\n\nTippt man auf die rechte Seite eines Eintrags, werden die Details des Eintrags gezeigt.\n\nTippt man auf die linke Seite eines Eintrags, wird dieser Eintrag als neuer Landkreis bzw. Stadt ausgewählt.";
 
 /* Instructions for the user 4 */
 "Instructions-4-Header" = "Persönliche Auswahl:";

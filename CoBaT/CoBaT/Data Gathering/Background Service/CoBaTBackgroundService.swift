@@ -148,12 +148,12 @@ final class CoBaTBackgroundService: NSObject {
         
         //#if DEBUG_PRINT_FUNCCALLS
         GlobalStorage.unique.storeLastError(
-            errorText:"closeBackgroundTask: will call setTaskCompleted(success: true)")
+            errorText:"closeBackgroundTask: will call setTaskCompleted(success: true) in 1 second")
         //#endif
         
         // to make sure we did everything we wanted to do, before the background task will be killed,
-        // we do an async .barrier call
-        GlobalStorageQueue.async(flags: .barrier, execute: {
+        // we do an async .barrier call with a 1 second delay to make sure all other tasks are done
+        GlobalStorageQueue.asyncAfter(deadline: .now() + .seconds(1), flags: .barrier, execute: {
             
             // with this flag GlobalStorage knows it have to use this class
             self.RKIBackgroundFetchIsOngoingFlag = false

@@ -960,9 +960,14 @@ final class iCloudService: NSObject {
                         
                     } else {
                         
-                        // no, user is NOT logged in so skip that
+                        // no, user is NOT logged in so we have to put this daycode into reference table otherwise we will end in an endless loop
+                        
+                        self.CoBaTReferenceTableState.insert(ReferenceTableStruct(dayNumber: currentDayCode,
+                                                                                  dateString: "dummy",
+                                                                                  dataHashValue: 0),
+                                                             at: dayCodeIndex)
                         #if DEBUG_PRINT_FUNCCALLS
-                        print("iCloudService.checkCoBaTStateData(): dayNumber \(currentDayCode) is not in reference table, but will NOT call sendStateToICloud(\(currentDayCode)), as user is not logged in")
+                        print("iCloudService.checkCoBaTStateData(): dayNumber \(currentDayCode) is not in reference table, but will NOT call sendStateToICloud(\(currentDayCode)), as user is not logged in, insert \(currentDayCode) at index: \(dayCodeIndex) to avoid endless loop")
                         #endif
                     }
                     
@@ -1207,9 +1212,14 @@ final class iCloudService: NSObject {
                         
                     } else {
                         
-                        // no, user is NOT logged in so skip that
+                        // no, user is NOT logged in so we have to put this daycode into reference table otherwise we will end in an endless loop
+                        
+                        self.CoBaTReferenceTableCounty.insert(ReferenceTableStruct(dayNumber: currentDayCode,
+                                                                                  dateString: "dummy",
+                                                                                  dataHashValue: 0),
+                                                             at: dayCodeIndex)
                         #if DEBUG_PRINT_FUNCCALLS
-                        print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) is not in reference table, but will NOT call sendCountyToICloud(\(currentDayCode)), as user is not logged in")
+                        print("iCloudService.checkCoBaTCountyData(): dayNumber \(currentDayCode) is not in reference table, but will NOT call sendCoBaTCountyToICloud(\(currentDayCode)), as user is not logged in, insert \(currentDayCode) at index: \(dayCodeIndex) to avoid endless loop")
                         #endif
                     }
                     
