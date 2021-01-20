@@ -56,19 +56,28 @@ final class GlobalUIData: NSObject {
     
     // there are three small graphs on top of the DetailsRKITableView
     // The size of that graphs will be depending on the screen width of the device
-    // thius are the constants which are used in differtent functions
+    // this are the constants which are used in differtent functions
     
-    public let UIScreenWidth: CGFloat         = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+    public let RKIGraphMaxWidth: CGFloat      = 650.0
+    public var UIScreenWidth: CGFloat         = min(UIScreen.main.bounds.width, 650.0)
+    
     public let RKIGraphSideMargins: CGFloat   = 10.0
     public let RKIGraphTopMargine: CGFloat    = 0.0
-    public let RKIGraphBottomMargine: CGFloat = 5.0
-    public let RKIGraphNeededWidth: CGFloat =  round((min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
-                                        - (10.0 * 2)) * 0.32)
-    public let RKIGraphNeededHeight: CGFloat = round(
-                                round((min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
-                                        - (10.0 * 2)) * 0.32)
-                                    / 5 * 4)
+    public var RKIGraphBottomMargine: CGFloat = 5.0
+    public var RKIGraphNeededWidth: CGFloat =
+        round ((min(UIScreen.main.bounds.width, 650.0) - (10.0 * 2)) * 0.32)
+    public var RKIGraphNeededHeight: CGFloat =
+        round(((min(UIScreen.main.bounds.width, 650.0) - (10.0 * 2)) * 0.32) / 5 * 4)
+//    public var RKIGraphNeededWidth: CGFloat =  round((min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+//                                        - (10.0 * 2)) * 0.32)
+//    public var RKIGraphNeededHeight: CGFloat = round(
+//                                round((min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+//                                        - (10.0 * 2)) * 0.32)
+//                                    / 5 * 4)
 
+    public var RKIGraphCurrentViewWidth: CGFloat = min(UIScreen.main.bounds.width, 650.0)
+    public var RKIGraphCurrentViewHeight: CGFloat = min(UIScreen.main.bounds.height, 650.0)
+    
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Variables (permanent stored)

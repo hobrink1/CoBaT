@@ -47,9 +47,9 @@ final class DetailsRKITableViewController: UITableViewController {
     private var weekdayOfCurrentDay: Int = 0
     
     // the three images
-    private var leftImage: UIImage?
-    private var middleImage: UIImage?
-    private var rightImage: UIImage?
+    private var leftImage: UIImage = UIImage(named: "5To4TestImage")!
+    private var middleImage: UIImage = UIImage(named: "5To4TestImage")!
+    private var rightImage: UIImage = UIImage(named: "5To4TestImage")!
         
     // the cell with the three graphs
     private let rowNumberForGraphCells: Int = 1
@@ -163,7 +163,7 @@ final class DetailsRKITableViewController: UITableViewController {
             self.myTextColor = GlobalUIData.unique.UIDetailsRKITextColor
             
             // get the graphs
-            RKIGraphicQueue.sync(execute: {
+            RKIGraphicQueue.async(execute: {
                 self.leftImage = DetailsRKIGraphic.unique.GraphLeft
                 self.middleImage = DetailsRKIGraphic.unique.GraphMiddle
                 self.rightImage = DetailsRKIGraphic.unique.GraphRight
@@ -306,6 +306,10 @@ final class DetailsRKITableViewController: UITableViewController {
             // set the label text on main thread
             DispatchQueue.main.async(execute: {
                 
+                DetailsRKIGraphic.unique.recalcGraphSizeIfNeeded(
+                    viewHeight: min(self.view.bounds.height, GlobalUIData.unique.RKIGraphMaxWidth),
+                    viewWidth: min(self.view.bounds.width, GlobalUIData.unique.RKIGraphMaxWidth))
+
                 self.showDetailData = localDataBuilding
                 
                 #if DEBUG_PRINT_FUNCCALLS
@@ -335,13 +339,17 @@ final class DetailsRKITableViewController: UITableViewController {
             if (self.initialDataAreDone == true)
                 && (self.tableView.numberOfRows(inSection: 0) >= self.rowNumberForGraphCells) {
                 
-                RKIGraphicQueue.sync(execute: {
+                RKIGraphicQueue.async(execute: {
+                    
                     self.leftImage = DetailsRKIGraphic.unique.GraphLeft
                     self.middleImage = DetailsRKIGraphic.unique.GraphMiddle
                     self.rightImage = DetailsRKIGraphic.unique.GraphRight
+                    
+                    DispatchQueue.main.async(execute: {
+                        self.tableView.reloadRows(at: [IndexPath(row: self.rowNumberForGraphCells, section: 0)],
+                                                  with: .none)
+                    })
                 })
-
-                self.tableView.reloadRows(at: [IndexPath(row: self.rowNumberForGraphCells, section: 0)], with: .none)
                 
             } else {
                
@@ -392,6 +400,51 @@ final class DetailsRKITableViewController: UITableViewController {
 
         self.refreshLocalData()
     }
+    
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     viewWillTransition()
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+
+        // on iPads we allow orientation changes, so we have to recalc the graph sizes.
+        // In addition, on iPads the sizes of details views could be smaller than screensize
+        
+        // check orientation
+        if (size.width > self.view.frame.size.width) {
+            
+            //Landscape
+            
+            let viewWidth = min(size.width, GlobalUIData.unique.RKIGraphMaxWidth)
+            let viewHeight = min(size.height, GlobalUIData.unique.RKIGraphMaxWidth)
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("DetailsRKITableViewController.willTransition(): Landscape, will call recalcGraphSizeIfNeeded(height: \(viewHeight), Width: \(viewWidth)")
+            #endif
+            
+            DetailsRKIGraphic.unique.recalcGraphSizeIfNeeded(viewHeight: viewHeight,
+                                                             viewWidth: viewWidth)
+        } else {
+            
+            //Portrait
+            
+            let viewWidth = min(size.width, GlobalUIData.unique.RKIGraphMaxWidth)
+             let viewHeight =  min(size.height, GlobalUIData.unique.RKIGraphMaxWidth)
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("DetailsRKITableViewController.willTransition(): Portrait, will call recalcGraphSizeIfNeeded(height: \(viewHeight), Width: \(viewWidth)")
+            #endif
+            
+            DetailsRKIGraphic.unique.recalcGraphSizeIfNeeded(viewHeight: viewHeight,
+                                                             viewWidth: viewWidth)
+        }
+    }
+
 
     /**
      -----------------------------------------------------------------------------------------------
@@ -408,11 +461,6 @@ final class DetailsRKITableViewController: UITableViewController {
         tableView.estimatedRowHeight = 222
     }
     
-//    override func viewWillLayoutSubviews() {
-//        super.viewWillLayoutSubviews()
-//
-//
-//    }
     
     
     /**
@@ -625,6 +673,83 @@ final class DetailsRKITableViewController: UITableViewController {
             let cell = tableView.dequeueReusableCell(withIdentifier: "DetailsRKIGraphTableViewCell",
                                                      for: indexPath) as! DetailsRKIGraphTableViewCell
             
+            
+            // we give the three imageviews the optimal size, depending on the screen size of the device
+            // the values are pre calculated at GlobalUIData() as they will not change over lifetime
+            
+            let screenWidth: CGFloat = GlobalUIData.unique.UIScreenWidth
+            
+            
+            let sideMargins: CGFloat = GlobalUIData.unique.RKIGraphSideMargins
+            let topMargin: CGFloat = GlobalUIData.unique.RKIGraphTopMargine
+            
+            let neededWidth = GlobalUIData.unique.RKIGraphNeededWidth
+            let neededHeight = GlobalUIData.unique.RKIGraphNeededHeight
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("DetailsRKITableViewController.rowNumberForGraphCells(): screenWidth: \(screenWidth), neededWidth: \(neededWidth)")
+            #endif
+            
+
+            // setup the images and add the images as subviews
+            // we have to do it here and in a possible awakeFromNib() as we might change the size
+            // if we encounter, that the dimensions of the view had changed
+            // as we will add subviews, we first have to remove old subviews from a reused cell
+            
+            // remove possible old subviews
+            if let viewWithTag1 = self.view.viewWithTag(1) {
+                viewWithTag1.removeFromSuperview()
+            }
+            
+            if let viewWithTag2 = self.view.viewWithTag(2) {
+                viewWithTag2.removeFromSuperview()
+            }
+            
+            if let viewWithTag3 = self.view.viewWithTag(3) {
+                viewWithTag3.removeFromSuperview()
+            }
+            
+            // now create the new ones
+            cell.LeftImage = UIImageView(image: DetailsRKIGraphic.unique.GraphLeft)
+            cell.LeftImage.frame = CGRect(x: sideMargins, y: topMargin,
+                                          width: neededWidth, height: neededHeight)
+            
+            cell.LeftImage.layer.cornerRadius = 4
+            cell.LeftImage.clipsToBounds = true
+            
+            // we need that tag to remove it later on, otherwise we have more than one subview
+            cell.LeftImage.tag = 1
+            
+            cell.addSubview(cell.LeftImage)
+            
+            
+            
+            cell.MiddleImage = UIImageView(image: DetailsRKIGraphic.unique.GraphLeft)
+            cell.MiddleImage.frame = CGRect(x: (screenWidth / 2) - (neededWidth / 2), y: topMargin,
+                                            width: neededWidth, height: neededHeight)
+            
+            cell.MiddleImage.layer.cornerRadius = 4
+            cell.MiddleImage.clipsToBounds = true
+            
+            // we need that tag to remove it later on, otherwise we have more than one subview
+            cell.MiddleImage.tag = 2
+            
+            cell.addSubview(cell.MiddleImage)
+            
+            
+            
+            cell.RightImage = UIImageView(image: DetailsRKIGraphic.unique.GraphLeft)
+            cell.RightImage.frame = CGRect(x: screenWidth - sideMargins - neededWidth, y: topMargin,
+                                           width: neededWidth, height: neededHeight)
+            
+            cell.RightImage.layer.cornerRadius = 4
+            cell.RightImage.clipsToBounds = true
+            
+            // we need that tag to remove it later on, otherwise we have more than one subview
+            cell.RightImage.tag = 3
+            
+            cell.addSubview(cell.RightImage)
+
             // save the colors for embedded CommonTabTableViewController
             //let textColor = self.myTextColor
             let backgroundColor = self.myBackgroundColor

@@ -110,11 +110,11 @@ final class DetailsRKIGraphic: NSObject {
         print("DetailsRKIGraphic.startGraphicSystem() just started, call createAllNewGraphs()")
         #endif
         
-        self.setAllParameters()
-        
-        self.createAllNewGraphs()
-        
         RKIGraphicQueue.async(flags:.barrier, execute: {
+            self.setAllParameters()
+            
+            self.createAllNewGraphs()
+            
             self.GraphLeft = self.GraphLeftWait
             self.GraphMiddle = self.GraphMiddleWait
             self.GraphRight = self.GraphRightWait
@@ -532,14 +532,17 @@ final class DetailsRKIGraphic: NSObject {
                 
                 if (selectedData[index].count > selectedIDIndex)
                     && (selectedData[index + 1].count > selectedIDIndex) {
+                    
                     // calculate the delta
                     let delta = selectedData[index][selectedIDIndex].cases
                         - selectedData[index + 1][selectedIDIndex].cases
                     
                     // and append
                     valuesToDraw.append(delta)
+                    
                 } else {
-                    print ("error: selectedData[index].count (\(selectedData[index].count)) > selectedIDIndex (\(selectedIDIndex))")
+                    
+                    GlobalStorage.unique.storeLastError(errorText: "createCasesGraph() error: selectedData[index].count (\(selectedData[index].count)) > selectedIDIndex (\(selectedIDIndex))")
                 }
             }
         }
@@ -1153,6 +1156,51 @@ final class DetailsRKIGraphic: NSObject {
         return returnImage
         
     }
+    
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     Recalcs the graphic dimensions if there is a difference to the former values
+     
+     -----------------------------------------------------------------------------------------------
+     
+     - Parameters:
+        - viewHeight: Dimensions to recalc
+        - viewWidth: Dimensions to recalc
+     */
+    public func recalcGraphSizeIfNeeded(viewHeight: CGFloat, viewWidth: CGFloat) {
+        
+        RKIGraphicQueue.async(execute: {
+            
+            // check if we have to recalc
+            if  GlobalUIData.unique.RKIGraphCurrentViewWidth != viewWidth {
+               
+                // yes, the dimensions are different, so recalc and create new graphs
+                RKIGraphicQueue.async(flags: .barrier, execute: {
+
+                    GlobalUIData.unique.RKIGraphCurrentViewWidth = viewWidth
+                    GlobalUIData.unique.UIScreenWidth = viewWidth
+                    
+                    // we treat it always as portrait mode
+                    GlobalUIData.unique.RKIGraphNeededWidth =
+                        round((viewWidth - (GlobalUIData.unique.RKIGraphSideMargins * 2)) * 0.32)
+                    
+                    GlobalUIData.unique.RKIGraphNeededHeight =
+                        round(GlobalUIData.unique.RKIGraphNeededWidth / 5 * 4)
+                    
+                    self.setAllParameters()
+                    
+                    // we use the same queue as the
+                    OperationQueue.main.addOperation {
+                        self.createNewSetOfGraphs()
+                    }
+                })
+            }
+        })
+    }
+    
+    
     /**
      -----------------------------------------------------------------------------------------------
      
@@ -1168,7 +1216,7 @@ final class DetailsRKIGraphic: NSObject {
      */
     private func setAllParameters() {
         
-        RKIGraphicQueue.async(flags: .barrier, execute: {
+        //RKIGraphicQueue.async(flags: .barrier, execute: {
             
             // we use this general idea of proportions of the graph
             // bar width:         10
@@ -1206,7 +1254,7 @@ final class DetailsRKIGraphic: NSObject {
                                      ) / 2.0)
             
             self.rightBorder = widthNeeded - self.leftBorder
-        })
+        //})
     }
     
     
