@@ -109,7 +109,7 @@ final class RKIDataDownload: NSObject {
                                                 
                                                 // convert it to string and print it (used for testing AND
                                                 // for quickType webside to generate the "JSON RKI ....swift" files
-                                                // print("\(String(data: data!, encoding: .utf8) ?? "Convertion data to string failed")")
+                                                print("\(String(data: data!, encoding: .utf8) ?? "Convertion data to string failed")")
                                                 
                                                 // handle the content
                                                 self.handleRKIContent(data!, singleDataSet.RKI_DataType)

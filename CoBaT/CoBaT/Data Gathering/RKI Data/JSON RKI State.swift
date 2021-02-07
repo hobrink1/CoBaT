@@ -306,6 +306,7 @@ fileprivate extension RKI_State_Field {
 
 enum RKI_State_SQLType: String, Codable {
     case sqlTypeDouble = "sqlTypeDouble"
+    case sqlTypeInteger = "sqlTypeInteger"
     case sqlTypeOther = "sqlTypeOther"
 }
 

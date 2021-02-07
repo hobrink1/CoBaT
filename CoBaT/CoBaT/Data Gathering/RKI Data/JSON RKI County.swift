@@ -457,6 +457,7 @@ fileprivate extension RKI_County_Field {
 
 enum RKI_County_SQLType: String, Codable {
     case sqlTypeDouble = "sqlTypeDouble"
+    case sqlTypeInteger = "sqlTypeInteger"
     case sqlTypeOther = "sqlTypeOther"
 }
 

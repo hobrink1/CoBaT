@@ -70,15 +70,15 @@ final class HelpTableViewController: UITableViewController {
         
         localDataStruct(dataType: .doubleString,
                         label1: "Data-Privacy-Header", label2: "Data-Privacy"),
-        
+
         localDataStruct(dataType: .doubleString,
                         label1: "", label2: ""),
-        
-        localDataStruct(dataType: .doubleString,
-                        label1: "RKI-Disclaimer-Header", label2: "RKI-Disclaimer"),
-        
-        localDataStruct(dataType: .doubleString,
-                        label1: "", label2: ""),
+//
+//        localDataStruct(dataType: .doubleString,
+//                        label1: "RKI-Disclaimer-Header", label2: "RKI-Disclaimer"),
+//
+//        localDataStruct(dataType: .doubleString,
+//                        label1: "", label2: ""),
 
     ]
 
@@ -193,6 +193,25 @@ final class HelpTableViewController: UITableViewController {
                                         label1: "",
                                         label2: label1Text))
             }
+//            
+//            localDataBuild.append(localDataStruct(dataType: .doubleString,
+//                            label1: "", label2: ""))
+//
+//            localDataBuild.append(localDataStruct(dataType: .doubleString,
+//                                                  label1: NSLocalizedString("Data-Privacy-Header",
+//                                                                            comment: ""),
+//                                                  label2: NSLocalizedString("Data-Privacy",
+//                                                                            comment: "")))
+            
+            localDataBuild.append(localDataStruct(dataType: .doubleString,
+                                                  label1: "",
+                                                  label2: ""))
+            
+            localDataBuild.append(localDataStruct(dataType: .doubleString,
+                                                  label1: NSLocalizedString("RKI-Disclaimer-Header",
+                                                                            comment: ""),
+                                                  label2: NSLocalizedString("RKI-Disclaimer",
+                                                                            comment: "")))
             
             
             DispatchQueue.main.async(execute: {

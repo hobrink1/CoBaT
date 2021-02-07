@@ -9,7 +9,7 @@ import UIKit
 import Foundation
 import BackgroundTasks
 
-let VersionLabel: String = "CoBaT V2.1.0.6"
+let VersionLabel: String = "CoBaT V2.1.0.8"
 
 
 // simple variable to detect if we are in background or not
@@ -62,7 +62,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
      
         // UIApplication.shared.setMinimumBackgroundFetchInterval(3600)
         BGTaskScheduler.shared.register(
-            forTaskWithIdentifier: "org.hobrink.CoBat.refreshRKIBackground",
+            forTaskWithIdentifier: "org.hobrink.CoBaT2.refreshRKIBackground",
             using: nil)
         { task in
              self.handleRKIBackgroundFetch(task: task as! BGAppRefreshTask)
@@ -213,7 +213,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
      */
     func scheduleAppRefresh() {
         
-        let request = BGAppRefreshTaskRequest(identifier: "org.hobrink.CoBat.refreshRKIBackground")
+        let request = BGAppRefreshTaskRequest(identifier: "org.hobrink.CoBaT2.refreshRKIBackground")
         
         // Fetch no earlier than 60 minutes from now
         request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60)

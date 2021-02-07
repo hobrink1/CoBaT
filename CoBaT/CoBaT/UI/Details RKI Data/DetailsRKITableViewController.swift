@@ -677,14 +677,21 @@ final class DetailsRKITableViewController: UITableViewController {
             // we give the three imageviews the optimal size, depending on the screen size of the device
             // the values are pre calculated at GlobalUIData() as they will not change over lifetime
             
-            let screenWidth: CGFloat = GlobalUIData.unique.UIScreenWidth
-            
-            
-            let sideMargins: CGFloat = GlobalUIData.unique.RKIGraphSideMargins
-            let topMargin: CGFloat = GlobalUIData.unique.RKIGraphTopMargine
-            
+            //let screenWidth: CGFloat = GlobalUIData.unique.UIScreenWidth
+            let screenWidth: CGFloat = min(cell.contentView.frame.width, cell.frame.width)
+  
             let neededWidth = GlobalUIData.unique.RKIGraphNeededWidth
             let neededHeight = GlobalUIData.unique.RKIGraphNeededHeight
+            
+
+            let usedSpace: CGFloat = neededWidth * 3
+            let freeSpace = screenWidth - usedSpace
+            
+            //let sideMargins: CGFloat = GlobalUIData.unique.RKIGraphSideMargins
+            let sideMargins: CGFloat = round(freeSpace / 6.0)
+            let topMargin: CGFloat = GlobalUIData.unique.RKIGraphTopMargine
+            
+        
             
             #if DEBUG_PRINT_FUNCCALLS
             print("DetailsRKITableViewController.rowNumberForGraphCells(): screenWidth: \(screenWidth), neededWidth: \(neededWidth)")

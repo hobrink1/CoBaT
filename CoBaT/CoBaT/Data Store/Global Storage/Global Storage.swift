@@ -1202,14 +1202,24 @@ final class GlobalStorage: NSObject {
         // reset the dictonary
         self.RKIStateDic = [:]
         
-        // walk over the RKI state data of day 0
-        for stateIndex in 0 ..< self.RKIData[RKIDataState][0].count {
+        if self.RKIData[RKIDataState].isEmpty == false {
             
-            // we take day 0 as the reference
-            let currentState = self.RKIData[RKIDataState][0][stateIndex]
+            // walk over the RKI state data of day 0
+            for stateIndex in 0 ..< self.RKIData[RKIDataState][0].count {
+                
+                // we take day 0 as the reference
+                let currentState = self.RKIData[RKIDataState][0][stateIndex]
+                
+                // set the dictonary item
+                self.RKIStateDic[currentState.myID ?? " "] = currentState.name
+            }
             
-            // set the dictonary item
-            self.RKIStateDic[currentState.myID ?? " "] = currentState.name
+        } else {
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("rebuildStateDic RKIData[RKIDataState].isEmpty == false")
+            #endif
+
         }
     }
     
