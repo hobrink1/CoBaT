@@ -9,14 +9,21 @@ import UIKit
 import Foundation
 import BackgroundTasks
 
-let VersionLabel: String = "CoBaT V2.1.0.8"
+let VersionLabel: String = "CoBaT V2.1.1.0"
 
 
 // simple variable to detect if we are in background or not
 // this avoids to call UIApplication.shared.applicationState, as this always have to be called on main thread
 var weAreInBackground: Bool = true
 
+// the strings to identify the background tasks
+let BGAppRefreshTaskIdentifier: String = "org.hobrink.CoBat.refreshRKIBackground"
+let BackgroundTaskName: String = "org.hobrink.CoBaT.BackgroundFetchBackgroundTask"
+
+// the background task ID of the current background task
 var backgroundTaskID: UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier.invalid
+
+// we need that later on in CoBaTBackgroundService.swift closeBackgroundTask()
 var myCoBaTAppDelegate: AppDelegate!
 
 // -------------------------------------------------------------------------------------------------
@@ -41,6 +48,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         // Override point for customization after application launch.
+        
+        
+        // we need that later on in CoBaTBackgroundService.swift closeBackgroundTask()
         myCoBaTAppDelegate = self
 
         
@@ -62,7 +72,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
      
         // UIApplication.shared.setMinimumBackgroundFetchInterval(3600)
         BGTaskScheduler.shared.register(
-            forTaskWithIdentifier: "org.hobrink.CoBaT2.refreshRKIBackground",
+            forTaskWithIdentifier: BGAppRefreshTaskIdentifier,
             using: nil)
         { task in
              self.handleRKIBackgroundFetch(task: task as! BGAppRefreshTask)
@@ -181,7 +191,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // ask for more background time
         // but make sure that a possible old one has been canceled
         self.stopCurrentBackgroundTask()
-        backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: "CoBaT.BackgroundFetchBackgroundTask") {
+        backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: BackgroundTaskName) {
             
             // End the task if time expires.
             self.stopCurrentBackgroundTask()
@@ -213,7 +223,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
      */
     func scheduleAppRefresh() {
         
-        let request = BGAppRefreshTaskRequest(identifier: "org.hobrink.CoBaT2.refreshRKIBackground")
+        let request = BGAppRefreshTaskRequest(identifier: BGAppRefreshTaskIdentifier)
         
         // Fetch no earlier than 60 minutes from now
         request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60)
