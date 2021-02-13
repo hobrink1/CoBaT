@@ -82,6 +82,7 @@ Details RKI data
  - lists all datasets for the selected item
  - each data set holds the data of one days
  - it also shows the differences between each two data sets
+ - provides three self sizing graphs for new cases, deaths and incidences, each showing values of last three weeks
 
 Help Screen
  - shows the data copyright and disclaimer by RKI
