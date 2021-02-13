@@ -9,13 +9,22 @@ import UIKit
 import Foundation
 import BackgroundTasks
 
-let VersionLabel: String = "CoBaT V1.1.3.2"
+let VersionLabel: String = "CoBaT V2.1.1.0"
 
 
 // simple variable to detect if we are in background or not
 // this avoids to call UIApplication.shared.applicationState, as this always have to be called on main thread
 var weAreInBackground: Bool = true
 
+// the strings to identify the background tasks
+let BGAppRefreshTaskIdentifier: String = "org.hobrink.CoBat.refreshRKIBackground"
+let BackgroundTaskName: String = "org.hobrink.CoBaT.BackgroundFetchBackgroundTask"
+
+// the background task ID of the current background task
+var backgroundTaskID: UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier.invalid
+
+// we need that later on in CoBaTBackgroundService.swift closeBackgroundTask()
+var myCoBaTAppDelegate: AppDelegate!
 
 // -------------------------------------------------------------------------------------------------
 // MARK: -
@@ -40,9 +49,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Override point for customization after application launch.
         
+        
+        // we need that later on in CoBaTBackgroundService.swift closeBackgroundTask()
+        myCoBaTAppDelegate = self
+
+        
         // build the formatters
         buildAllFormatters()
 
+//        // get the iCloud reference table
+//        iCloudService.unique.getReferences()
+//
         // restore the permanent stored data
         GlobalUIData.unique.restoreSavedUIData()
         GlobalStorage.unique.restoreSavedRKIData()
@@ -55,7 +72,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
      
         // UIApplication.shared.setMinimumBackgroundFetchInterval(3600)
         BGTaskScheduler.shared.register(
-            forTaskWithIdentifier: "org.hobrink.CoBat.refreshRKIBackground",
+            forTaskWithIdentifier: BGAppRefreshTaskIdentifier,
             using: nil)
         { task in
              self.handleRKIBackgroundFetch(task: task as! BGAppRefreshTask)
@@ -163,20 +180,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       */
     func handleRKIBackgroundFetch(task: BGAppRefreshTask) {
 
-        #if DEBUG_PRINT_FUNCCALLS
-        print("handleRKIBackgroundFetch(): just started")
-        #endif
+        //#if DEBUG_PRINT_FUNCCALLS
+        GlobalStorage.unique.storeLastError(
+            errorText: "handleRKIBackgroundFetch(): just started")
+        //#endif
 
         // Schedule a new refresh task
         scheduleAppRefresh()
+        
+        // ask for more background time
+        // but make sure that a possible old one has been canceled
+        self.stopCurrentBackgroundTask()
+        backgroundTaskID = UIApplication.shared.beginBackgroundTask (withName: BackgroundTaskName) {
+            
+            // End the task if time expires.
+            self.stopCurrentBackgroundTask()
+        }
 
         // call the background handler. The handler will also call task.setTaskCompleted(success: )
         CoBaTBackgroundService.unique.startRKIBackgroundFetch(task: task)
         
- 
         // Provide an expiration handler for the background task that cancels the operation
         task.expirationHandler = {
             
+            //#if DEBUG_PRINT_FUNCCALLS
+            GlobalStorage.unique.storeLastError(
+                errorText: "handleRKIBackgroundFetch().expirationHandler: will call setTaskCompleted(success: false)")
+            //#endif
+
+            self.stopCurrentBackgroundTask()
+
             task.setTaskCompleted(success: false)
         }
     }
@@ -190,17 +223,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
      */
     func scheduleAppRefresh() {
         
-        let request = BGAppRefreshTaskRequest(identifier: "org.hobrink.CoBat.refreshRKIBackground")
+        let request = BGAppRefreshTaskRequest(identifier: BGAppRefreshTaskIdentifier)
         
-        // Fetch no earlier than 10 minutes from now
+        // Fetch no earlier than 60 minutes from now
         request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60)
         
         do {
             try BGTaskScheduler.shared.submit(request)
             
-            #if DEBUG_PRINT_FUNCCALLS
-            print("scheduleAppRefresh(): did submit task")
-            #endif
+            //#if DEBUG_PRINT_FUNCCALLS
+            GlobalStorage.unique.storeLastError(
+                errorText: "scheduleAppRefresh(): did submit task")
+            //#endif
             
         } catch let error as NSError {
             
@@ -209,11 +243,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
     
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     We need that function to give the CoBaTBackgroundService a chance to call it
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    public func stopCurrentBackgroundTask() {
+        
+        if backgroundTaskID != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTaskID)
+            backgroundTaskID = UIBackgroundTaskIdentifier.invalid
+        }
+    }
+    
     // ---------------------------------------------------------------------------------------------
     // MARK: - UISceneSession Lifecycle
     // ---------------------------------------------------------------------------------------------
-
- 
     /**
      -----------------------------------------------------------------------------------------------
      

@@ -15,7 +15,7 @@ import UIKit
 // MARK: -
 // MARK: - Class
 // -------------------------------------------------------------------------------------------------
-class StateTabViewController: UIViewController {
+final class StateTabViewController: UIViewController {
 
 
     // ---------------------------------------------------------------------------------------------

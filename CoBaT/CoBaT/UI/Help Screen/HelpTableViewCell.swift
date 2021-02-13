@@ -12,7 +12,7 @@ import UIKit
 // ----------------------------------------------------------------------------------
 
 
-class HelpTableViewCell: UITableViewCell {
+final class HelpTableViewCell: UITableViewCell {
 
     // ------------------------------------------------------------------------------
     // MARK: - Class Properties

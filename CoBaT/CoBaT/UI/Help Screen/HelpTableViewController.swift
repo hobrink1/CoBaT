@@ -18,7 +18,7 @@ import UIKit
 // MARK: - Class
 // -------------------------------------------------------------------------------------------------
     
-class HelpTableViewController: UITableViewController {
+final class HelpTableViewController: UITableViewController {
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Class Properties
@@ -44,8 +44,41 @@ class HelpTableViewController: UITableViewController {
     // .errorMessage will never translated
     let AboutTexts: [localDataStruct] = [
         
-        localDataStruct(dataType: .version, label1: "", label2: ""),
-        localDataStruct(dataType: .singleString, label1: "RKI-Disclaimer", label2: ""),
+        localDataStruct(dataType: .version,
+                        label1: "", label2: ""),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Instructions-Main-Header", label2: ""),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Instructions-1-Header", label2: "Instructions-1"),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Instructions-2-Header", label2: "Instructions-2"),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Instructions-3-Header", label2: "Instructions-3"),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Instructions-4-Header", label2: "Instructions-4"),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Instructions-5-Header", label2: "Instructions-5"),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "", label2: ""),
+        
+        localDataStruct(dataType: .doubleString,
+                        label1: "Data-Privacy-Header", label2: "Data-Privacy"),
+
+        localDataStruct(dataType: .doubleString,
+                        label1: "", label2: ""),
+//
+//        localDataStruct(dataType: .doubleString,
+//                        label1: "RKI-Disclaimer-Header", label2: "RKI-Disclaimer"),
+//
+//        localDataStruct(dataType: .doubleString,
+//                        label1: "", label2: ""),
 
     ]
 
@@ -76,11 +109,11 @@ class HelpTableViewController: UITableViewController {
                 // append a new record
                 localDataBuild.append(localDataStruct(
                                         dataType: item.localDataType,
-                                        label1: VersionLabel,
-                                        label2: ""))
-
+                                        label1: "",
+                                        label2: "\(VersionLabel) © 2021 Hartwig Hopfenzitz"))
                 
-            
+                
+                
             case .singleString:
                 
                 // translate the label text
@@ -91,7 +124,7 @@ class HelpTableViewController: UITableViewController {
                                         dataType: item.localDataType,
                                         label1: label1Text,
                                         label2: ""))
- 
+                
                 
             case .doubleString:
                 
@@ -104,16 +137,16 @@ class HelpTableViewController: UITableViewController {
                                         dataType: item.localDataType,
                                         label1: label1Text,
                                         label2: label2Text))
- 
-
+                
+                
             case .errorMessage:
                 
                 // append a new record
                 localDataBuild.append(item)
-
+                
             }
         }
-
+        
         
         GlobalStorageQueue.sync(execute: {
             
@@ -121,7 +154,7 @@ class HelpTableViewController: UITableViewController {
                 
                 // translate the label text
                 let label1Text = NSLocalizedString("Explanation-Error-Messages",
-                    comment: "List of current error messages")
+                                                   comment: "List of current error messages")
                 
                 
                 
@@ -130,7 +163,7 @@ class HelpTableViewController: UITableViewController {
                                         dataType: .singleString,
                                         label1: label1Text,
                                         label2: ""))
-
+                
                 // resort the erros so that newest is on top
                 let sortedErrors = GlobalStorage.unique.lastErrors.sorted(
                     by: { $0.errorTimeStamp > $1.errorTimeStamp } )
@@ -152,21 +185,41 @@ class HelpTableViewController: UITableViewController {
                 
                 // translate the label text
                 let label1Text = NSLocalizedString("Explanation-No-Error-Messages",
-                    comment: "no error messages")
+                                                   comment: "no error messages")
                 
                 // append a new record
                 localDataBuild.append(localDataStruct(
                                         dataType: .singleString,
-                                        label1: label1Text,
-                                        label2: ""))
+                                        label1: "",
+                                        label2: label1Text))
             }
-        })
-        
-        DispatchQueue.main.async(execute: {
+//            
+//            localDataBuild.append(localDataStruct(dataType: .doubleString,
+//                            label1: "", label2: ""))
+//
+//            localDataBuild.append(localDataStruct(dataType: .doubleString,
+//                                                  label1: NSLocalizedString("Data-Privacy-Header",
+//                                                                            comment: ""),
+//                                                  label2: NSLocalizedString("Data-Privacy",
+//                                                                            comment: "")))
             
-            self.localData = localDataBuild
+            localDataBuild.append(localDataStruct(dataType: .doubleString,
+                                                  label1: "",
+                                                  label2: ""))
             
-            self.tableView.reloadData()
+            localDataBuild.append(localDataStruct(dataType: .doubleString,
+                                                  label1: NSLocalizedString("RKI-Disclaimer-Header",
+                                                                            comment: ""),
+                                                  label2: NSLocalizedString("RKI-Disclaimer",
+                                                                            comment: "")))
+            
+            
+            DispatchQueue.main.async(execute: {
+                
+                self.localData = localDataBuild
+                
+                self.tableView.reloadData()
+            })
         })
     }
 
@@ -205,6 +258,7 @@ class HelpTableViewController: UITableViewController {
     }
 
     
+    
     // ---------------------------------------------------------------------------------------------
     // MARK: - Table view data source
     // ---------------------------------------------------------------------------------------------
@@ -233,6 +287,35 @@ class HelpTableViewController: UITableViewController {
         return self.localData.count
     }
 
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     willSelectRowAt:
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        
+        // we want the effect, that error messages could be selected, to have some kind of a bookmark, but we do not want that effect in the instructions.
+        let row = indexPath.row
+        let numberOfInstructions = self.AboutTexts.count
+        
+        // check if this is a errormessage
+        if row > numberOfInstructions {
+            
+            // yes, it's an error message so allow theselection
+            return indexPath
+            
+        } else {
+            
+            // no it's not an error message, so do not allow this
+            return nil
+        }
+    }
+    
+    
+    
     /**
      -----------------------------------------------------------------------------------------------
      

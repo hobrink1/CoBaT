@@ -9,10 +9,10 @@ import UIKit
 
 // -------------------------------------------------------------------------------------------------
 // MARK: -
-// MARK: - Browse County Data Table View Controller
+// MARK: - Details RKI Table View Controller
 // -------------------------------------------------------------------------------------------------
 
-class DetailsRKITableViewController: UITableViewController {
+final class DetailsRKITableViewController: UITableViewController {
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Local storage
@@ -21,15 +21,45 @@ class DetailsRKITableViewController: UITableViewController {
     // the oberservers have to be released, otherwise there wil be a memory leak.
     // this variables were set in "ViewDidApear()" and released in "ViewDidDisappear()"
     
-    var newRKIDataReadyObserver: NSObjectProtocol?
+    private var newRKIDataReadyObserver: NSObjectProtocol?
+    private var commonTabBarChangedContentObserver: NSObjectProtocol?
+    private var newGraphReadyObserver: NSObjectProtocol?
     
+    // flag if the initial data are displayed. Will be used in refreshCellWithGraph()
+    private var initialDataAreDone: Bool = false
     
+    // color codes for the first row
+    private var myBackgroundColor = UIColor.systemBackground
+    private var myTextColor = UIColor.label
     
+    // the variables to fill the "kindOf" and "Inhabitants" labels
+    private let rowNumberForInhabitantsCell: Int = 0
+    private var myKindOfString : String = ""
+    private var myInhabitantsValueString: String = ""
+    private var myInhabitantsLabelString: String = ""
+    
+    // the color for the row which have the same weekday than the current one
+    private let rowHighlightedBackgroundUIColor: UIColor = UIColor.gray
+    private let rowhBarHighlightedBackgroundCGColor: CGColor = UIColor.gray.cgColor
+    private let rowHighlightedTextUIColor: UIColor = UIColor.white
+    private let rowhBarHighlightedTextCGColor: CGColor = UIColor.white.cgColor
+
+    private var weekdayOfCurrentDay: Int = 0
+    
+    // the three images
+    private var leftImage: UIImage = UIImage(named: "5To4TestImage")!
+    private var middleImage: UIImage = UIImage(named: "5To4TestImage")!
+    private var rightImage: UIImage = UIImage(named: "5To4TestImage")!
+        
+    // the cell with the three graphs
+    private let rowNumberForGraphCells: Int = 1
+    
+    // we have three different kind of detail cells, this is the enum for them
     enum showDeltaCellTypeEnum: Int {
         case current = 0, dayDiff = 1, weekDiff = 2
     }
     
-    
+    // we use this struct to precalculate all data
     struct showDetailStruct {
         
         let rkiDataStruct: GlobalStorage.RKIDataStruct
@@ -40,6 +70,7 @@ class DetailsRKITableViewController: UITableViewController {
         let cellType: showDeltaCellTypeEnum
         let sortKey: String
         let otherDayTimeStamp: TimeInterval
+        let dayOfWeek: Int
         
         let backgroundColor: UIColor
         let textColor: UIColor
@@ -51,6 +82,7 @@ class DetailsRKITableViewController: UITableViewController {
              cellType: showDeltaCellTypeEnum,
              sortKey: String,
              otherDayTimeStamp: TimeInterval,
+             dayOfWeek: Int,
              backgroundColor: UIColor,
              textColor: UIColor,
              textColorLower: UIColor)
@@ -62,50 +94,83 @@ class DetailsRKITableViewController: UITableViewController {
             self.cellType           = cellType
             self.sortKey            = sortKey
             self.otherDayTimeStamp  = otherDayTimeStamp
+            self.dayOfWeek          = dayOfWeek
             self.backgroundColor    = backgroundColor
             self.textColor          = textColor
             self.textColorLower     = textColorLower
         }
     }
 
-    var showDetailData: [showDetailStruct] = []
+    private var showDetailData: [showDetailStruct] = []
 
     // the id string of the selected item, to highlight the related cell
-    var selectedItemID: String = ""
+    private var selectedItemID: String = ""
 
 
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Translated strings
     // ---------------------------------------------------------------------------------------------
-    let casesText = NSLocalizedString("label-cases", comment: "Label text for cases")
-    let incidencesText = NSLocalizedString("label-cases-7days", comment: "Label text for cases in 7 days")
-    let inhabitantsText = NSLocalizedString("label-inhabitants", comment: "Label text for inhabitants")
-    let deathsText = NSLocalizedString("label-deaths", comment: "Label text for deaths")
+    private let inhabitantsText = NSLocalizedString("label-inhabitants", comment: "Label text for inhabitants")
 
-    let totalText = NSLocalizedString("label-total", comment: "Label text for total")
-    let per100kText = NSLocalizedString("label-per-100k", comment: "Label text for per 100k")
     
-    let changeText = NSLocalizedString("label-change", comment: "Text for changes")
+    private let casesText = NSLocalizedString("label-cases", comment: "Label text for cases")
+    private let casesTextNew = NSLocalizedString("RKIGraph-Cases", comment: "Label text for graph \"new cases\"")
+    
+    private let deathsText = NSLocalizedString("label-deaths", comment: "Label text for deaths")
+    private let deathsTextNew = NSLocalizedString("RKIGraph-Deaths", comment: "Label text for graph \"new deaths\"")
+
+    private let incidencesText = NSLocalizedString("label-cases-7days", comment: "Label text for cases in 7 days")
+    private let incidencesTextNew = NSLocalizedString("label-cases-7days-new", comment: "Label text for new cases in 7 days")
+
+
+    private let totalText = NSLocalizedString("label-total", comment: "Label text for total")
+    private let per100kText = NSLocalizedString("label-per-100k", comment: "Label text for per 100k")
+    
+    private let changeText = NSLocalizedString("label-change", comment: "Text for changes")
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - Helper
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     refreshLocalData()
+     
+     -----------------------------------------------------------------------------------------------
+     */
     private func refreshLocalData() {
         
-        // create shortcuts
-        let selectedAreaLevel = GlobalUIData.unique.UIDetailsRKIAreaLevel
-        let selectedMyID = GlobalUIData.unique.UIDetailsRKISelectedMyID
-        
-        var localRKIDataLoaded : [GlobalStorage.RKIDataStruct] = []
-        
-        var localDataBuiling:[showDetailStruct] = []
-
         // get the related data from the global storage in sync
-        GlobalStorageQueue.sync(execute: {
+        GlobalStorageQueue.async(execute: {
             
-             
+            // create shortcuts
+            let selectedAreaLevel = GlobalUIData.unique.UIDetailsRKIAreaLevel
+            let selectedMyID = GlobalUIData.unique.UIDetailsRKISelectedMyID
+            
+            var localRKIDataLoaded : [GlobalStorage.RKIDataStruct] = []
+            let selectedWekdays: [Int] = GlobalStorage.unique.RKIDataWeekdays[selectedAreaLevel]
+            if selectedWekdays.isEmpty == false {
+                self.weekdayOfCurrentDay = selectedWekdays.first!
+            }
+            
+            var localDataBuilding:[showDetailStruct] = []
+            
+            
+            // set the colors for the inhabitants cell
+            self.myBackgroundColor = GlobalUIData.unique.UIDetailsRKIBackgroundColor
+            self.myTextColor = GlobalUIData.unique.UIDetailsRKITextColor
+            
+            // get the graphs
+            RKIGraphicQueue.async(execute: {
+                self.leftImage = DetailsRKIGraphic.unique.GraphLeft
+                self.middleImage = DetailsRKIGraphic.unique.GraphMiddle
+                self.rightImage = DetailsRKIGraphic.unique.GraphRight
+            })
+            
+            
+            // go over the data
             for dayIndex in 0 ..< GlobalStorage.unique.RKIData[selectedAreaLevel].count {
                 
                 // shortcut
@@ -120,127 +185,180 @@ class DetailsRKITableViewController: UITableViewController {
                 } else {
                     
                     // we did not found a valid index, report and use default values
-                    GlobalStorage.unique.storeLastError(errorText: "DetailsRKITableViewController.refreshLocalData: Error: RKIData: did not found valid record for day \(dayIndex) of ID \"\(selectedMyID)/” of area level \"\(selectedAreaLevel)\", ignore record")
+                    GlobalStorage.unique.storeLastError(errorText: "DetailsRKITableViewController.refreshLocalData: Error: RKIData: did not found valid record for day \(dayIndex) of ID \"\(selectedMyID)\" of area level \"\(selectedAreaLevel)\", ignore record")
                 }
             }
-        })
-        
-        // Build the data to show
-        
-        
-        
-        for index in 0 ..< localRKIDataLoaded.count {
             
-            let item = localRKIDataLoaded[index]
+            // Build the data to show
             
-            let deaths100k = Double(item.deaths)
-                           / Double(item.inhabitants)
-                           * 100_000.0
+            // inhabitants
+            if localRKIDataLoaded.isEmpty == false {
+                
+                let item = localRKIDataLoaded.first!
+                self.myKindOfString = item.kindOf
+                self.myInhabitantsValueString = numberNoFractionFormatter.string(from: NSNumber(value: item.inhabitants)) ?? ""
+                self.myInhabitantsLabelString = self.inhabitantsText
+                
+                //}
+                
+                for index in 0 ..< localRKIDataLoaded.count {
+                    
+                    let item = localRKIDataLoaded[index]
+                    
+                    let deaths100k = Double(item.deaths)
+                        / Double(item.inhabitants)
+                        * 100_000.0
+                    
+                    let cases7Days = item.cases7DaysPer100K
+                        * Double(item.inhabitants)
+                        / 100_000.0
+                    
+                    let indexString: String
+                    if let temp = numberNoFraction3DigitsFormatter.string(from: NSNumber(value: index)) {
+                        indexString = temp
+                    } else {
+                        indexString = "   "
+                    }
+                    
+                    let cellType: showDeltaCellTypeEnum = .current
+                    
+                    let sortKey = "\(indexString)\(cellType.rawValue)"
+                    
+                    let (backgroundColor, textColor, textColorLower, _) = CovidRating.unique.getColorsForValue(item.cases7DaysPer100K)
+                    
+                    localDataBuilding.append(showDetailStruct(
+                                                rkiDataStruct: item,
+                                                deaths100k: deaths100k,
+                                                cases7Days: cases7Days,
+                                                cellType: cellType,
+                                                sortKey: sortKey,
+                                                otherDayTimeStamp: 0,
+                                                dayOfWeek: selectedWekdays[index],
+                                                backgroundColor: backgroundColor,
+                                                textColor: textColor,
+                                                textColorLower: textColorLower))
+                    
+                }
+                
+                // just to prevent crashes (empty localDataBuiling[])
+                //if localDataBuiling.isEmpty == false {
+                
+                // get the deltas
+                for index in 0 ..< (localDataBuilding.count - 1) {
+                    
+                    let itemCurrent = localDataBuilding[index]
+                    let itemNextDay = localDataBuilding[index + 1]
+                    
+                    
+                    let diffInhabitants    = itemCurrent.rkiDataStruct.inhabitants       - itemNextDay.rkiDataStruct.inhabitants
+                    let diffCases          = itemCurrent.rkiDataStruct.cases             - itemNextDay.rkiDataStruct.cases
+                    let diffCases100k      = itemCurrent.rkiDataStruct.casesPer100k      - itemNextDay.rkiDataStruct.casesPer100k
+                    let diffDeaths         = itemCurrent.rkiDataStruct.deaths            - itemNextDay.rkiDataStruct.deaths
+                    let diffCases7Days100k = itemCurrent.rkiDataStruct.cases7DaysPer100K - itemNextDay.rkiDataStruct.cases7DaysPer100K
+                    
+                    let myRKIDataStruct = GlobalStorage.RKIDataStruct(
+                        stateID:            itemCurrent.rkiDataStruct.stateID,
+                        myID:               itemCurrent.rkiDataStruct.myID ?? "",
+                        name:               itemCurrent.rkiDataStruct.name,
+                        kindOf:             itemCurrent.rkiDataStruct.kindOf,
+                        inhabitants:        diffInhabitants,
+                        cases:              diffCases,
+                        deaths:             diffDeaths,
+                        casesPer100k:       diffCases100k,
+                        cases7DaysPer100K:  diffCases7Days100k,
+                        timeStamp:          itemCurrent.rkiDataStruct.timeStamp)
+                    
+                    
+                    let diffDeaths100k     = itemCurrent.deaths100k - itemNextDay.deaths100k
+                    let diffCases7Days     = itemCurrent.cases7Days - itemNextDay.cases7Days
+                    
+                    
+                    let indexString: String
+                    if let temp = numberNoFraction3DigitsFormatter.string(from: NSNumber(value: index)) {
+                        indexString = temp
+                    } else {
+                        indexString = "   "
+                    }
+                    
+                    let cellType: showDeltaCellTypeEnum = .dayDiff
+                    
+                    let sortKey = "\(indexString)\(cellType.rawValue)"
+                    
+                    
+                    localDataBuilding.append(showDetailStruct(
+                                                rkiDataStruct: myRKIDataStruct,
+                                                deaths100k: diffDeaths100k,
+                                                cases7Days: diffCases7Days,
+                                                cellType: cellType,
+                                                sortKey: sortKey,
+                                                otherDayTimeStamp: itemNextDay.rkiDataStruct.timeStamp,
+                                                dayOfWeek: selectedWekdays[index],
+                                                backgroundColor: itemCurrent.backgroundColor,
+                                                textColor: itemCurrent.textColorLower,
+                                                textColorLower: itemCurrent.textColorLower))
+                }
+                
+                // sort it to get the deltas inbetween teir original data cells
+                localDataBuilding.sort(by: { $0.sortKey < $1.sortKey } )
+                
+            } // localDataBuiling.isEmpty
             
-            let cases7Days = item.cases7DaysPer100K
-                           * Double(item.inhabitants)
-                           / 100_000.0
-            
-            let indexString: String
-            if let temp = numberNoFraction3DigitsFormatter.string(from: NSNumber(value: index)) {
-                indexString = temp
-            } else {
-                indexString = "   "
-            }
-            
-            let cellType: showDeltaCellTypeEnum = .current
-            
-            let sortKey = "\(indexString)\(cellType.rawValue)"
-            
-            let (backgroundColor, textColor, textColorLower, _) = CovidRating.unique.getColorsForValue(item.cases7DaysPer100K)
-            
-            localDataBuiling.append(showDetailStruct(
-                                        rkiDataStruct: item,
-                                        deaths100k: deaths100k,
-                                        cases7Days: cases7Days,
-                                        cellType: cellType,
-                                        sortKey: sortKey,
-                                        otherDayTimeStamp: 0,
-                                        backgroundColor: backgroundColor,
-                                        textColor: textColor,
-                                        textColorLower: textColorLower))
- 
-        }
-        
-        let upperBorderFreezed = localDataBuiling.count - 1
-        
-        for index in 0 ..< upperBorderFreezed {
-            
-            let itemCurrent = localDataBuiling[index]
-            let itemNextDay = localDataBuiling[index + 1]
-            
-            
-            let diffInhabitants    = itemCurrent.rkiDataStruct.inhabitants       - itemNextDay.rkiDataStruct.inhabitants
-            let diffCases          = itemCurrent.rkiDataStruct.cases             - itemNextDay.rkiDataStruct.cases
-            let diffCases100k      = itemCurrent.rkiDataStruct.casesPer100k      - itemNextDay.rkiDataStruct.casesPer100k
-            let diffDeaths         = itemCurrent.rkiDataStruct.deaths            - itemNextDay.rkiDataStruct.deaths
-            let diffCases7Days100k = itemCurrent.rkiDataStruct.cases7DaysPer100K - itemNextDay.rkiDataStruct.cases7DaysPer100K
-            
-            let myRKIDataStruct = GlobalStorage.RKIDataStruct(
-                stateID:            itemCurrent.rkiDataStruct.stateID,
-                myID:               itemCurrent.rkiDataStruct.myID ?? "",
-                name:               itemCurrent.rkiDataStruct.name,
-                kindOf:             itemCurrent.rkiDataStruct.kindOf,
-                inhabitants:        diffInhabitants,
-                cases:              diffCases,
-                deaths:             diffDeaths,
-                casesPer100k:       diffCases100k,
-                cases7DaysPer100K:  diffCases7Days100k,
-                timeStamp:          itemCurrent.rkiDataStruct.timeStamp)
-            
-            
-            let diffDeaths100k     = itemCurrent.deaths100k - itemNextDay.deaths100k
-            let diffCases7Days     = itemCurrent.cases7Days - itemNextDay.cases7Days
-            
-            
-            let indexString: String
-            if let temp = numberNoFraction3DigitsFormatter.string(from: NSNumber(value: index)) {
-                indexString = temp
-            } else {
-                indexString = "   "
-            }
-            
-            let cellType: showDeltaCellTypeEnum = .dayDiff
-            
-            let sortKey = "\(indexString)\(cellType.rawValue)"
-            
-            
-            localDataBuiling.append(showDetailStruct(
-                                        rkiDataStruct: myRKIDataStruct,
-                                        deaths100k: diffDeaths100k,
-                                        cases7Days: diffCases7Days,
-                                        cellType: cellType,
-                                        sortKey: sortKey,
-                                        otherDayTimeStamp: itemNextDay.rkiDataStruct.timeStamp,
-                                        backgroundColor: itemCurrent.backgroundColor,
-                                        textColor: itemCurrent.textColorLower,
-                                        textColorLower: itemCurrent.textColorLower))
-        }
-        
-        
-        localDataBuiling.sort(by: { $0.sortKey < $1.sortKey } )
+            // set the label text on main thread
+            DispatchQueue.main.async(execute: {
+                
+                DetailsRKIGraphic.unique.recalcGraphSizeIfNeeded(
+                    viewHeight: min(self.view.bounds.height, GlobalUIData.unique.RKIGraphMaxWidth),
+                    viewWidth: min(self.view.bounds.width, GlobalUIData.unique.RKIGraphMaxWidth))
 
-        
-        
-        // set the label text on main thread
-        DispatchQueue.main.async(execute: {
-            
-            self.showDetailData = localDataBuiling
-            
-            #if DEBUG_PRINT_FUNCCALLS
-            print("DetailsRKITableViewController.refreshLocalData done")
-            #endif
-            
-            // reload the cells
-            self.tableView.reloadData()
+                self.showDetailData = localDataBuilding
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("DetailsRKITableViewController.refreshLocalData done")
+                #endif
+                
+                // reload the cells
+                self.tableView.reloadData()
+                
+                self.initialDataAreDone = true
+            })
         })
+        
     }
     
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     refreshCellWithGraph()
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func refreshCellWithGraph() {
+        
+        DispatchQueue.main.async(execute: {
+            
+            if (self.initialDataAreDone == true)
+                && (self.tableView.numberOfRows(inSection: 0) >= self.rowNumberForGraphCells) {
+                
+                RKIGraphicQueue.async(execute: {
+                    
+                    self.leftImage = DetailsRKIGraphic.unique.GraphLeft
+                    self.middleImage = DetailsRKIGraphic.unique.GraphMiddle
+                    self.rightImage = DetailsRKIGraphic.unique.GraphRight
+                    
+                    DispatchQueue.main.async(execute: {
+                        self.tableView.reloadRows(at: [IndexPath(row: self.rowNumberForGraphCells, section: 0)],
+                                                  with: .none)
+                    })
+                })
+                
+            } else {
+               
+                #if DEBUG_PRINT_FUNCCALLS
+                print("refreshCellWithGraph() initialDataAreDone == false or numberOfRows < 1")
+                #endif
+            }
+        })
+    }
     
     
     // ---------------------------------------------------------------------------------------------
@@ -261,12 +379,14 @@ class DetailsRKITableViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
+                
         
         // set the id of the selected item
         switch GlobalUIData.unique.UIBrowserRKIAreaLevel {
    
-        case GlobalStorage.unique.RKIDataCountry:
-            break
+//        case GlobalStorage.unique.RKIDataCountry:
+//            self.selectedItemID = ""
+//
             
         case GlobalStorage.unique.RKIDataState:
             self.selectedItemID = GlobalUIData.unique.UIBrowserRKISelectedStateID
@@ -275,12 +395,73 @@ class DetailsRKITableViewController: UITableViewController {
             self.selectedItemID = GlobalUIData.unique.UIBrowserRKISelectedCountyID
             
         default:
-            break
+            self.selectedItemID = ""
       }
 
         self.refreshLocalData()
     }
+    
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     viewWillTransition()
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
 
+        // on iPads we allow orientation changes, so we have to recalc the graph sizes.
+        // In addition, on iPads the sizes of details views could be smaller than screensize
+        
+        // check orientation
+        if (size.width > self.view.frame.size.width) {
+            
+            //Landscape
+            
+            let viewWidth = min(size.width, GlobalUIData.unique.RKIGraphMaxWidth)
+            let viewHeight = min(size.height, GlobalUIData.unique.RKIGraphMaxWidth)
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("DetailsRKITableViewController.willTransition(): Landscape, will call recalcGraphSizeIfNeeded(height: \(viewHeight), Width: \(viewWidth)")
+            #endif
+            
+            DetailsRKIGraphic.unique.recalcGraphSizeIfNeeded(viewHeight: viewHeight,
+                                                             viewWidth: viewWidth)
+        } else {
+            
+            //Portrait
+            
+            let viewWidth = min(size.width, GlobalUIData.unique.RKIGraphMaxWidth)
+             let viewHeight =  min(size.height, GlobalUIData.unique.RKIGraphMaxWidth)
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("DetailsRKITableViewController.willTransition(): Portrait, will call recalcGraphSizeIfNeeded(height: \(viewHeight), Width: \(viewWidth)")
+            #endif
+            
+            DetailsRKIGraphic.unique.recalcGraphSizeIfNeeded(viewHeight: viewHeight,
+                                                             viewWidth: viewWidth)
+        }
+    }
+
+
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     viewWillAppear()
+     
+     -----------------------------------------------------------------------------------------------
+     */
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 222
+    }
+    
+    
     
     /**
      -----------------------------------------------------------------------------------------------
@@ -293,10 +474,13 @@ class DetailsRKITableViewController: UITableViewController {
         super .viewDidAppear(animated)
         
         // add observer to recognise if user selcted new state
+        if let observer = newRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         newRKIDataReadyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_NewRKIDataReady,
             object: nil,
-            queue: nil,
+            queue: OperationQueue.main,
             using: { Notification in
                 
                 #if DEBUG_PRINT_FUNCCALLS
@@ -305,6 +489,41 @@ class DetailsRKITableViewController: UITableViewController {
                 
                 self.refreshLocalData()
             })
+        
+        // add observer to recognise if user selcted other tab
+        if let observer = commonTabBarChangedContentObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        commonTabBarChangedContentObserver = NotificationCenter.default.addObserver(
+            forName: .CoBaT_CommonTabBarChangedContent,
+            object: nil,
+            queue: OperationQueue.main,
+            using: { Notification in
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("DetailsRKITableViewController just recieved signal .CoBaT_CommonTabBarChangedContent, call RefreshLocalData()")
+                #endif
+                
+                self.refreshLocalData()
+            })
+        
+        // we have new graphs available
+        if let observer = newGraphReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        newGraphReadyObserver = NotificationCenter.default.addObserver(
+            forName: .CoBaT_Graph_NewGraphAvailable,
+            object: nil,
+            queue: OperationQueue.main,
+            using: { Notification in
+
+                #if DEBUG_PRINT_FUNCCALLS
+                print("DetailsRKITableViewController just recieved signal .CoBaT_Graph_NewGraphAvailable, call refreshCellWithGraph()")
+                #endif
+
+                self.refreshCellWithGraph()
+            })
+
     }
  
     /**
@@ -322,9 +541,42 @@ class DetailsRKITableViewController: UITableViewController {
             NotificationCenter.default.removeObserver(observer)
         }
         
+        // remove the observer if set
+        if let observer = commonTabBarChangedContentObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = newGraphReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+   }
+
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     deinit
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    deinit {
+
+        // remove the observer if set
+        if let observer = newRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = commonTabBarChangedContentObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = newGraphReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
-    
 
     
     // ---------------------------------------------------------------------------------------------
@@ -349,10 +601,29 @@ class DetailsRKITableViewController: UITableViewController {
      
      -----------------------------------------------------------------------------------------------
      */    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return self.showDetailData.count
+
+        // we have the arry and one special row for the inhabitants
+        return self.showDetailData.count + 2
     }
 
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        switch indexPath.row {
+        
+        case 1:
+            
+            return GlobalUIData.unique.RKIGraphTopMargine
+                + GlobalUIData.unique.RKIGraphNeededHeight
+                + GlobalUIData.unique.RKIGraphBottomMargine
+        
+        default:
+            
+            //tableView.estimatedRowHeight = 116
+            return UITableView.automaticDimension
+            
+        }
+    }
     /**
      -----------------------------------------------------------------------------------------------
      
@@ -362,145 +633,317 @@ class DetailsRKITableViewController: UITableViewController {
      */
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        // dequeue a cell
-        let cell = tableView.dequeueReusableCell(withIdentifier: "DetailsRKITableViewCellV2",
-                                                 for: indexPath) as! DetailsRKITableViewCell
-        
-        
+         
         // get the related data set from local storage
         let index = indexPath.row
-        let myData = showDetailData[index]
         
-        // get color schema for 7 day average caces per 100 K people
-        let backgroundColor = myData.backgroundColor
-        let textColorToUse = myData.textColor
+        switch index {
         
-        // set the background of the cell
-        cell.contentView.backgroundColor = backgroundColor
-       
+        case rowNumberForInhabitantsCell:
+            // line with kind of elment and the inhabitants
+            // dequeue a cell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DetailsInhabitantsTableViewCell",
+                                                     for: indexPath) as! DetailsInhabitantsTableViewCell
+            
+            // save the colors for embedded CommonTabTableViewController
+            let textColor = self.myTextColor
+            let backgroundColor = self.myBackgroundColor
+  
+            // set the background of the cell
+            cell.contentView.backgroundColor = backgroundColor
+            
+            // set the text colors
+            cell.ValueKindOf.textColor = textColor
+            cell.ValueInhabitants.textColor = textColor
+            cell.LabelInhabitants.textColor = textColor
+            
+            // set the content
+            cell.ValueKindOf.text = self.myKindOfString
+            cell.ValueInhabitants.text = self.myInhabitantsValueString
+            cell.LabelInhabitants.text = self.myInhabitantsLabelString
+
+            // return the cell
+            return cell
+            
+            
+        case rowNumberForGraphCells:
+            
+            // three graphs to show development
+            // dequeue a cell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DetailsRKIGraphTableViewCell",
+                                                     for: indexPath) as! DetailsRKIGraphTableViewCell
+            
+            
+            // we give the three imageviews the optimal size, depending on the screen size of the device
+            // the values are pre calculated at GlobalUIData() as they will not change over lifetime
+            
+            //let screenWidth: CGFloat = GlobalUIData.unique.UIScreenWidth
+            let screenWidth: CGFloat = min(cell.contentView.frame.width, cell.frame.width)
+  
+            let neededWidth = GlobalUIData.unique.RKIGraphNeededWidth
+            let neededHeight = GlobalUIData.unique.RKIGraphNeededHeight
+            
+
+            let usedSpace: CGFloat = neededWidth * 3
+            let freeSpace = screenWidth - usedSpace
+            
+            //let sideMargins: CGFloat = GlobalUIData.unique.RKIGraphSideMargins
+            let sideMargins: CGFloat = round(freeSpace / 6.0)
+            let topMargin: CGFloat = GlobalUIData.unique.RKIGraphTopMargine
+            
         
-        // set the text colors
-        cell.LabelDate.textColor = textColorToUse
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("DetailsRKITableViewController.rowNumberForGraphCells(): screenWidth: \(screenWidth), neededWidth: \(neededWidth)")
+            #endif
+            
 
-        //cell.LabelInhabitans.textColor = textColorToUse
-        //cell.ValueInhabitans.textColor = textColorToUse
+            // setup the images and add the images as subviews
+            // we have to do it here and in a possible awakeFromNib() as we might change the size
+            // if we encounter, that the dimensions of the view had changed
+            // as we will add subviews, we first have to remove old subviews from a reused cell
+            
+            // remove possible old subviews
+            if let viewWithTag1 = self.view.viewWithTag(1) {
+                viewWithTag1.removeFromSuperview()
+            }
+            
+            if let viewWithTag2 = self.view.viewWithTag(2) {
+                viewWithTag2.removeFromSuperview()
+            }
+            
+            if let viewWithTag3 = self.view.viewWithTag(3) {
+                viewWithTag3.removeFromSuperview()
+            }
+            
+            // now create the new ones
+            cell.LeftImage = UIImageView(image: DetailsRKIGraphic.unique.GraphLeft)
+            cell.LeftImage.frame = CGRect(x: sideMargins, y: topMargin,
+                                          width: neededWidth, height: neededHeight)
+            
+            cell.LeftImage.layer.cornerRadius = 4
+            cell.LeftImage.clipsToBounds = true
+            
+            // we need that tag to remove it later on, otherwise we have more than one subview
+            cell.LeftImage.tag = 1
+            
+            cell.addSubview(cell.LeftImage)
+            
+            
+            
+            cell.MiddleImage = UIImageView(image: DetailsRKIGraphic.unique.GraphLeft)
+            cell.MiddleImage.frame = CGRect(x: (screenWidth / 2) - (neededWidth / 2), y: topMargin,
+                                            width: neededWidth, height: neededHeight)
+            
+            cell.MiddleImage.layer.cornerRadius = 4
+            cell.MiddleImage.clipsToBounds = true
+            
+            // we need that tag to remove it later on, otherwise we have more than one subview
+            cell.MiddleImage.tag = 2
+            
+            cell.addSubview(cell.MiddleImage)
+            
+            
+            
+            cell.RightImage = UIImageView(image: DetailsRKIGraphic.unique.GraphLeft)
+            cell.RightImage.frame = CGRect(x: screenWidth - sideMargins - neededWidth, y: topMargin,
+                                           width: neededWidth, height: neededHeight)
+            
+            cell.RightImage.layer.cornerRadius = 4
+            cell.RightImage.clipsToBounds = true
+            
+            // we need that tag to remove it later on, otherwise we have more than one subview
+            cell.RightImage.tag = 3
+            
+            cell.addSubview(cell.RightImage)
 
-        cell.LabelTotal.textColor = textColorToUse
-        cell.LabelPer100k.textColor = textColorToUse
+            // save the colors for embedded CommonTabTableViewController
+            //let textColor = self.myTextColor
+            let backgroundColor = self.myBackgroundColor
+  
+            // set the background of the cell
+            cell.contentView.backgroundColor = backgroundColor
 
-        cell.LabelCases.textColor = textColorToUse
-        cell.CasesTotal.textColor = textColorToUse
-        cell.Cases100k.textColor = textColorToUse
+            // get the graphs
+            //RKIGraphicQueue.sync(execute: {
+            cell.LeftImage.image = self.leftImage
+            cell.MiddleImage.image = self.middleImage
+            cell.RightImage.image = self.rightImage
+            //})
 
-        cell.LabelDeaths.textColor = textColorToUse
-        cell.DeathsTotal.textColor = textColorToUse
-        cell.Deaths100k.textColor = textColorToUse
+            return cell
+            
+            
+        default:
+            // the usual details content
+            
+            // we have a cell with the usual content (details)
+            let myData = showDetailData[index - 2]
+            
+            // dequeue a cell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DetailsRKITableViewCellV2",
+                                                     for: indexPath) as! DetailsRKITableViewCell
+            
 
-        cell.LabelIncidences.textColor = textColorToUse
-        cell.IncidencesTotal.textColor = textColorToUse
-        cell.Incidences100k.textColor = textColorToUse
-        
-        // set the fixed texts (labels etc.)
-        cell.LabelCases.text = casesText
-        cell.LabelDeaths.text = deathsText
-        cell.LabelIncidences.text = incidencesText
-        
-        cell.LabelTotal.text = totalText
-        cell.LabelPer100k.text = per100kText
-        
-        // Check which cell type it is and set border color and values accordingly
-        if myData.cellType == .current {
+            if myData.dayOfWeek == self.weekdayOfCurrentDay {
+                
+            }
+            // get color schema f
+            let backgroundColor: UIColor
+            let textColorToUse: UIColor
             
-            // It is an actual day
-            cell.layer.borderColor = textColorToUse.cgColor
-            
-            cell.LabelDate.font = UIFont.preferredFont(forTextStyle: .body)
-            
-            // set the values
-            let shortDate = shortSingleRelativeDateFormatter.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
-            
-            let shortTime = shortSingleTimeFormatter.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
-            
-            let weekday = dateFormatterLocalizedWeekdayShort.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
-            
-            cell.LabelDate.text = "\(shortDate) (\(weekday)), \(shortTime)"
-            
-            //cell.ValueInhabitans.text = numberNoFractionFormatter.string(
-            //    from: NSNumber(value: myData.rkiDataStruct.inhabitants))
-            
-            cell.CasesTotal.text = numberNoFractionFormatter.string(
-                from: NSNumber(value: myData.rkiDataStruct.cases))
-            
-            cell.Cases100k.text = number1FractionFormatter.string(
-                from: NSNumber(value: myData.rkiDataStruct.casesPer100k))
-            
-            cell.DeathsTotal.text = numberNoFractionFormatter.string(
-                from: NSNumber(value: myData.rkiDataStruct.deaths))
-            
-            cell.Deaths100k.text = number1FractionFormatter.string(
-                from: NSNumber(value: myData.deaths100k))
-            
-            cell.IncidencesTotal.text = numberNoFractionFormatter.string(
-                from: NSNumber(value: myData.cases7Days))
-            
-            cell.Incidences100k.text = number1FractionFormatter.string(
-                from: NSNumber(value: myData.rkiDataStruct.cases7DaysPer100K))
-            
-        } else {
-            
-            // it is a cell with differences
-            cell.layer.borderColor = backgroundColor.cgColor
-            
-            cell.LabelDate.font = UIFont.preferredFont(forTextStyle: .subheadline)
-            
-            // set the values
-            let fromDate = shortSingleRelativeDateFormatter.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
-           
-            let fromWeekday = dateFormatterLocalizedWeekdayShort.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+            if (myData.dayOfWeek == self.weekdayOfCurrentDay)
+                && (myData.cellType == .dayDiff) {
+                
+                backgroundColor = self.rowHighlightedBackgroundUIColor
+                textColorToUse = self.rowHighlightedTextUIColor
 
-            let untilDate = shortSingleRelativeDateFormatter.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.otherDayTimeStamp))
+            } else {
+                
+                backgroundColor = myData.backgroundColor
+                textColorToUse = myData.textColor
+            }
+            
+            // set the background of the cell
+            cell.contentView.backgroundColor = backgroundColor
+            
+            
+            // set the text colors
+            cell.LabelDate.textColor = textColorToUse
+            
+            //cell.LabelInhabitans.textColor = textColorToUse
+            //cell.ValueInhabitans.textColor = textColorToUse
+            
+            cell.LabelTotal.textColor = textColorToUse
+            cell.LabelPer100k.textColor = textColorToUse
+            
+            cell.LabelCases.textColor = textColorToUse
+            cell.CasesTotal.textColor = textColorToUse
+            cell.Cases100k.textColor = textColorToUse
+            
+            cell.LabelDeaths.textColor = textColorToUse
+            cell.DeathsTotal.textColor = textColorToUse
+            cell.Deaths100k.textColor = textColorToUse
+            
+            cell.LabelIncidences.textColor = textColorToUse
+            cell.IncidencesTotal.textColor = textColorToUse
+            cell.Incidences100k.textColor = textColorToUse
+            
+            // set the fixed texts (labels etc.)
+            if myData.cellType == .current {
+                
+                cell.LabelCases.text = casesText
+                cell.LabelDeaths.text = deathsText
+                cell.LabelIncidences.text = incidencesText
 
-            let untilWeekday = dateFormatterLocalizedWeekdayShort.string(
-                from: Date(timeIntervalSinceReferenceDate: myData.otherDayTimeStamp))
-
-            //cell.LabelDate.text = "\(changeText) \(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))"
-            cell.LabelDate.text = "<\(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))>"
-
-            //cell.ValueInhabitans.text = getFormattedDeltaTextInt(
-            //    number: myData.rkiDataStruct.inhabitants)
+            } else {
+                
+                cell.LabelCases.text = casesTextNew
+                cell.LabelDeaths.text = deathsTextNew
+                cell.LabelIncidences.text = incidencesTextNew
+            }
             
-            cell.CasesTotal.text = getFormattedDeltaTextInt(
-                number:  myData.rkiDataStruct.cases)
             
-            cell.Cases100k.text = getFormattedDeltaTextDouble(
-                number: myData.rkiDataStruct.casesPer100k,
-                fraction: 1)
+            cell.LabelTotal.text = totalText
+            cell.LabelPer100k.text = per100kText
             
-            cell.DeathsTotal.text = getFormattedDeltaTextInt(
-                number:  myData.rkiDataStruct.deaths)
+            // Check which cell type it is and set border color and values accordingly
+            if myData.cellType == .current {
+                
+                // It is an actual day
+                cell.layer.borderColor = textColorToUse.cgColor
+                
+                cell.LabelDate.font = UIFont.preferredFont(forTextStyle: .body)
+                
+                // set the values
+                let shortDate = shortSingleRelativeDateFormatter.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+                
+                let shortTime = shortSingleTimeFormatter.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+                
+                let weekday = dateFormatterLocalizedWeekdayShort.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+                
+                cell.LabelDate.text = "\(shortDate) (\(weekday)), \(shortTime)"
+                
+                //cell.ValueInhabitans.text = numberNoFractionFormatter.string(
+                //    from: NSNumber(value: myData.rkiDataStruct.inhabitants))
+                
+                cell.CasesTotal.text = numberNoFractionFormatter.string(
+                    from: NSNumber(value: myData.rkiDataStruct.cases))
+                
+                cell.Cases100k.text = number1FractionFormatter.string(
+                    from: NSNumber(value: myData.rkiDataStruct.casesPer100k))
+                
+                cell.DeathsTotal.text = numberNoFractionFormatter.string(
+                    from: NSNumber(value: myData.rkiDataStruct.deaths))
+                
+                cell.Deaths100k.text = number1FractionFormatter.string(
+                    from: NSNumber(value: myData.deaths100k))
+                
+                cell.IncidencesTotal.text = numberNoFractionFormatter.string(
+                    from: NSNumber(value: myData.cases7Days))
+                
+                cell.Incidences100k.text = number1FractionFormatter.string(
+                    from: NSNumber(value: myData.rkiDataStruct.cases7DaysPer100K))
+                
+            } else {
+                
+                // it is a cell with differences
+                cell.layer.borderColor = backgroundColor.cgColor
+                
+                cell.LabelDate.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                
+                // set the values
+                let fromDate = shortSingleRelativeDateFormatter.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+                
+                let fromWeekday = dateFormatterLocalizedWeekdayShort.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.rkiDataStruct.timeStamp))
+                
+                let untilDate = shortSingleRelativeDateFormatter.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.otherDayTimeStamp))
+                
+                let untilWeekday = dateFormatterLocalizedWeekdayShort.string(
+                    from: Date(timeIntervalSinceReferenceDate: myData.otherDayTimeStamp))
+                
+                //cell.LabelDate.text = "\(changeText) \(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))"
+                cell.LabelDate.text = "\(fromDate) (\(fromWeekday)) <> \(untilDate) (\(untilWeekday))"
+                
+                //cell.ValueInhabitans.text = getFormattedDeltaTextInt(
+                //    number: myData.rkiDataStruct.inhabitants)
+                
+                cell.CasesTotal.text = getFormattedDeltaTextInt(
+                    number:  myData.rkiDataStruct.cases)
+                
+                cell.Cases100k.text = getFormattedDeltaTextDouble(
+                    number: myData.rkiDataStruct.casesPer100k,
+                    fraction: 1)
+                
+                cell.DeathsTotal.text = getFormattedDeltaTextInt(
+                    number:  myData.rkiDataStruct.deaths)
+                
+                cell.Deaths100k.text = getFormattedDeltaTextDouble(
+                    number:  myData.deaths100k,
+                    fraction: 1)
+                
+                cell.IncidencesTotal.text = getFormattedDeltaTextDouble(
+                    number:  myData.cases7Days,
+                    fraction: 0)
+                
+                cell.Incidences100k.text = getFormattedDeltaTextDouble(
+                    number:  myData.rkiDataStruct.cases7DaysPer100K,
+                    fraction: 1)
+                
+            }
             
-            cell.Deaths100k.text = getFormattedDeltaTextDouble(
-                number:  myData.deaths100k,
-                fraction: 1)
+//            cell.sizeToFit()
+//            cell.setNeedsLayout()
             
-            cell.IncidencesTotal.text = getFormattedDeltaTextDouble(
-                number:  myData.cases7Days,
-                fraction: 0)
-            
-            cell.Incidences100k.text = getFormattedDeltaTextDouble(
-                number:  myData.rkiDataStruct.cases7DaysPer100K,
-                fraction: 1)
+            return cell
 
         }
-
- 
-        return cell
     }
     
     /**

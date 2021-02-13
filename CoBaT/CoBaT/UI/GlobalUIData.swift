@@ -27,8 +27,19 @@ final class GlobalUIData: NSObject {
 
     // The DetailsRKITableViewController uses this data to build local data out of the global Storage
     public var UIDetailsRKIAreaLevel: Int = GlobalStorage.unique.RKIDataCounty
-    public var UIDetailsRKISelectedMyID: String = "9"
+    public var UIDetailsRKISelectedMyID: String = "7"
     
+    // the details screen is called in two differnt scenarios: First form main screen and
+    // in rki browser. to make sure that the right graph will be shown when user gets back
+    // to the main screen, we have to save the selected arealevel and ID and restore it, when
+    // the browsed detail screen disapeared
+    // we do that by saving the two values in BrowseRKIDataTableViewController.detailsButtonTapped()
+    // and restore it in DetailsRKIViewController.viewDidDisappear()
+    public var UIDetailsRKIAreaLevelSaved: Int = GlobalStorage.unique.RKIDataCounty
+    public var UIDetailsRKISelectedMyIDSaved: String = "7"
+
+
+
     // tabBar currently active, will be set by CountryTabViewController (0), StateTabViewController (1) or CountyTabViewController (2)
     public var UITabBarCurrentlyActive: Int = 0
     
@@ -37,22 +48,52 @@ final class GlobalUIData: NSObject {
     public var UITabBarCurentBackgroundColor: UIColor = UIColor.systemBackground
     public var UITabBarCurentGrade: Int = 0
 
+    // this colors have to be set for the DetailsRKITableViewController. it will use this to color the
+    // cells which are not related to day details
+    public var UIDetailsRKITextColor: UIColor = UIColor.label
+    public var UIDetailsRKIBackgroundColor: UIColor = UIColor.systemBackground
     
+    
+    // there are three small graphs on top of the DetailsRKITableView
+    // The size of that graphs will be depending on the screen width of the device
+    // this are the constants which are used in differtent functions
+    
+    public let RKIGraphMaxWidth: CGFloat      = 650.0
+    public var UIScreenWidth: CGFloat         = min(UIScreen.main.bounds.width, 650.0)
+    
+    public let RKIGraphSideMargins: CGFloat   = 10.0
+    public let RKIGraphTopMargine: CGFloat    = 0.0
+    public var RKIGraphBottomMargine: CGFloat = 5.0
+    public var RKIGraphNeededWidth: CGFloat =
+        round ((min(UIScreen.main.bounds.width, 650.0) - (10.0 * 2)) * 0.32)
+    public var RKIGraphNeededHeight: CGFloat =
+        round(((min(UIScreen.main.bounds.width, 650.0) - (10.0 * 2)) * 0.32) / 5 * 4)
+//    public var RKIGraphNeededWidth: CGFloat =  round((min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+//                                        - (10.0 * 2)) * 0.32)
+//    public var RKIGraphNeededHeight: CGFloat = round(
+//                                round((min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+//                                        - (10.0 * 2)) * 0.32)
+//                                    / 5 * 4)
+
+    public var RKIGraphCurrentViewWidth: CGFloat = min(UIScreen.main.bounds.width, 650.0)
+    public var RKIGraphCurrentViewHeight: CGFloat = min(UIScreen.main.bounds.height, 650.0)
+    
+
     // ---------------------------------------------------------------------------------------------
     // MARK: - Variables (permanent stored)
     // ---------------------------------------------------------------------------------------------
     public var UIBrowserRKIAreaLevel: Int = GlobalStorage.unique.RKIDataCounty
     
-    public var UIBrowserRKITitelString: String = "Bayern"
+    public var UIBrowserRKITitelString: String = "Rheinland-Pfalz"
     
-    public var UIBrowserRKISelectedStateName: String = "Bayern"
-    public var UIBrowserRKISelectedStateID: String = "9"
+    public var UIBrowserRKISelectedStateName: String = "Rheinland-Pfalz"
+    public var UIBrowserRKISelectedStateID: String = "7"
     
-    public var UIBrowserRKISelectedCountyName: String = "Regensburg"
-    public var UIBrowserRKISelectedCountyID: String = "259"
+    public var UIBrowserRKISelectedCountyName: String = "Mayen-Koblenz"
+    public var UIBrowserRKISelectedCountyID: String = "149"
 
     // in this dictionary we store the selected County ID per State
-    public var UIBrowserCountyIDPerStateID: [String : String] = ["9" : "259"]
+    public var UIBrowserCountyIDPerStateID: [String : String] = ["7" : "149"]
     
     public enum UIBrowserRKISortEnum: Int {
         case alphabetically = 0, incidencesAscending = 1, incidencesDescending = 2
@@ -61,6 +102,8 @@ final class GlobalUIData: NSObject {
     public var UIBrowserRKISorting: UIBrowserRKISortEnum = .alphabetically
     
     public var UIMainTabBarSelectedTab: Int = 0 
+    
+    
     
     
     // ---------------------------------------------------------------------------------------------
@@ -226,8 +269,11 @@ final class GlobalUIData: NSObject {
             self.UIMainTabBarSelectedTab = self.permanentStore.integer(
                 forKey: "CoBaT.UIMainTabBarSelectedTab")
             
-            // the load of some UI elemnts is faster than this restore, so we send a post to sync it
-            NotificationCenter.default.post(Notification(name: .CoBaT_UIDataRestored))
+            // the load of some UI elements is faster than this restore, so we send a post to sync it
+            DispatchQueue.main.async(execute: {
+                NotificationCenter.default.post(Notification(name: .CoBaT_UIDataRestored))
+            })
+            
             #if DEBUG_PRINT_FUNCCALLS
             print("restoreSavedUIData just posted .CoBaT_UIDataRestored")
             #endif

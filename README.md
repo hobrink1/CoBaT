@@ -1,16 +1,16 @@
 # CoBaT
- Corona Bavaria Traffic light
+ Corona Basic Traffic light
 
-IOS project to use during application phase.
+IOS project to fetch and browse data provided by Rpbert-Koch-Institute (RKI) related to Covid-19 / Corona. Data are only valid for Germany.
 
 # Overview
-The App reads the current RKI data for Covid 19 and stores them locally in a userdefault store on each start and by user request.
+The App reads the current RKI data for Covid 19 and stores them locally in a userdefault store on each start and by user request. It also uses iCloud public container to store new data there.
 
 There are three granularity levels: Country, State and County.
 
-If the received data are different a new data set is stored. Usually this reflects a new set of daily data. Maximum of 15 of these data sets are stored.
+If the received data are different a new data set is stored. Usually this reflects a new set of daily data. Maximum of 22 of these data sets are stored.
 
-UI is able browse over that datasets. It also shows the regularities for public behavior based on the new Covid-19-Cases of last 7 days per 100,000 inhabitants ("Incidences")
+UI is able browse over that datasets. It also shows some graphs of that data.
 
 UI is build with UIKit.
 
@@ -43,7 +43,7 @@ Background service
  - manages the background fetch of the RKI Data, uses BGTaskScheduler, introduced with IOS 13
 
 Location service
- - will hold the location service for Version 2
+ - will hold the location service for Version 3
 
 ## Data store
 Global Storage
@@ -53,9 +53,13 @@ Global Storage
  - post messages on several occasions for the UI
  - provides a simple error message handling, by storing the last 20 error messages (non permanent)
 
- Notification service
-  - extents the IOS notification namespace by the names used by this app
-
+iCloud Integration
+ - holds the original RKI JSON files and JSON files of the internal datastructures in the default public container
+ - like the original RKI data there are seperated tables for federal states and counties / cities
+ - RKI only provides data for "Yesterday", so this code implememts a mechanism to provide older data for new users 
+     - Each time the app recieves new data, it checks if the new date is already in the container. If not, it adds it as new data or updates the existing data.
+     - If the iCloud container holds data which the app does not have, the app loads this data from the iCloud container.
+  
 ## UI
 Global UI Data
   - holds the common data elements of the UI
@@ -78,6 +82,7 @@ Details RKI data
  - lists all datasets for the selected item
  - each data set holds the data of one days
  - it also shows the differences between each two data sets
+ - provides three self sizing graphs for new cases, deaths and incidences, each showing values of last three weeks
 
 Help Screen
  - shows the data copyright and disclaimer by RKI
@@ -87,7 +92,8 @@ Help Screen
   - provides the unique decision point which incident values needs what color code and what ranking (Traffic lights)
 
 ## User Notifications
-  - provides a well formatted user notification if a background fetch found new data
+ - extents the IOS notification namespace by the names used by this app
+ - provides a well formatted user notification if a background fetch found new data
 
 ## Helpers
   - just some predefined formatters

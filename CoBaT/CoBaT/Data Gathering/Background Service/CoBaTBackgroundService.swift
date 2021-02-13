@@ -13,7 +13,7 @@ import BackgroundTasks
 // MARK: -
 // MARK: - RKI Data Download
 // -------------------------------------------------------------------------------------------------
-class CoBaTBackgroundService: NSObject {
+final class CoBaTBackgroundService: NSObject {
 
     // ---------------------------------------------------------------------------------------------
     // MARK: - Singleton
@@ -60,10 +60,6 @@ class CoBaTBackgroundService: NSObject {
         // globalStorage() uses this flag to determine, if a background task is active
         // it will set it to false after all is done
         RKIBackgroundFetchIsOngoingFlag = true
-        
-        // set the flag to be able to determin if both data typs are done
-        RKICountyDataOK = false
-        RKIStateDataOK = false
         
         // check if we already restored the saved data. We need them to determin if the recieved data are new ones
         if GlobalStorage.unique.savedRKIDataRestored == true {
@@ -124,16 +120,49 @@ class CoBaTBackgroundService: NSObject {
             && (RKICountyDataOK == true) {
             
             // yes both parts are done, so close the task
-            #if DEBUG_PRINT_FUNCCALLS
+            //#if DEBUG_PRINT_FUNCCALLS
             GlobalStorage.unique.storeLastError(
-                errorText:"newRKIDataArrived: RKIStateDataOK == true) && (RKICountyDataOK == true), close background task")
-            #endif
+                errorText:"newRKIDataArrived: kindOf: \(kindOf), (RKIStateDataOK == \(RKIStateDataOK)) && (RKICountyDataOK == \(RKICountyDataOK)), call closeBackgroundTask()")
+            //#endif
          
+            self.closeBackgroundTask()
+            
+        } else {
+            
+            //#if DEBUG_PRINT_FUNCCALLS
+            GlobalStorage.unique.storeLastError(
+                errorText:"newRKIDataArrived: kindOf: \(kindOf), RKIStateDataOK == \(RKIStateDataOK), RKICountyDataOK == \(RKICountyDataOK), DO NOT close background task")
+            //#endif
+        }
+    }
+    
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     Closes the backgroundtask by calling RKIBackgroundFetchTask?.setTaskCompleted(success: true)
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    
+    public func closeBackgroundTask() {
+        
+        //#if DEBUG_PRINT_FUNCCALLS
+        GlobalStorage.unique.storeLastError(
+            errorText:"closeBackgroundTask: will call setTaskCompleted(success: true) in 1 second")
+        //#endif
+        
+        // to make sure we did everything we wanted to do, before the background task will be killed,
+        // we do an async .barrier call with a 1 second delay to make sure all other tasks are done
+        GlobalStorageQueue.asyncAfter(deadline: .now() + .seconds(1), flags: .barrier, execute: {
+            
             // with this flag GlobalStorage knows it have to use this class
-            RKIBackgroundFetchIsOngoingFlag = false
+            self.RKIBackgroundFetchIsOngoingFlag = false
+            
+            myCoBaTAppDelegate.stopCurrentBackgroundTask()
 
             // close the current task
-            RKIBackgroundFetchTask?.setTaskCompleted(success: true)
-        }
+            self.RKIBackgroundFetchTask?.setTaskCompleted(success: true)
+        })
     }
 }

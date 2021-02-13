@@ -23,17 +23,18 @@ protocol BrowseRKIDataTableViewCellPlacesDelegate {
 // ----------------------------------------------------------------------------------
 // MARK: - Class
 // ----------------------------------------------------------------------------------
-class BrowseRKIDataTableViewCell: UITableViewCell {
+final class BrowseRKIDataTableViewCell: UITableViewCell {
 
     // ------------------------------------------------------------------------------
     // MARK: - Class Properties
     // ------------------------------------------------------------------------------
-    var myIndexPath: IndexPath!
+    public var myIndexPath: IndexPath!
     
     // ------------------------------------------------------------------------------
     // MARK: - IBOutlets
     // ------------------------------------------------------------------------------
     @IBOutlet weak var Name: UILabel!
+    @IBOutlet weak var KindOf: UILabel!
     
     @IBOutlet weak var Cases: UILabel!
     @IBOutlet weak var FirstCases: UILabel!
@@ -55,7 +56,7 @@ class BrowseRKIDataTableViewCell: UITableViewCell {
     // MARK: - Select Button
     // ------------------------------------------------------------------------------
     // var for the delegate, which will be set in "cellForRowAt:"
-    var selectButtonDelegate: BrowseRKIDataTableViewCellPlacesDelegate?
+    public var selectButtonDelegate: BrowseRKIDataTableViewCellPlacesDelegate?
 
     // the button outlet
      @IBOutlet weak var SelectButton: UIButton!
@@ -81,7 +82,7 @@ class BrowseRKIDataTableViewCell: UITableViewCell {
     // MARK: - details Button
     // ------------------------------------------------------------------------------
     // var for the delegate, which will be set in "cellForRowAt:"
-    var detailsButtonDelegate: BrowseRKIDataTableViewCellPlacesDelegate?
+    public var detailsButtonDelegate: BrowseRKIDataTableViewCellPlacesDelegate?
 
     // the button outlet
     @IBOutlet weak var DetailsButton: UIButton!
@@ -101,6 +102,42 @@ class BrowseRKIDataTableViewCell: UITableViewCell {
                errorText: "BrowseRKIDataTableViewCell(Row:\(self.myIndexPath.row).detailsButtonAction() Error: delegate = detailsButtonDelegate was nil")
        }
     }
+    
+    // ------------------------------------------------------------------------------
+    // MARK: - Life cycle
+    // ------------------------------------------------------------------------------
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     awakeFromNib()
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        // Initialization code
+        
+        // we use a rounded cornder style
+        self.layer.cornerRadius = 5
+        self.layer.borderWidth = 1
+    }
+
+
+}
+ 
+// ----------------------------------------------------------------------------------
+// MARK: - Class
+// ----------------------------------------------------------------------------------
+final class BrowseRKIDataTableViewCellText: UITableViewCell {
+    
+    // ------------------------------------------------------------------------------
+    // MARK: - Class Properties
+    // ------------------------------------------------------------------------------
+    
+    // ------------------------------------------------------------------------------
+    // MARK: - IBOutlets
+    // ------------------------------------------------------------------------------
+    @IBOutlet weak var TextToDisplay: UILabel!
     
     
     // ------------------------------------------------------------------------------
@@ -122,3 +159,6 @@ class BrowseRKIDataTableViewCell: UITableViewCell {
         self.layer.borderWidth = 1
     }
 }
+
+
+

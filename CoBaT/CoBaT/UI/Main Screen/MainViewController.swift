@@ -18,8 +18,13 @@ import UIKit
 // MARK: -
 // MARK: - Class
 // -------------------------------------------------------------------------------------------------
-class MainViewController: UIViewController {
+final class MainViewController: UIViewController {
 
+    
+    override var shouldAutomaticallyForwardAppearanceMethods: Bool {
+        return true
+    }
+    
     // ---------------------------------------------------------------------------------------------
     // MARK: - Properties
     // ---------------------------------------------------------------------------------------------
@@ -31,6 +36,8 @@ class MainViewController: UIViewController {
     
     var RKIDataRetrievedObserver: NSObjectProtocol?
     var NewRKIDataReadyObserver: NSObjectProtocol?
+    
+    var SceneWillEnterForegroundObserver: NSObjectProtocol?
 
 
     // ---------------------------------------------------------------------------------------------
@@ -166,6 +173,7 @@ class MainViewController: UIViewController {
         // values will be set in
     }
 
+
     /**
      -----------------------------------------------------------------------------------------------
      
@@ -178,6 +186,9 @@ class MainViewController: UIViewController {
         // Do any additional setup after loading the view.
         
         // add observer to recognise if user selcted new state
+        if let observer = userSelectedStateObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         userSelectedStateObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UserDidSelectState,
             object: nil,
@@ -191,7 +202,10 @@ class MainViewController: UIViewController {
             })
         
         // add observer to recognise if user selcted new state
-        userSelectedStateObserver = NotificationCenter.default.addObserver(
+        if let observer = userSelectedCountyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        userSelectedCountyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UserDidSelectCounty,
             object: nil,
             queue: OperationQueue.main,
@@ -204,6 +218,9 @@ class MainViewController: UIViewController {
         
         
         // add observer to recognise a new retrieved status
+        if let observer = RKIDataRetrievedObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         RKIDataRetrievedObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_RKIDataRetrieved,
             object: nil,
@@ -217,6 +234,9 @@ class MainViewController: UIViewController {
             })
         
         // add observer to recognise if new data are available
+        if let observer = NewRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         NewRKIDataReadyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_NewRKIDataReady,
             object: nil,
@@ -230,6 +250,25 @@ class MainViewController: UIViewController {
                 #endif
             })
         
+        // add observer to recognise if view did apear (IOS 13 may fail to report it)
+        if let observer = SceneWillEnterForegroundObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        SceneWillEnterForegroundObserver = NotificationCenter.default.addObserver(
+            forName: .CoBaT_SceneWillEnterForeground,
+            object: nil,
+            queue: OperationQueue.main,
+            using: { Notification in
+                
+                self.updateRKIAsOfLabel()
+                self.updateRKILastRetrieved()
+
+                #if DEBUG_PRINT_FUNCCALLS
+                print("MainViewController just recieved signal .CoBaT_SceneWillEnterForeground")
+                #endif
+            })
+
+
         // update the labels first time
         self.updateRKIAsOfLabel()
         self.updateRKILastRetrieved()
@@ -264,7 +303,48 @@ class MainViewController: UIViewController {
         if let observer = NewRKIDataReadyObserver {
             NotificationCenter.default.removeObserver(observer)
         }
+        
+        // remove the observer if set
+        if let observer = SceneWillEnterForegroundObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     deinit
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    deinit {
+        // remove the observer if set
+        if let observer = userSelectedStateObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = userSelectedCountyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = RKIDataRetrievedObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = NewRKIDataReadyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = SceneWillEnterForegroundObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+
+    }
+    
+    
  }
 

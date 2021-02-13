@@ -51,18 +51,69 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         DispatchQueue.main.async(execute: {
             
             // first tab is always Country level
-            self.tabBar.items?[GlobalStorage.unique.RKIDataCountry].title = "Deutschland"
-            self.tabBar.items?[GlobalStorage.unique.RKIDataCountry].image = nil
-            self.tabBar.items?[GlobalStorage.unique.RKIDataCountry].selectedImage = nil
+            let firstItem = self.tabBar.items?[GlobalStorage.unique.RKIDataCountry]
+            
+//            let firstViewTabBar = firstItem?.value(forKey: "view") as? UIView
+//            let firstLabel = firstViewTabBar?.subviews.last as? UILabel
+//            firstLabel?.lineBreakMode = .byWordWrapping
+//            firstLabel?.numberOfLines = 0
+            
+            firstItem?.title = "Deutschland"
+            firstItem?.image = nil
+            firstItem?.selectedImage = nil
+            
+            
             
             // set the state level
-            self.tabBar.items?[GlobalStorage.unique.RKIDataState].title = GlobalUIData.unique.UIBrowserRKISelectedStateName
-            self.tabBar.items?[GlobalStorage.unique.RKIDataState].image = nil
-            self.tabBar.items?[GlobalStorage.unique.RKIDataState].selectedImage = nil
+            let secondItem = self.tabBar.items?[GlobalStorage.unique.RKIDataState]
             
-            self.tabBar.items?[GlobalStorage.unique.RKIDataCounty].title = GlobalUIData.unique.UIBrowserRKISelectedCountyName
-            self.tabBar.items?[GlobalStorage.unique.RKIDataCounty].image = nil
-            self.tabBar.items?[GlobalStorage.unique.RKIDataCounty].selectedImage = nil
+//            let secondViewTabBar = secondItem?.value(forKey: "view") as? UIView
+//            let secondLabel = secondViewTabBar?.subviews.last as? UILabel
+//            secondLabel?.lineBreakMode = .byWordWrapping
+//            secondLabel?.numberOfLines = 0
+
+            if GlobalUIData.unique.UIBrowserRKISelectedStateName.count > 11 {
+            secondItem?.title = String(GlobalUIData.unique.UIBrowserRKISelectedStateName.prefix(10) + ".")
+            } else {
+                secondItem?.title = GlobalUIData.unique.UIBrowserRKISelectedStateName
+            }
+            secondItem?.image = nil
+            secondItem?.selectedImage = nil
+            
+            
+            
+            // set the county level
+            let thirdItem = self.tabBar.items?[GlobalStorage.unique.RKIDataCounty]
+            
+//            let thirdViewTabBar = secondItem?.value(forKey: "view") as? UIView
+//            let thirdLabel = thirdViewTabBar?.subviews.last as? UILabel
+//            thirdLabel?.lineBreakMode = .byWordWrapping
+//            thirdLabel?.numberOfLines = 0
+
+            //thirdItem?.title = String(GlobalUIData.unique.UIBrowserRKISelectedCountyName.prefix(11))
+            if GlobalUIData.unique.UIBrowserRKISelectedCountyName.count > 11 {
+                thirdItem?.title = String(GlobalUIData.unique.UIBrowserRKISelectedCountyName.prefix(10) + ".")
+            } else {
+                thirdItem?.title = GlobalUIData.unique.UIBrowserRKISelectedCountyName
+            }
+            thirdItem?.image = nil
+            thirdItem?.selectedImage = nil
+            
+            
+            // set favorites Level
+            let fourthItem = self.tabBar.items?[3]
+            
+//            let thirdViewTabBar = secondItem?.value(forKey: "view") as? UIView
+//            let thirdLabel = thirdViewTabBar?.subviews.last as? UILabel
+//            thirdLabel?.lineBreakMode = .byWordWrapping
+//            thirdLabel?.numberOfLines = 0
+
+            fourthItem?.title = NSLocalizedString("tabLabelSelection", comment: "Label for the tab Selection")
+            fourthItem?.image = nil
+            fourthItem?.selectedImage = nil
+//            fourthItem?.image = UIImage(systemName: "heart.fill")
+//            fourthItem?.selectedImage = UIImage(systemName: "heart.fill")
+
         })
     }
     
@@ -145,15 +196,28 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         
         // we use a largher font for the barItems, as we do not use images
         let appearance = UITabBarItem.appearance()
-        let attributes = [NSAttributedString.Key.font:UIFont.systemFont(ofSize: 17)]
+        let attributes = [NSAttributedString.Key.font:UIFont.systemFont(ofSize: 16)]
         appearance.setTitleTextAttributes(attributes as [NSAttributedString.Key : Any], for: .normal)
 
+        self.tabBar.itemPositioning = .automatic
         // set the tab names
         self.refreshBarItemTitles()
          
         self.delegate = self
     }
     
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     viewDidAppear()
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    override func viewWillAppear(_ animated: Bool) {
+        super .viewWillAppear(animated)
+        
+    }
     /**
      -----------------------------------------------------------------------------------------------
      
@@ -166,6 +230,9 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         // Do any additional setup after loading the view.
         
         // add observer to recognise if user selcted new state
+        if let observer = userSelectedStateObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         userSelectedStateObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UserDidSelectState,
             object: nil,
@@ -181,7 +248,10 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
             })
         
         // add observer to recognise if user selcted new state
-        userSelectedStateObserver = NotificationCenter.default.addObserver(
+        if let observer = userSelectedCountyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        userSelectedCountyObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UserDidSelectCounty,
             object: nil,
             queue: OperationQueue.main,
@@ -196,7 +266,10 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
             })
         
         // add observer to recognise if user selcted new state
-         UIDataRestoredObserver = NotificationCenter.default.addObserver(
+        if let observer = UIDataRestoredObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        UIDataRestoredObserver = NotificationCenter.default.addObserver(
             forName: .CoBaT_UIDataRestored,
             object: nil,
             queue: OperationQueue.main,
@@ -246,6 +319,30 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         
     }
 
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     deinit
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    deinit {
+        
+        // remove the observer if set
+        if let observer = userSelectedStateObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = userSelectedCountyObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // remove the observer if set
+        if let observer = UIDataRestoredObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
 
     /*
     // MARK: - Navigation
