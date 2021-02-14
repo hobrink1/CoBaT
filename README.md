@@ -12,7 +12,7 @@ There are three granularity levels: Country, State and County.
 
 If the received data are different a new data set is stored. Usually this reflects a new set of daily data. Maximum of 22 of these data sets are stored.
 
-UI is able browse over that datasets. It also shows some graphs of that data.
+UI is able to browse over that datasets. It also shows some graphs of that data.
 
 UI is build with UIKit.
 
