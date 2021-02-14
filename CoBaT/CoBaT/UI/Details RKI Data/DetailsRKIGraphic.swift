@@ -148,10 +148,8 @@ final class DetailsRKIGraphic: NSObject {
             })
 
 
-        
+        // create the initial set of graphs
         self.createNewSetOfGraphs()
-        
-
         
     }
     
@@ -391,70 +389,76 @@ final class DetailsRKIGraphic: NSObject {
     */
     private func createNewSetOfGraphs() {
         
-        // first check if we have a valid ID we can use
-        if GlobalUIData.unique.UIDetailsRKISelectedMyID != "" {
+        // keep the work away from main thread
+        // we had SPRINGBOARD crashes because generating graphs took too much CPU in background
+        // so we try to shift this away from main to probably get rid of that crash
+        RKIGraphicQueue.async(execute: {
             
-            // yes, it's a valid ID so try to create the graph for cases
-            let newLeftGraph = createCasesGraph()
-            
-            // check if it worked
-            if newLeftGraph == nil {
+            // first check if we have a valid ID we can use
+            if GlobalUIData.unique.UIDetailsRKISelectedMyID != "" {
                 
-                // no it did not, so file the error
-                GlobalStorage.unique.storeLastError(
-                    errorText: "DetailsRKIGraphic.createNewSetOfGraphs().leftImage createCasesGraph() returned nil")
-            }
-            
-            let newMiddleGraph = createDeathsGraph()
-            
-            // check if it worked
-            if newMiddleGraph == nil {
+                // yes, it's a valid ID so try to create the graph for cases
+                let newLeftGraph = self.createCasesGraph()
                 
-                // no it did not, so file the errormiddleImage
-                GlobalStorage.unique.storeLastError(
-                    errorText: "DetailsRKIGraphic.createNewSetOfGraphs().middleImage createCasesGraph() returned nil")
-            }
- 
-            
-            let newRightGraph = createIncidencesGraph()
-            
-            // check if it worked
-            if newRightGraph == nil {
+                // check if it worked
+                if newLeftGraph == nil {
+                    
+                    // no it did not, so file the error
+                    GlobalStorage.unique.storeLastError(
+                        errorText: "DetailsRKIGraphic.createNewSetOfGraphs().leftImage createCasesGraph() returned nil")
+                }
                 
-                // no it did not, so file the errormiddleImage
-                GlobalStorage.unique.storeLastError(
-                    errorText: "DetailsRKIGraphic.createNewSetOfGraphs().rightImage createIncidencesGraph() returned nil")
-            }
-             
-            // store the newly created images and post the event
-            RKIGraphicQueue.async(flags: .barrier, execute: {
+                let newMiddleGraph = self.createDeathsGraph()
                 
-                self.GraphLeft = newLeftGraph ?? self.GraphLeftNoData
-                self.GraphMiddle = newMiddleGraph ?? self.GraphMiddleNoData
-                self.GraphRight = newRightGraph ?? self.GraphRightNoData
+                // check if it worked
+                if newMiddleGraph == nil {
+                    
+                    // no it did not, so file the errormiddleImage
+                    GlobalStorage.unique.storeLastError(
+                        errorText: "DetailsRKIGraphic.createNewSetOfGraphs().middleImage createCasesGraph() returned nil")
+                }
                 
-                // report that we have selected a new detail
-                DispatchQueue.main.async(execute: {
+                
+                let newRightGraph = self.createIncidencesGraph()
+                
+                // check if it worked
+                if newRightGraph == nil {
+                    
+                    // no it did not, so file the errormiddleImage
+                    GlobalStorage.unique.storeLastError(
+                        errorText: "DetailsRKIGraphic.createNewSetOfGraphs().rightImage createIncidencesGraph() returned nil")
+                }
+                
+                // store the newly created images and post the event
+                RKIGraphicQueue.async(flags: .barrier, execute: {
+                    
+                    self.GraphLeft = newLeftGraph ?? self.GraphLeftNoData
+                    self.GraphMiddle = newMiddleGraph ?? self.GraphMiddleNoData
+                    self.GraphRight = newRightGraph ?? self.GraphRightNoData
+                    
+                    // report that we have selected a new detail
+                    DispatchQueue.main.async(execute: {
+                        NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewGraphAvailable))
+                    })
+                })
+                
+            } else {
+                
+                // UIDetailsRKISelectedMyID == ""
+                RKIGraphicQueue.async(flags: .barrier, execute: {
+                    
+                    self.GraphLeft = self.GraphLeftNoData
+                    self.GraphMiddle = self.GraphMiddleNoData
+                    self.GraphRight = self.GraphRightNoData
+                    
+                    GlobalStorage.unique.storeLastError(
+                        errorText: "DetailsRKIGraphic.createNewSetOfGraphs().UIDetailsRKISelectedMyID == \"\", post .CoBaT_Graph_NewGraphAvailable anyway, with NoData graphs")
+                    
+                    // report that we have selected a new detail
                     NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewGraphAvailable))
                 })
-            })
-            
-        } else {
-                  
-            // UIDetailsRKISelectedMyID == ""
-            RKIGraphicQueue.async(flags: .barrier, execute: {
-                
-                self.GraphLeft = self.GraphLeftNoData
-                self.GraphMiddle = self.GraphMiddleNoData
-                self.GraphRight = self.GraphRightNoData
-                
-                GlobalStorage.unique.storeLastError(
-                    errorText: "DetailsRKIGraphic.createNewSetOfGraphs().UIDetailsRKISelectedMyID == \"\", post .CoBaT_Graph_NewGraphAvailable anyway, with NoData graphs")
-                
-                // report that we have selected a new detail
-                NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewGraphAvailable))
-            })
-        }
+            }
+        })
     }
     
     /**
@@ -548,9 +552,9 @@ final class DetailsRKIGraphic: NSObject {
         }
         
         // shortcut for the image we use as background
-        //let imageToUse: UIImage = self.GraphLeftInitial
-        let imageToUse: UIImage = RKIGraphicQueue.sync(execute: { self.GraphLeftInitial })
-        
+        let imageToUse: UIImage = self.GraphLeftInitial
+        //let imageToUse: UIImage = RKIGraphicQueue.sync(execute: { self.GraphLeftInitial })
+
         // this will hold the return image or nil
         let returnImage: UIImage?
         
@@ -787,8 +791,8 @@ final class DetailsRKIGraphic: NSObject {
         }
         
         // shortcut for the image we use as background
-        //let imageToUse: UIImage = self.GraphMiddleInitial
-        let imageToUse: UIImage = RKIGraphicQueue.sync(execute: { self.GraphMiddleInitial })
+        let imageToUse: UIImage = self.GraphMiddleInitial
+        //let imageToUse: UIImage = RKIGraphicQueue.sync(execute: { self.GraphMiddleInitial })
 
         // this will hold the return image or nil
         let returnImage: UIImage?
@@ -1016,8 +1020,9 @@ final class DetailsRKIGraphic: NSObject {
         
         // shortcut for the image we use as background
         
-        let imageToUse: UIImage = RKIGraphicQueue.sync(execute: { self.GraphRightInitial })
-        
+        let imageToUse: UIImage = self.GraphRightInitial 
+        //let imageToUse: UIImage = RKIGraphicQueue.sync(execute: { self.GraphRightInitial })
+
         // this will hold the return image or nil
         let returnImage: UIImage?
         
