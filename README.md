@@ -39,13 +39,13 @@ RKI data
  - holds the JSON structs to decode the JSON data from RKI
  - reads the RKI JSON data
  - handles the decoding
- - triggered by app start and on request by user in UI
+ - triggered by app start or on request by user in UI
  
 Background service
  - manages the background fetch of the RKI Data, uses BGTaskScheduler, introduced with IOS 13
 
 Location service
- - will hold the location service for Version 3
+ - will hold the location service in Version 3. Currently empty.
 
 ## Data store
 Global Storage
@@ -53,14 +53,14 @@ Global Storage
  - handles new incoming datasets
  - manage the permanent Storage (simply userDefaults)
  - post messages on several occasions for the UI
- - provides a simple error message handling, by storing the last 20 error messages (non permanent)
+ - provides a simple error message handling, by storing the last 50 error messages (permanently)
 
 iCloud Integration
- - holds the original RKI JSON files and JSON files of the internal datastructures in the default public container
+ - holds the original RKI JSON files and JSON files of the internal datastructures in the default public iCloud container
  - like the original RKI data there are seperated tables for federal states and counties / cities
- - RKI only provides data for "Yesterday", so this code implememts a mechanism to provide older data for new users 
-     - Each time the app recieves new data, it checks if the new date is already in the container. If not, it adds it as new data or updates the existing data.
-     - If the iCloud container holds data which the app does not have, the app loads this data from the iCloud container.
+ - RKI only provides data for "Yesterday", so this app implememts a mechanism to provide older data for new users 
+     - push: each time the app recieves new data, it checks if the new date is already in the container. If not, it adds it as new data or updates the existing data.
+     - pull: if the iCloud container holds data which the app does not have, the app loads this data from the iCloud container.
   
 ## UI
 Global UI Data
@@ -70,9 +70,9 @@ Global UI Data
 
 Main Screen
  - Entry point of the UI and main Screen
- - shows an overview of the data of the preselected area (Bavaria, Regensburg on first app start)
+ - shows an overview of the data of the preselected area
  - three different area levels (Country, State and County) are available by a tabBarController
- - based on the Incidences (cases last 7 days per 100,000) of the selected area the obligatory rules are shown
+ - a fourth tab holds the favorites selected by the user
  - provides buttons to show a help Screen, retrieve new data set, select a different area and show details
 
 Browse RKI Data
@@ -82,11 +82,12 @@ Browse RKI Data
 
 Details RKI data
  - lists all datasets for the selected item
- - each data set holds the data of one days
+ - each data set holds the data of one day
  - it also shows the differences between each two data sets
  - provides three self sizing graphs for new cases, deaths and incidences, each showing values of last three weeks
 
 Help Screen
+ - shows some "how to" instructions and the data privacy statement
  - shows the data copyright and disclaimer by RKI
  - shows the stored error messages
 
@@ -101,7 +102,7 @@ Help Screen
   - just some predefined formatters
 
 ## Assets.xcassets
-  - keeps the images and the definition of the tint color (Bavaria blue)
+  - keeps the images and some color definitions
 
 
 ## Localizable.strings
