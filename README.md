@@ -1,7 +1,9 @@
 # CoBaT
- Corona Basic Traffic light
+Corona Basic Traffic light
 
-IOS project to fetch and browse data provided by Rpbert-Koch-Institute (RKI) related to Covid-19 / Corona. Data are only valid for Germany.
+IOS project to fetch and browse data provided by Rpbert-Koch-Institute (RKI) related to Covid-19 / Corona. 
+
+Data are only valid for Germany.
 
 # Overview
 The App reads the current RKI data for Covid 19 and stores them locally in a userdefault store on each start and by user request. It also uses iCloud public container to store new data there.
@@ -17,7 +19,7 @@ UI is build with UIKit.
 # Package content
 
   - Xcode project
-  - playground with initial tests for JSON hgandling of the RKI data interface
+  - playground with initial tests for JSON handling of the RKI data interface
   - Sketch files with the images
   - Powerpoint with UI design and some initial notes
   - this readme.md file
