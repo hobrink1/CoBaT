@@ -5,6 +5,8 @@ IOS project to fetch and browse data provided by Rpbert-Koch-Institute (RKI) rel
 
 Data are only valid for Germany.
 
+Product page: https://www.hobrink.org/cobatinfo/
+
 # Overview
 The App reads the current RKI data for Covid 19 and stores them locally in a userdefault store on each start and by user request. It also uses iCloud public container to store new data there.
 
