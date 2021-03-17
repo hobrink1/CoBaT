@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import MapKit
 
 
 // -------------------------------------------------------------------------------------------------
@@ -102,6 +103,15 @@ final class GlobalUIData: NSObject {
     public var UIBrowserRKISorting: UIBrowserRKISortEnum = .alphabetically
     
     public var UIMainTabBarSelectedTab: Int = 0 
+    
+    // we restore the last map region. Initially we show whole Germany. The values are taken from a real device
+    public var UIMapLastCenterCoordinate: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 51.117027000000036,
+                                                                                          longitude: 10.333652)
+    
+    public var UIMapLastSpan: MKCoordinateSpan = MKCoordinateSpan(latitudeDelta: 9.589147244505277,
+                                                                  longitudeDelta: 10.026110459526336)
+
+    
     
     
     
@@ -269,6 +279,41 @@ final class GlobalUIData: NSObject {
             self.UIMainTabBarSelectedTab = self.permanentStore.integer(
                 forKey: "CoBaT.UIMainTabBarSelectedTab")
             
+            
+            // restore the map region
+            let mapCenterLatitude = self.permanentStore.double(
+                forKey: "CoBaT.UIMapLastCenterCoordinateLatitude")
+            
+            if mapCenterLatitude != 0.0 {
+                
+                let mapCenterLongitude = self.permanentStore.double(
+                    forKey: "CoBaT.UIMapLastCenterCoordinateLongitude")
+                
+                if mapCenterLongitude != 0.0 {
+                    
+                    let mapSpanLatitude = self.permanentStore.double(
+                        forKey: "CoBaT.UIMapLastSpanLatitudeDelta")
+                    
+                    if mapSpanLatitude != 0 {
+                        
+                        let mapSpanLongitude = self.permanentStore.double(
+                            forKey: "CoBaT.UIMapLastSpanLongitudeDelta")
+                        
+                        if mapSpanLongitude != 0 {
+                            
+                            self.UIMapLastCenterCoordinate = CLLocationCoordinate2D(
+                                latitude: mapCenterLatitude,
+                                longitude: mapCenterLongitude)
+                            
+                            self.UIMapLastSpan = MKCoordinateSpan(
+                                latitudeDelta: mapSpanLatitude,
+                                longitudeDelta: mapSpanLongitude)
+                        }
+                    }
+                }
+            }
+                        
+            
             // the load of some UI elements is faster than this restore, so we send a post to sync it
             DispatchQueue.main.async(execute: {
                 NotificationCenter.default.post(Notification(name: .CoBaT_UIDataRestored))
@@ -291,7 +336,7 @@ final class GlobalUIData: NSObject {
     public func saveUIData() {
         
         // make sure we have consistent data
-        GlobalStorageQueue.async(execute: {
+        GlobalStorageQueue.async(flags: .barrier, execute: {
             
             #if DEBUG_PRINT_FUNCCALLS
             print("saveUIData just started")
@@ -322,6 +367,33 @@ final class GlobalUIData: NSObject {
             self.permanentStore.set(self.UIMainTabBarSelectedTab,
                                     forKey: "CoBaT.UIMainTabBarSelectedTab")
             
+            // map Data
+            self.saveMapRegion()
          })
     }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     stores the current map region
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    public func saveMapRegion() {
+        
+        self.permanentStore.set(self.UIMapLastCenterCoordinate.latitude,
+                                forKey: "CoBaT.UIMapLastCenterCoordinateLatitude")
+        
+        self.permanentStore.set(self.UIMapLastCenterCoordinate.longitude,
+                                forKey: "CoBaT.UIMapLastCenterCoordinateLongitude")
+
+        self.permanentStore.set(self.UIMapLastSpan.latitudeDelta,
+                                forKey: "CoBaT.UIMapLastSpanLatitudeDelta")
+
+        self.permanentStore.set(self.UIMapLastSpan.longitudeDelta,
+                                forKey: "CoBaT.UIMapLastSpanLongitudeDelta")
+
+
+    }
+
 }

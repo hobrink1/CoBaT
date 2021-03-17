@@ -56,7 +56,12 @@ final class CommonTabViewControllerV2: UIViewController {
             switch GlobalUIData.unique.UITabBarCurrentlyActive {
             
             case GlobalStorage.unique.RKIDataCountry:
-                break
+                
+                DispatchQueue.main.async(execute: {
+                    self.performSegue(
+                        withIdentifier: "CallMapViewControllerFromCommonTabViewController",
+                        sender: self)
+                })
                 
             case GlobalStorage.unique.RKIDataState:
                 
@@ -277,13 +282,13 @@ final class CommonTabViewControllerV2: UIViewController {
                 // Buttons
                 
                 // we do not need a select button on Country level, so check if we have to hide it
-                if selectedArea == GlobalStorage.unique.RKIDataCountry {
-                    
-                    // yes, country level, so hide the button
-                    self.SelectButton.isHidden = true
-                    self.SelectButton.isEnabled = false
-                    
-                } else {
+//                if selectedArea == GlobalStorage.unique.RKIDataCountry {
+//
+//                    // yes, country level, so hide the button
+//                    self.SelectButton.isHidden = true
+//                    self.SelectButton.isEnabled = false
+//
+//                } else {
                     
                     // no, not country level, so make sure the button is working
                     self.SelectButton.isHidden = false
@@ -291,7 +296,7 @@ final class CommonTabViewControllerV2: UIViewController {
                     
                     self.SelectButton.setTitleColor(textColor, for: .normal)
                     self.SelectButton.layer.borderColor = textColor.cgColor
-                }
+//                }
                 
                 
                 // ---------------------------------------------------------------------------------
@@ -338,12 +343,24 @@ final class CommonTabViewControllerV2: UIViewController {
         self.SelectButton.layer.cornerRadius = 5
         self.SelectButton.layer.borderWidth = 1
         self.SelectButton.layer.borderColor = self.view.tintColor.cgColor
-        self.SelectButton.setTitle(
-            NSLocalizedString("Title-Select-Button",
-                              comment: "Title of Select Button"),
-            for: .normal)
-
-
+        
+        switch GlobalUIData.unique.UITabBarCurrentlyActive {
+        
+        case GlobalStorage.unique.RKIDataCountry:
+            
+            self.SelectButton.setTitle(
+                NSLocalizedString("Title-Map-Button",
+                                  comment: "Title of Map Button"),
+                for: .normal)
+            
+        default:
+            
+            self.SelectButton.setTitle(
+                NSLocalizedString("Title-Select-Button",
+                                  comment: "Title of Select Button"),
+                for: .normal)
+            
+        }
     }
     
     /**
@@ -425,6 +442,25 @@ final class CommonTabViewControllerV2: UIViewController {
                 self.refreshOwnDataOutlets()
             })
 
+        
+        // sometimes the button has the wrong label, so set it again
+        switch GlobalUIData.unique.UITabBarCurrentlyActive {
+        
+        case GlobalStorage.unique.RKIDataCountry:
+            
+            self.SelectButton.setTitle(
+                NSLocalizedString("Title-Map-Button",
+                                  comment: "Title of Map Button"),
+                for: .normal)
+            
+        default:
+            
+            self.SelectButton.setTitle(
+                NSLocalizedString("Title-Select-Button",
+                                  comment: "Title of Select Button"),
+                for: .normal)
+            
+        }
         self.refreshOwnDataOutlets()
     }
 

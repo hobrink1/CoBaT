@@ -64,6 +64,8 @@
 /* Title of Details Button */
 "Title-Details-Button" = "Details";
 
+/* Title of Map Button */
+"Title-Map-Button" = "Karte";
 
 /* Label text for incidences per 100 k*/
 "label-incidences-100k" = "Fälle in 7 Tagen per 100.000:";
@@ -286,6 +288,15 @@ bestimmte öffentliche Plätze ab 21:00";
 /* Label text for graph "incidencess" */
 "RKIGraph-Incidences" = "Inzidenz";
 
+
+/**************************************************************************************************
+ *
+ * class MapViewController
+ *
+ **************************************************************************************************/
+
+/* no County Data available */
+"no-County-data" = "(noch) keine Daten verfügbar";
 
 
 /**************************************************************************************************
