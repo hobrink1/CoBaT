@@ -74,7 +74,7 @@ final class MainViewController: UIViewController {
     @IBAction func RefreshButtonAction(_ sender: UIButton) {
         
         // get fresh data
-        RKIDataDownload.unique.getRKIData()
+        RKIDataDownload.unique.getRKIData(from: 0, until: 1)
     }
    
     

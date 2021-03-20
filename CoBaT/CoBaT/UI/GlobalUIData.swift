@@ -25,7 +25,21 @@ final class GlobalUIData: NSObject {
     // MARK: - Constants and variables (NOT permanent stored)
     // ---------------------------------------------------------------------------------------------
     private let permanentStore = UserDefaults.standard
+    
+    // this is the directory in .applicationSupportDirectory for the map data
+    private let mapDataDirectory : String = "mapData"
+    
+    // this are the current filenames
+    private let mapDataCurrentFilenameCountyShapes: String = "RKICountyShapesV2"
+    private let mapDataCurrentFilenameStateShapes: String =  "RKIStateShapesV1"
 
+    // in this array we store the old filenames. Used in self.checkMapFiles().
+    // All files in that array have an outdated structure or outdated data. So they will be removed.
+    // by this we can do some kind of version management, but there is no data migratiuon, we simply
+    // reload the data from RKI website
+    private let mapDataOldFilenamesToDelete: [String] = ["RKICountyShapesV1", "RKIStateShapes"]
+
+    
     // The DetailsRKITableViewController uses this data to build local data out of the global Storage
     public var UIDetailsRKIAreaLevel: Int = GlobalStorage.unique.RKIDataCounty
     public var UIDetailsRKISelectedMyID: String = "7"
@@ -44,7 +58,7 @@ final class GlobalUIData: NSObject {
     // tabBar currently active, will be set by CountryTabViewController (0), StateTabViewController (1) or CountyTabViewController (2)
     public var UITabBarCurrentlyActive: Int = 0
     
-    // this UICoros will be set in CommonTabViewController for the embedded CommonTabTableViewController
+    // this UIColors will be set in CommonTabViewController for the embedded CommonTabTableViewController
     public var UITabBarCurentTextColor: UIColor = UIColor.label
     public var UITabBarCurentBackgroundColor: UIColor = UIColor.systemBackground
     public var UITabBarCurentGrade: Int = 0
@@ -54,6 +68,8 @@ final class GlobalUIData: NSObject {
     public var UIDetailsRKITextColor: UIColor = UIColor.label
     public var UIDetailsRKIBackgroundColor: UIColor = UIColor.systemBackground
     
+    // this is a predefined neutral color
+    public let UIClearColor: UIColor = UIColor.clear
     
     // there are three small graphs on top of the DetailsRKITableView
     // The size of that graphs will be depending on the screen width of the device
@@ -78,6 +94,7 @@ final class GlobalUIData: NSObject {
 
     public var RKIGraphCurrentViewWidth: CGFloat = min(UIScreen.main.bounds.width, 650.0)
     public var RKIGraphCurrentViewHeight: CGFloat = min(UIScreen.main.bounds.height, 650.0)
+    
     
 
     // ---------------------------------------------------------------------------------------------
@@ -115,6 +132,308 @@ final class GlobalUIData: NSObject {
     
     
     
+    
+    // ---------------------------------------------------------------------------------------------
+    // MARK: - RKI Map Data (permanent)
+    // ---------------------------------------------------------------------------------------------
+    public struct RKIMapDataStruct : Encodable, Decodable {
+        
+        let myID: String                // each item has a unique ID, it's a number but we use a string
+        let name: String                // the name of the item
+
+        let ringsX: [[Double]]          // We split the MKMapPoint to its two part (x and Y)
+        let ringsY: [[Double]]          // to keep the struct En/Decodable
+
+        let centerLatitude: Double      // Latitude of center coordinate
+        let centerLongitude: Double     // Longitude of center coordinate
+        
+        let boundingRectOriginX: Double // X value of origin of the bounding rectangle
+        let boundingRectOriginY: Double // Y value of origin of the bounding rectangle
+        
+        let boundingRectSizeWidth: Double // width of size of the bounding rectangle
+        let boundingRectSizeHeight: Double // hight of size of the bounding rectangle
+
+        
+        
+        init(_ myID: String,
+             _ name: String,
+             _ ringsX: [[Double]],
+             _ ringsY: [[Double]],
+             centerLatitude: Double,
+             longitude centerLongitude: Double,
+             boundingRectOriginX: Double,
+             y boundingRectOriginY: Double,
+             boundingRectSizeWidth: Double,
+             height boundingRectSizeHight: Double
+             ) {
+            
+            self.myID                   = myID
+            self.name                   = name
+            self.ringsX                 = ringsX
+            self.ringsY                 = ringsY
+            self.centerLatitude         = centerLatitude
+            self.centerLongitude        = centerLongitude
+            self.boundingRectOriginX    = boundingRectOriginX
+            self.boundingRectOriginY    = boundingRectOriginY
+            self.boundingRectSizeWidth  = boundingRectSizeWidth
+            self.boundingRectSizeHeight  = boundingRectSizeHight
+
+        }
+    }
+    
+    // in here we store the raw data of the counties and states for the map
+    // both arrays will be restored from files at app start.
+    // If the files does not exist, the data is read from RKI Website and stored in the files
+    public var RKIMapCountyData: [RKIMapDataStruct] = []
+    public var RKIMapStateData: [RKIMapDataStruct] = []
+    
+
+    // this is the array of all overlays. The overlays will be generated once. The map reloads them
+    // in viewDidLoad()
+    public var RKIMapOverlays: [RKIMapOverlay] = []
+    
+    // a flag used in MapViewController to show "data not ready"
+    public var RKIMapOverlaysBuild: Bool = false
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     
+     
+     -----------------------------------------------------------------------------------------------
+     
+     - Parameters:
+     - :
+     
+     - Returns:
+     
+     */
+    private func handleRKIShapeData() {
+        
+        // we start the work on the map data deferred, as we do not want to disturb the start sequence
+        GlobalStorageQueue.asyncAfter(deadline: .now() + .seconds(3), flags: .barrier, execute: {
+            
+            // Instance of a private filemanager
+            let myFileManager = FileManager.default
+            
+            // get the application support directory
+            if let applicationSupportDirectoryURL = myFileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+                
+                let applicationSupportDirectoryPath:String = applicationSupportDirectoryURL.path
+                //myFileManager.changeCurrentDirectoryPath(homeDirectoryPath)
+                
+                // check if we have to create the directory
+                if myFileManager.fileExists(atPath: applicationSupportDirectoryPath) == false {
+                    
+                    // does not exist, so create it
+                    do {
+                        try myFileManager.createDirectory(atPath: applicationSupportDirectoryPath,
+                                                          withIntermediateDirectories: false,
+                                                          attributes: nil)
+                        
+                        GlobalStorage.unique.storeLastError(errorText: "handleRKIShapeData(): just created .applicationSupportDirectory")
+                        
+                    } catch let error  {
+                        
+                        GlobalStorage.unique.storeLastError(errorText: "handleRKIShapeData(): creation of .applicationSupportDirectory directory failed, error: \"\(error)\", return")
+                        
+                        return
+                    }
+                    
+                } else {
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print("handleRKIShapeData(): .applicationSupportDirectory exists")
+                    #endif
+                }
+                
+                // build the path of the map data directory
+                let mapDataDirectoryPath = applicationSupportDirectoryPath + "/" + self.mapDataDirectory
+                
+                // check if we have to create the directory
+                if myFileManager.fileExists(atPath: mapDataDirectoryPath) == false {
+                    
+                    // does not exist, so create it
+                    do {
+                        try myFileManager.createDirectory(atPath: mapDataDirectoryPath,
+                                                          withIntermediateDirectories: false,
+                                                          attributes: nil)
+                        
+                        #if DEBUG_PRINT_FUNCCALLS
+                        print("handleRKIShapeData(): just created mapData directory")
+                        #endif
+                        
+                    } catch let error  {
+                        
+                        GlobalStorage.unique.storeLastError(errorText: "handleRKIShapeData(): creation of mapData directory failed, do nothing, error: \"\(error)\"")
+                        
+                        return
+                    }
+                    
+                } else {
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print("handleRKIShapeData(): mapData directory exists")
+                    #endif
+                }
+                
+                // if we got here, we have a valid map data directory
+                
+                // check if we have outdated files in that directory.
+                // use the array of obsolete files
+                for index in 0 ..< self.mapDataOldFilenamesToDelete.count {
+                    
+                    let oldMapFilePath = mapDataDirectoryPath + "/" + self.mapDataOldFilenamesToDelete[index]
+                    
+                    if myFileManager.fileExists(atPath: oldMapFilePath) == true {
+                        
+                        // delete the file
+                        do {
+                            try myFileManager.removeItem(atPath: oldMapFilePath)
+                            
+                        } catch let error as NSError {
+                            
+                            // something went wrong
+                            GlobalStorage.unique.storeLastError(errorText: "handleRKIShapeData(): ERROR deleting old mapFile \"\(self.mapDataOldFilenamesToDelete[index])\": \(error.description)")
+                        }
+                    }
+                }
+                
+                // now look for the current file
+                let mapDataCountyShapePath = mapDataDirectoryPath + "/" + self.mapDataCurrentFilenameCountyShapes
+                
+                if myFileManager.fileExists(atPath: mapDataCountyShapePath) == true {
+                    
+                    // read the file
+                    do {
+                        
+                        #if DEBUG_PRINT_FUNCCALLS
+                        let start = CFAbsoluteTimeGetCurrent()
+                        #endif
+                        
+                        let fileURL = URL(fileURLWithPath: mapDataCountyShapePath)
+                        let myData = try Data(contentsOf: fileURL)
+                        self.RKIMapCountyData = try JSONDecoder().decode([RKIMapDataStruct].self,
+                                                                 from: myData)
+                        
+                        #if DEBUG_PRINT_FUNCCALLS
+                        let end = CFAbsoluteTimeGetCurrent()
+                        let duration = (end - start)
+                        print("handleRKIShapeData(): done in \(duration) sec! Will call self.buildCountyShapeOverlays()")
+                        #endif
+                        
+                        self.buildCountyShapeOverlays()
+                        
+                    } catch let error as NSError {
+                        
+                        // encode did fail, log the message
+                        GlobalStorage.unique.storeLastError(errorText: "handleRKIShapeData(): Error: JSON dencoder could not dencode RKIMapCountyData or read from file failed: error: \"\(error.description)\"")
+                    }
+                    
+                } else {
+                    
+                    GlobalStorage.unique.storeLastError(errorText: "handleRKIShapeData(): no local data file, try to get the data from RKI, call getRKIData(from: 2, until: 2)")
+
+                    
+                    // get fresh data
+                    RKIDataDownload.unique.getRKIData(from: 2, until: 2)
+                    
+                }
+                
+            } else {
+                
+                // no app support directory
+                GlobalStorage.unique.storeLastError(errorText: "handleRKIShapeData(): ERROR: did not get a valid diretory for \".applicationSupportDirectory\", do nothing")
+            }
+            
+        })
+    }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     
+     
+     -----------------------------------------------------------------------------------------------
+     
+     - Parameters:
+     - :
+     
+     - Returns:
+     
+     */
+    private func buildCountyShapeOverlays() {
+        
+        GlobalStorageQueue.async(flags: .barrier, execute: {
+            
+            // check if we really have to do something
+            if self.RKIMapCountyData.isEmpty == false {
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("buildCountyShapeOverlays(): just started, RKIMapCountyData has \(self.RKIMapCountyData.count) elements")
+                #endif
+                
+                // remove all old data
+                self.RKIMapOverlays.removeAll()
+                
+                
+                // shortcut for the index of the county data
+                let typeIndex = GlobalStorage.unique.RKIDataCounty
+                
+                // loop over the shape array
+                for index in 0 ..< self.RKIMapCountyData.count {
+                    
+                    // get a shortcut for the current element of RKIMapCountyData[]
+                    let item = self.RKIMapCountyData[index]
+                    let myID = item.myID
+                    
+                    // check if we have a corresponding county item
+                    if let _ = GlobalStorage.unique.RKIData[typeIndex][0].firstIndex(where: { $0.myID == myID } ) {
+                        // we found a valid record, so we can build the overlay
+                        
+                        // build the needed values
+                        let centerCoordinate = CLLocationCoordinate2D(latitude:  item.centerLatitude,
+                                                                      longitude: item.centerLongitude)
+                        
+                        let boundingRectangle = MKMapRect(x:      item.boundingRectOriginX,
+                                                          y:      item.boundingRectOriginY,
+                                                          width:  item.boundingRectSizeWidth,
+                                                          height: item.boundingRectSizeHeight)
+                        
+                        // build the overlay
+                        let newOverlay = RKIMapOverlay(type: .countyArea,
+                                                       myID: item.myID,
+                                                       dayIndex: 0,
+                                                       map: nil,
+                                                       center: centerCoordinate,
+                                                       rect: boundingRectangle)
+                        
+                        // append to the array of overlays
+                        self.RKIMapOverlays.append(newOverlay)
+                        
+                    } // found county
+                } // loop
+                
+                // set the flag
+                self.RKIMapOverlaysBuild = true
+                
+                // the map might have to be redrawn, so we send a notification
+                DispatchQueue.main.async(execute: {
+                    NotificationCenter.default.post(Notification(name: .CoBaT_Map_OverlaysBuild))
+                })
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("buildCountyShapeOverlays just posted .CoBaT_Map_OverlaysBuild")
+                #endif
+                
+            } else {
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("buildCountyShapeOverlays(): just started,RKIMapCountyData.isEmpty == false, do nothing")
+                #endif
+            }
+        })
+    }
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - RKI Data API
@@ -313,7 +632,9 @@ final class GlobalUIData: NSObject {
                 }
             }
                         
-            
+            // prepare the map data
+            self.handleRKIShapeData()
+
             // the load of some UI elements is faster than this restore, so we send a post to sync it
             DispatchQueue.main.async(execute: {
                 NotificationCenter.default.post(Notification(name: .CoBaT_UIDataRestored))
@@ -371,6 +692,129 @@ final class GlobalUIData: NSObject {
             self.saveMapRegion()
          })
     }
+    
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     save new data of county shapes for the map to the local file and call
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    public func saveNewCountyShapeData() {
+        
+        GlobalStorageQueue.async(flags: .barrier, execute: {
+            
+            // Instance of a private filemanager
+            let myFileManager = FileManager.default
+            
+            // get the application support directory
+            if let applicationSupportDirectoryURL = myFileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+                
+                let applicationSupportDirectoryPath:String = applicationSupportDirectoryURL.path
+                //myFileManager.changeCurrentDirectoryPath(homeDirectoryPath)
+                
+                // check if we have to create the directory
+                if myFileManager.fileExists(atPath: applicationSupportDirectoryPath) == false {
+                    
+                    // does not exist, so create it
+                    do {
+                        try myFileManager.createDirectory(atPath: applicationSupportDirectoryPath,
+                                                          withIntermediateDirectories: false,
+                                                          attributes: nil)
+                        
+                        GlobalStorage.unique.storeLastError(errorText: "saveNewCountyShapeData(): just created .applicationSupportDirectory")
+                        
+                    } catch let error  {
+                        
+                        GlobalStorage.unique.storeLastError(errorText: "saveNewCountyShapeData(): creation of .applicationSupportDirectory directory failed, error: \"\(error)\", return")
+                        
+                        return
+                    }
+                    
+                } else {
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print("saveNewCountyShapeData(): .applicationSupportDirectory exists")
+                    #endif
+                }
+                
+                // build the path of the placemark directory
+                let mapDataDirectoryPath = applicationSupportDirectoryPath + "/" + self.mapDataDirectory
+                
+                // check if we have to create the directory
+                if myFileManager.fileExists(atPath: mapDataDirectoryPath) == false {
+                    
+                    // does not exist, so create it
+                    do {
+                        try myFileManager.createDirectory(atPath: mapDataDirectoryPath,
+                                                          withIntermediateDirectories: false,
+                                                          attributes: nil)
+                        
+                        #if DEBUG_PRINT_FUNCCALLS
+                        print("saveNewCountyShapeData(): just created mapData directory")
+                        #endif
+                        
+                    } catch let error  {
+                        
+                        GlobalStorage.unique.storeLastError(errorText: "saveNewCountyShapeData(): creation of mapData directory failed, error: \"\(error)\"")
+                    }
+                    
+                } else {
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print("saveNewCountyShapeData(): mapData directory exists")
+                    #endif
+                }
+                
+                // check if an old file exist, if so, remove it
+                let mapDataCountyShapePath = mapDataDirectoryPath + "/" + self.mapDataCurrentFilenameCountyShapes
+                
+                if myFileManager.fileExists(atPath: mapDataCountyShapePath) == true {
+                    
+                    // delete the file
+                    do {
+                        try myFileManager.removeItem(atPath: mapDataCountyShapePath)
+                        
+                    } catch let error as NSError {
+                        
+                        // something went wrong
+                        GlobalStorage.unique.storeLastError(errorText: "saveNewCountyShapeData(): ERROR deleting old mapFile: \(error.description)")
+                    }
+                }
+                
+                // try to save the data
+                do {
+                    // try to encode the county data and the timeStamps
+                    let encodedMapData = try JSONEncoder().encode(self.RKIMapCountyData)
+                    
+                    let fileURL = URL(fileURLWithPath: mapDataCountyShapePath)
+                    // if we got to here, no errors encountered, so store it
+                    try encodedMapData.write(to: fileURL)
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print("saveNewCountyShapeData(): done! Will call self.buildCountyShapeOverlays()")
+                    #endif
+                    
+                    self.buildCountyShapeOverlays()
+                    
+                } catch let error as NSError {
+                    
+                    // encode did fail, log the message
+                    GlobalStorage.unique.storeLastError(errorText: "saveNewCountyShapeData(): Error: JSON encoder could not encode RKIMapCountyData or write to file failed: error: \"\(error.description)\"")
+                }
+                
+                
+            } else {
+                
+                // no app support directory
+                GlobalStorage.unique.storeLastError(errorText: "saveNewCountyShapeData(): ERROR: did not get a valid diretory for \".applicationSupportDirectory\", do nothing")
+            }
+        })
+        
+    }
+    
+
     
     /**
      -----------------------------------------------------------------------------------------------

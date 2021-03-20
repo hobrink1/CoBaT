@@ -27,6 +27,10 @@
 		F253DC182584303400E4855D /* DetailsInhabitantsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F253DC172584303400E4855D /* DetailsInhabitantsTableViewCell.swift */; };
 		F253DC20258760F200E4855D /* DetailsRKIGraphTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F253DC1F258760F200E4855D /* DetailsRKIGraphTableViewCell.swift */; };
 		F253DC252588047600E4855D /* DetailsRKIGraphic.swift in Sources */ = {isa = PBXBuildFile; fileRef = F253DC242588047600E4855D /* DetailsRKIGraphic.swift */; };
+		F25AEF7F26034C8D008FEBDC /* JSON RKI CountyShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = F25AEF7E26034C8D008FEBDC /* JSON RKI CountyShape.swift */; };
+		F25AEF872603533D008FEBDC /* JSON RKI StateShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = F25AEF862603533D008FEBDC /* JSON RKI StateShape.swift */; };
+		F25AEF8F260502E0008FEBDC /* RKI Map Overlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F25AEF8E260502E0008FEBDC /* RKI Map Overlay.swift */; };
+		F25AEF9426054513008FEBDC /* RKI Map Overlay Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F25AEF9326054513008FEBDC /* RKI Map Overlay Renderer.swift */; };
 		F273D76C256E4D860002E15B /* CovidRating.swift in Sources */ = {isa = PBXBuildFile; fileRef = F273D76B256E4D860002E15B /* CovidRating.swift */; };
 		F273D78D25713B5A0002E15B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F273D78F25713B5A0002E15B /* Localizable.strings */; };
 		F2AD3056256D00B700FDDE4B /* JSON RKI County.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AD3055256D00B700FDDE4B /* JSON RKI County.swift */; };
@@ -101,6 +105,10 @@
 		F253DC172584303400E4855D /* DetailsInhabitantsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsInhabitantsTableViewCell.swift; sourceTree = "<group>"; };
 		F253DC1F258760F200E4855D /* DetailsRKIGraphTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRKIGraphTableViewCell.swift; sourceTree = "<group>"; };
 		F253DC242588047600E4855D /* DetailsRKIGraphic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRKIGraphic.swift; sourceTree = "<group>"; };
+		F25AEF7E26034C8D008FEBDC /* JSON RKI CountyShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSON RKI CountyShape.swift"; sourceTree = "<group>"; };
+		F25AEF862603533D008FEBDC /* JSON RKI StateShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSON RKI StateShape.swift"; sourceTree = "<group>"; };
+		F25AEF8E260502E0008FEBDC /* RKI Map Overlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RKI Map Overlay.swift"; sourceTree = "<group>"; };
+		F25AEF9326054513008FEBDC /* RKI Map Overlay Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RKI Map Overlay Renderer.swift"; sourceTree = "<group>"; };
 		F273D76B256E4D860002E15B /* CovidRating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CovidRating.swift; sourceTree = "<group>"; };
 		F273D78E25713B5A0002E15B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F273D79325713B670002E15B /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -277,6 +285,8 @@
 				F2AD3055256D00B700FDDE4B /* JSON RKI County.swift */,
 				F2AD305E256D035E00FDDE4B /* JSON RKI State.swift */,
 				F23657F6259E01C500252809 /* JSON RKI Age.swift */,
+				F25AEF7E26034C8D008FEBDC /* JSON RKI CountyShape.swift */,
+				F25AEF862603533D008FEBDC /* JSON RKI StateShape.swift */,
 				F2AD3063256D043900FDDE4B /* JSON RKI Helpers.swift */,
 			);
 			path = "RKI Data";
@@ -360,6 +370,8 @@
 			isa = PBXGroup;
 			children = (
 				F2ECAED026023B9F009B08E5 /* MapViewController.swift */,
+				F25AEF8E260502E0008FEBDC /* RKI Map Overlay.swift */,
+				F25AEF9326054513008FEBDC /* RKI Map Overlay Renderer.swift */,
 			);
 			path = "Map View";
 			sourceTree = "<group>";
@@ -534,6 +546,7 @@
 				F2DB33942577833700C47972 /* CommonTabTableViewCell.swift in Sources */,
 				F2DB33C52579251E00C47972 /* CoBaT User Notification.swift in Sources */,
 				F2AD305F256D035E00FDDE4B /* JSON RKI State.swift in Sources */,
+				F25AEF9426054513008FEBDC /* RKI Map Overlay Renderer.swift in Sources */,
 				F2ED1090256D9855003E2C41 /* BrowseRKIViewController.swift in Sources */,
 				F2DB33BD25790CE500C47972 /* CoBaTBackgroundService.swift in Sources */,
 				F2AD306C256D0AD900FDDE4B /* Global Storage.swift in Sources */,
@@ -547,6 +560,7 @@
 				F207CA702571B35B0000F90B /* GlobalUIData.swift in Sources */,
 				F2ED107E256D6E69003E2C41 /* BrowseRKIDataTableViewController.swift in Sources */,
 				F253DC20258760F200E4855D /* DetailsRKIGraphTableViewCell.swift in Sources */,
+				F25AEF7F26034C8D008FEBDC /* JSON RKI CountyShape.swift in Sources */,
 				F2DB338F257782E300C47972 /* CommonTabTableViewController.swift in Sources */,
 				F273D76C256E4D860002E15B /* CovidRating.swift in Sources */,
 				F24D37EE257398620036FEE3 /* DetailsRKITableViewCell.swift in Sources */,
@@ -558,6 +572,7 @@
 				F2DB337B2577825900C47972 /* CountryTabViewController.swift in Sources */,
 				F2ECAED126023B9F009B08E5 /* MapViewController.swift in Sources */,
 				F2DB338A257782C000C47972 /* CommonTabViewController.swift in Sources */,
+				F25AEF8F260502E0008FEBDC /* RKI Map Overlay.swift in Sources */,
 				F2ED1098256DAFDE003E2C41 /* Formatters.swift in Sources */,
 				F2DE391E25728A6C0033E6B2 /* Notification Name Extention.swift in Sources */,
 				F253DC252588047600E4855D /* DetailsRKIGraphic.swift in Sources */,
@@ -565,6 +580,7 @@
 				F21390ED25A4CD4100D8F336 /* FavoritesTabViewController.swift in Sources */,
 				F2AD3056256D00B700FDDE4B /* JSON RKI County.swift in Sources */,
 				F22EF17825B852B600964114 /* SceneDelegate.swift in Sources */,
+				F25AEF872603533D008FEBDC /* JSON RKI StateShape.swift in Sources */,
 				F253DC182584303400E4855D /* DetailsInhabitantsTableViewCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

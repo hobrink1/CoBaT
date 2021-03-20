@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import MapKit
 
 // -------------------------------------------------------------------------------------------------
 // MARK: -
@@ -42,8 +43,13 @@ final class RKIDataDownload: NSObject {
         
         RKI_DataTabStruct(.county,  "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json"),
         
-        RKI_DataTabStruct(.state, "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/Coronaf%C3%A4lle_in_den_Bundesl%C3%A4ndern/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json")
-        //,
+        RKI_DataTabStruct(.state, "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/Coronaf%C3%A4lle_in_den_Bundesl%C3%A4ndern/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json"),
+        
+        RKI_DataTabStruct(.countyShape, "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID,Shape__Area,Shape__Length,GEN&outSR=4326&f=json"),
+        
+        RKI_DataTabStruct(.stateShape, "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/Coronaf%C3%A4lle_in_den_Bundesl%C3%A4ndern/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID_1,Shape__Area,Shape__Length,LAN_ew_GEN&outSR=4326&f=json")
+
+       //,
         
 //        RKI_DataTabStruct(.age, "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_COVID19/FeatureServer/0/query?where=IdLandkreis%20%3D%20'01001'&outFields=*&outSR=4326&f=json")
     ]
@@ -57,17 +63,21 @@ final class RKIDataDownload: NSObject {
      Walks through the array "RKI_DataTab" of this class, calls the related URLs and calls handleRKIContent() if valid data recieved
      
      -----------------------------------------------------------------------------------------------
-     - Parameters: none
+     - Parameters:
+        - from:  startIndex in RKI_DataTab[]
+        - until: endIndex in RKI_DataTab[]
      - Returns: nothing
      */
-    public func getRKIData() {
+    public func getRKIData(from: Int, until: Int) {
         
         #if DEBUG_PRINT_FUNCCALLS
-        print("getRKIData just started")
+        print("getRKIData just started with from: \(from), until: \(until)")
         #endif
         
         // walk over the array with the configurations
-        for singleDataSet in RKI_DataTab {
+        for loopIndex in from ... until {
+            
+            let singleDataSet = RKI_DataTab[loopIndex]
             
             // build a valid URL
             if let url = URL(string: singleDataSet.URL_String) {
@@ -215,6 +225,7 @@ final class RKIDataDownload: NSObject {
                     
             switch RKI_DataType {
             
+            // -------------------------------------------------------------------------------------
             case .county:
                 
                 #if DEBUG_PRINT_FUNCCALLS
@@ -263,25 +274,25 @@ final class RKIDataDownload: NSObject {
                         // RKI reports the timestamp as a formatted string, so we have to convert that
                         // by means of a formatter (see Formatters.swift"
                         
-//                        // this will store the final timestamp
-//                        let updateDate : Date
-//
-//                        // try to convert the string into a Date() object
-//                        if let myDate = RKIDateFormatter.date(from:singleItem.attributes.lastUpdate) {
-//
-//                            // success: so we can use that
-//                            updateDate = myDate
-//
-//                        } else {
-//
-//                            // failed: take the current timestamp as the timestamp and report it
-//                            updateDate = Date()
-//
-//                            GlobalStorage.unique.storeLastError(
-//                                errorText: "CoBaT.RKIDataDownload.handleRKIContent.County: Error: could not get updateDate from \"\(singleItem.attributes.lastUpdate)\", use current date \"\(updateDate)\" instead"
-//                            )
-//                        }
-//
+                        //                        // this will store the final timestamp
+                        //                        let updateDate : Date
+                        //
+                        //                        // try to convert the string into a Date() object
+                        //                        if let myDate = RKIDateFormatter.date(from:singleItem.attributes.lastUpdate) {
+                        //
+                        //                            // success: so we can use that
+                        //                            updateDate = myDate
+                        //
+                        //                        } else {
+                        //
+                        //                            // failed: take the current timestamp as the timestamp and report it
+                        //                            updateDate = Date()
+                        //
+                        //                            GlobalStorage.unique.storeLastError(
+                        //                                errorText: "CoBaT.RKIDataDownload.handleRKIContent.County: Error: could not get updateDate from \"\(singleItem.attributes.lastUpdate)\", use current date \"\(updateDate)\" instead"
+                        //                            )
+                        //                        }
+                        //
                         //print("State Update Date: \(shortSingleDateTimeFormatter.string(from: updateDate)), RKI:\(shortSingleDateFormatterRKI.string(from: updateDate))")
                         
                         let noonTime = GlobalStorage.unique.getMidnightTimeInterval(time: updateDate.timeIntervalSinceReferenceDate)
@@ -299,15 +310,15 @@ final class RKIDataDownload: NSObject {
                                                 timeStamp: noonTime))
                     }
                     
-
+                    
                     // refresh our global storage
                     GlobalStorage.unique.refresh_RKICountyData(newRKICountyData: newDataArray)
                     
                     // save it to iCloud
                     iCloudService.unique.saveRKIData(RKI_DataType: RKI_DataType,
-                                                        time: updateDate.timeIntervalSinceReferenceDate,
-                                                        data: data)
-
+                                                     time: updateDate.timeIntervalSinceReferenceDate,
+                                                     data: data)
+                    
                 } else {
                     
                     GlobalStorage.unique.storeLastError(
@@ -318,6 +329,7 @@ final class RKIDataDownload: NSObject {
                 print("handleRKIContent County done")
                 #endif
                 
+            // -------------------------------------------------------------------------------------
             case .state:
                 
                 #if DEBUG_PRINT_FUNCCALLS
@@ -326,18 +338,18 @@ final class RKIDataDownload: NSObject {
                 
                 let stateData = try newJSONDecoder().decode(RKI_State_JSON.self, from: data)
                 
-  
+                
                 #if DEBUG_PRINT_FUNCCALLS
                 print("handleRKIContent after decoding")
                 #endif
-
-
+                
+                
                 if stateData.features.isEmpty == false {
                     
-
+                    
                     // get the first item as a refernce for the
                     let firstItem = stateData.features.first!
-
+                    
                     // RKI reports the timestamp as milliseconds since 1970, so we have to convert
                     let secondsSince1970: TimeInterval = TimeInterval(Double(firstItem.attributes.aktualisierung) / 1_000)
                     let lastUpdateRKI: Date = Date(timeIntervalSince1970: secondsSince1970)
@@ -370,12 +382,12 @@ final class RKIDataDownload: NSObject {
                     
                     // store it in global storage
                     GlobalStorage.unique.refresh_RKIStateData(newRKIStateData: newDataArray)
-
+                    
                     // save it to iCloud
                     iCloudService.unique.saveRKIData(RKI_DataType: RKI_DataType,
-                                                        time: lastUpdateTimeInterval,
-                                                        data: data)
-
+                                                     time: lastUpdateTimeInterval,
+                                                     data: data)
+                    
                 } else {
                     
                     GlobalStorage.unique.storeLastError(
@@ -385,14 +397,14 @@ final class RKIDataDownload: NSObject {
                 #if DEBUG_PRINT_FUNCCALLS
                 print("handleRKIContent State done")
                 #endif
-
                 
+            // -------------------------------------------------------------------------------------
             case .age:
                 
                 #if DEBUG_PRINT_FUNCCALLS
                 print("handleRKIContent Age Start")
                 #endif
-
+                
                 
                 let ageData = try newJSONDecoder().decode(RKI_Age_RKIAgeDeviation.self, from: data)
                 
@@ -408,13 +420,141 @@ final class RKIDataDownload: NSObject {
                 #if DEBUG_PRINT_FUNCCALLS
                 print("handleRKIContent after decoding")
                 #endif
-
+                
                 
                 
                 #if DEBUG_PRINT_FUNCCALLS
                 print("handleRKIContent Age Done")
                 #endif
+                
+                
+            // -------------------------------------------------------------------------------------
+            case .countyShape:
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("handleRKIContent CountyShape")
+                #endif
+                
+                let countyShapeData = try newJSONDecoder().decode(RKI_CS_CountyShapeJSON.self, from: data)
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("handleRKIContent after decoding")
+                #endif
+                
+                if countyShapeData.features.isEmpty == false {
+                    
+                    // clean the old data
+                    GlobalUIData.unique.RKIMapCountyData.removeAll()
+                    
+                    // loop over data
+                    for dataIndex in 0 ..< countyShapeData.features.count {
+                        
+                        // get the next item as a reference for the current item
+                        let currentItem = countyShapeData.features[dataIndex]
+                        
+                        // get the main data
+                        let myID = currentItem.attributes.objectid
+                        let name = currentItem.attributes.gen
+                        let rings = currentItem.geometry.rings
+                        
+                        // check if we have something todo
+                        if rings.isEmpty == false {
+                            
+                             
+                            // prepare the min / max variables to find the bounding rectangle
+                            var minX: Double = Double.greatestFiniteMagnitude
+                            var maxX: Double = 0.0
+                            
+                            var minY: Double = Double.greatestFiniteMagnitude
+                            var maxY: Double = 0.0
+                            
+                            // prepare the data arrays
+                            var ringsResultX: [[Double]] = []
+                            var ringsResultY: [[Double]] = []
+                            
+                            // read and convert the shape data
+                            // loop over the first index of rings[[]]
+                            for outerIndex in 0 ..< rings.count {
+                                
+                                // append an empty array for the data
+                                ringsResultX.append([])
+                                ringsResultY.append([])
+                                
+                                // loop over the second index of rings[[]]
+                                for innerIndex in 0 ..< rings[outerIndex].count {
+                                    
+                                    // first step convert the GPS coordinate into a MKMapPoint
+                                    let currentMKPoint = MKMapPoint(CLLocationCoordinate2D(
+                                                                        latitude:  rings[outerIndex][innerIndex][1],
+                                                                        longitude: rings[outerIndex][innerIndex][0]))
+                                    
+                                    // store it into the array
+                                    ringsResultX[outerIndex].append(currentMKPoint.x)
+                                    ringsResultY[outerIndex].append(currentMKPoint.y)
+                                    
+                                    // calculate min and max values
+                                    minX = min(minX, currentMKPoint.x)
+                                    minY = min(minY, currentMKPoint.y)
+                                    maxX = max(maxX, currentMKPoint.x)
+                                    maxY = max(maxY, currentMKPoint.y)
+                                    
+                                } // inner
+                            } // outer
+                            
+                            // build the bounding rectangle
+                            let minPoint = MKMapPoint(x: minX, y: minY)
+                            let maxPoint = MKMapPoint(x: maxX, y: maxY)
+                            
+                            let mapRect = MKMapRect(x: minPoint.x,
+                                                    y: minPoint.y,
+                                                    width: maxPoint.x - minPoint.x,
+                                                    height: maxPoint.y - minPoint.y)
+                            
+                            // build the center coordinate
+                            let centerPoint = MKMapPoint(x: mapRect.midX, y: mapRect.midY)
+                            let centerCoordinate = centerPoint.coordinate
+                            
+                            GlobalUIData.unique.RKIMapCountyData.append(
+                                GlobalUIData.RKIMapDataStruct(
+                                    "\(myID)",
+                                    name,
+                                    ringsResultX,
+                                    ringsResultY,
+                                    centerLatitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude,
+                                    boundingRectOriginX: mapRect.origin.x, y: mapRect.origin.y,
+                                    boundingRectSizeWidth: mapRect.size.width, height: mapRect.size.height))
+                            
+                            
+                             
+                        } else {
+                            
+                            GlobalStorage.unique.storeLastError(
+                                errorText: "CoBaT.RKIDataDownload.handleRKIContent: county shape data: rings data of item [\(dataIndex)] (\"\(name)\") is empty, skip")
+                        }
+                    }
+                    
+                    GlobalStorage.unique.storeLastError(
+                        errorText: "CoBaT.RKIDataDownload.handleRKIContent: county shape data: finished data conversion, will call GlobalStorage.unique.saveNewCountyShapeData()")
+                    
+                    GlobalUIData.unique.saveNewCountyShapeData()
 
+                    
+                } else {
+                    
+                    GlobalStorage.unique.storeLastError(
+                        errorText: "CoBaT.RKIDataDownload.handleRKIContent: county shape data were empty, do nothing")
+                }
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("handleRKIContent County Shape done")
+                #endif
+
+                
+                
+            // -------------------------------------------------------------------------------------
+            case .stateShape:
+                break
+                
             }
             
         } catch let error as NSError {

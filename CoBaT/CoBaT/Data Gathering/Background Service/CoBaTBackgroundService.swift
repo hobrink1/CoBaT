@@ -70,7 +70,7 @@ final class CoBaTBackgroundService: NSObject {
             #endif
 
             // get fresh data
-            RKIDataDownload.unique.getRKIData()
+            RKIDataDownload.unique.getRKIData(from: 0, until: 1)
 
         } else {
             

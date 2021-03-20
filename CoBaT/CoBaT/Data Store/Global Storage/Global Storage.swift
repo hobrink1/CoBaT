@@ -20,6 +20,7 @@
 
 
 import Foundation
+import MapKit
 
 // -------------------------------------------------------------------------------------------------
 // MARK: -
@@ -99,7 +100,7 @@ final class GlobalStorage: NSObject {
     
     // enum of the different data types
     public enum RKI_DataTypeEnum {
-        case county, state, age
+        case county, state, age, countyShape, stateShape
     }
 
     /**
@@ -408,7 +409,9 @@ final class GlobalStorage: NSObject {
         DetailsRKIGraphic.unique.startGraphicSystem()
         
         // get fresh data
-        RKIDataDownload.unique.getRKIData()
+        RKIDataDownload.unique.getRKIData(from: 0, until: 1)
+        
+         
         //})
     }
     
@@ -448,6 +451,7 @@ final class GlobalStorage: NSObject {
         // call the local methode to handle all, just tell that this are county datas
         self.refresh_RKIData(self.RKIDataCounty, newRKICountyData)
     }
+    
     
     
     /**
@@ -741,7 +745,7 @@ final class GlobalStorage: NSObject {
     
     // the dictonary of stateIDs and state names
     public var RKIStateDic: [String : String] = [:]
-
+    
     // ---------------------------------------------------------------------------------------------
     // MARK: - RKI Data Handling
     // ---------------------------------------------------------------------------------------------
@@ -1096,6 +1100,10 @@ final class GlobalStorage: NSObject {
         #endif
         // })
     }
+    
+
+    
+    
     
     
     // ---------------------------------------------------------------------------------------------
@@ -1926,6 +1934,11 @@ final class GlobalStorage: NSObject {
             self.lastErrors.append(lastErrorStruct(errorText: errorText))
              
             self.saveRKIData(from: "storeLastError")
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("\(errorText)")
+            #endif
+
             
 //            // local notification to update UI
 //            DispatchQueue.main.async(execute: {

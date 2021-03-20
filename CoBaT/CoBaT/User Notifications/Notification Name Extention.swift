@@ -87,5 +87,13 @@ extension Notification.Name {
     static let CoBaT_Graph_NewGraphAvailable = Notification.Name(rawValue: "CoBaT.Graph.NewGraphAvailable")
     
 
+    // ---------------------------------------------------------------------------------------------
+    // MARK: -
+    // MARK: - Map
+    // ---------------------------------------------------------------------------------------------
+
+    // Event: the overlays are build and ready to use for display
+    static let CoBaT_Map_OverlaysBuild = Notification.Name(rawValue: "CoBaT.Map.OverlaysBuild")
+
 
 }
