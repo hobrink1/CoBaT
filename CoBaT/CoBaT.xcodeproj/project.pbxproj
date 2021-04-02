@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F207CA702571B35B0000F90B /* GlobalUIData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F207CA6F2571B35B0000F90B /* GlobalUIData.swift */; };
+		F21159432617B9210089962E /* CountyAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F21159422617B9210089962E /* CountyAnnotation.swift */; };
 		F21390ED25A4CD4100D8F336 /* FavoritesTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F21390EC25A4CD4100D8F336 /* FavoritesTabViewController.swift */; };
 		F21390F525A6014E00D8F336 /* iCloudService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F21390F425A6014E00D8F336 /* iCloudService.swift */; };
 		F213910625A63E5200D8F336 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F213910525A63E5200D8F336 /* CloudKit.framework */; };
@@ -78,6 +79,7 @@
 
 /* Begin PBXFileReference section */
 		F207CA6F2571B35B0000F90B /* GlobalUIData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalUIData.swift; sourceTree = "<group>"; };
+		F21159422617B9210089962E /* CountyAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountyAnnotation.swift; sourceTree = "<group>"; };
 		F21390EC25A4CD4100D8F336 /* FavoritesTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesTabViewController.swift; sourceTree = "<group>"; };
 		F21390F425A6014E00D8F336 /* iCloudService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudService.swift; sourceTree = "<group>"; };
 		F213910025A63E1E00D8F336 /* CoBaT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CoBaT.entitlements; sourceTree = "<group>"; };
@@ -300,8 +302,8 @@
 				F2ED109F256DB398003E2C41 /* Browse RKI Data */,
 				F24D37E2257397820036FEE3 /* Details RKI Data */,
 				F2DB339825778AC100C47972 /* Help Screen */,
-				F273D76B256E4D860002E15B /* CovidRating.swift */,
 				F2ECAED526023BD9009B08E5 /* Map View */,
+				F273D76B256E4D860002E15B /* CovidRating.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -372,6 +374,7 @@
 				F2ECAED026023B9F009B08E5 /* MapViewController.swift */,
 				F25AEF8E260502E0008FEBDC /* RKI Map Overlay.swift */,
 				F25AEF9326054513008FEBDC /* RKI Map Overlay Renderer.swift */,
+				F21159422617B9210089962E /* CountyAnnotation.swift */,
 			);
 			path = "Map View";
 			sourceTree = "<group>";
@@ -549,6 +552,7 @@
 				F25AEF9426054513008FEBDC /* RKI Map Overlay Renderer.swift in Sources */,
 				F2ED1090256D9855003E2C41 /* BrowseRKIViewController.swift in Sources */,
 				F2DB33BD25790CE500C47972 /* CoBaTBackgroundService.swift in Sources */,
+				F21159432617B9210089962E /* CountyAnnotation.swift in Sources */,
 				F2AD306C256D0AD900FDDE4B /* Global Storage.swift in Sources */,
 				F24D37E4257398110036FEE3 /* DetailsRKIViewController.swift in Sources */,
 				F2DB33712577817400C47972 /* MainViewController.swift in Sources */,

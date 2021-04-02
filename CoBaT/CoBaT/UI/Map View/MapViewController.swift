@@ -29,7 +29,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     private var enterBackgroundObserver: NSObjectProtocol?
     private var MapOverlayBuildObserver: NSObjectProtocol?
     
-    
     private var currentIndex : Int = 0
     private var maxIndex : Int = 0
     private var oldIndex : Int = 0
@@ -39,7 +38,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     private let ButtonBorderColorDimmendUI = UIColor.tertiaryLabel
     private let ButtonBorderColorDimmendCG = UIColor.tertiaryLabel.cgColor
 
-    
+    private let annotationIndentifier = "CoBaT.MapAnnotation"
     // ---------------------------------------------------------------------------------------------
     // MARK: - UI Outlets
     // ---------------------------------------------------------------------------------------------
@@ -213,22 +212,16 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     
     // ---------------------------------------------------------------------------------------------
-    // MARK: - UI Helpers
+    // MARK: - Map Overlays
     // ---------------------------------------------------------------------------------------------
     
     
     /**
      -----------------------------------------------------------------------------------------------
      
-     
+     loadOverlays()
      
      -----------------------------------------------------------------------------------------------
-     
-     - Parameters:
-     - :
-     
-     - Returns:
-     
      */
     private func loadOverlays() {
         
@@ -259,10 +252,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                     // show the message
                     self.NotYetLabel.isHidden = false
                     
+                    // check reason to display correct info to user
                     if GlobalUIData.unique.RKIMapOverlaysBuild == false {
+                        
                         self.NotYetLabel.text = NSLocalizedString("no-Overlay-data",
-                                                                  comment: "no County Data available")
+                                                                  comment: "no Overlay Data available")
                     } else {
+                        
                         self.NotYetLabel.text = NSLocalizedString("no-County-data",
                                                                   comment: "no County Data available")
                     }
@@ -277,16 +273,103 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                     GlobalUIData.unique.RKIMapOverlays[index].mapToServe = self.MyMapView
                 }
 
+                // add the overlays to the map
                 DispatchQueue.main.async(execute: {
+                    
                     self.MyMapView.addOverlays(GlobalUIData.unique.RKIMapOverlays,
                                                level: .aboveRoads)
                     
+                    self.MyMapView.addAnnotations(GlobalUIData.unique.RKIMapAnnotations)
                     
                     // refresh the map
                     self.updateMap()
                 })
             }
         })
+    }
+    
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     mapView(rendererFor: )
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        
+        // variable for return a renderer
+        let renderer: MKOverlayRenderer
+        
+        if overlay is RKIMapOverlay {
+            
+            // this is our renderer for the map
+            renderer = RKIMapOverlayRenderer(overlay: overlay)
+            
+        } else {
+            
+            // default
+            renderer = MKOverlayRenderer(overlay: overlay)
+        }
+        
+        return renderer
+    } // func
+
+    
+    // ---------------------------------------------------------------------------------------------
+    // MARK: - Map Annotations
+    // ---------------------------------------------------------------------------------------------
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        
+        // check if we have to deal with it...
+        if annotation.isMember(of: CountyAnnotation.self) {
+            
+            
+            // var for the view
+            var view : MKAnnotationView!
+            
+            // try to reuse a view for annotation
+            if let dequeuedView = self.MyMapView.dequeueReusableAnnotationView(
+                withIdentifier: self.annotationIndentifier) {
+                
+                // we could reuse one
+                dequeuedView.annotation = annotation
+                view = dequeuedView
+                
+            } else {
+                
+                // we created a new one
+                view = MKAnnotationView(annotation: annotation,
+                                        reuseIdentifier: self.annotationIndentifier)
+            }
+            
+            // parameterize the view
+            
+            // our image
+            view.image = #imageLiteral(resourceName: "PlacemarkEmpty") // PlacemarkEmpty
+            
+            view.frame.size.width = view.image!.size.width
+            view.frame.size.height = view.image!.size.height
+            
+            view.layer.borderColor = UIColor.black.cgColor
+            
+            // the callout
+            view.canShowCallout = true
+            view.isEnabled = true
+           
+            view.calloutOffset = CGPoint(x: 0, y: (view.frame.size.height * -1))
+            
+            let button = UIButton(type: .detailDisclosure)
+            //button.tintColor = WaysTintColorUIColor
+            view.rightCalloutAccessoryView = button
+            
+            return view
+            
+        }
+        
+        
+        return nil
+
     }
     
     
@@ -303,26 +386,16 @@ class MapViewController: UIViewController, MKMapViewDelegate {
      - Returns:
      
      */
-    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
-        // variable for return a renderer
-        let renderer: MKOverlayRenderer
         
-        if overlay is RKIMapOverlay {
-            
-            // this is our renderer for the map
-            renderer = RKI_Map_Overlay_Renderer(overlay: overlay)
-            
-        } else {
-            
-            // default
-            renderer = MKOverlayRenderer(overlay: overlay)
-        }
-        
-        return renderer
-    } // func
-
+    }
     
+    // ---------------------------------------------------------------------------------------------
+    // MARK: - UI Helpers
+    // ---------------------------------------------------------------------------------------------
+    
+
     /**
      -----------------------------------------------------------------------------------------------
      
@@ -332,134 +405,144 @@ class MapViewController: UIViewController, MKMapViewDelegate {
      */
     private func updateMap() {
         
-        // switch the spinner ON
-        DispatchQueue.main.async(execute: {
+        // check if we have something to show
+        if (GlobalUIData.unique.RKIMapOverlaysBuild == true) {
             
-            self.ActivityIndicator.isHidden = false
-            self.ActivityIndicator.startAnimating()
-            
-            self.CurrentDayLabel.text = ""
-        })
-        
-        // get the related data from the global storage in sync
-        GlobalStorageQueue.async(execute: {
-            
-            // get the current max index (could be changed because of new loaded data)
-            self.maxIndex = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty].count - 1
-
-            // check bounds
-            if self.currentIndex > self.maxIndex {
+            // switch the spinner ON
+            DispatchQueue.main.async(execute: {
                 
-                self.currentIndex = self.maxIndex
-            }
-            
-            if self.oldIndex > self.maxIndex {
+                self.ActivityIndicator.isHidden = false
+                self.ActivityIndicator.startAnimating()
                 
-                self.oldIndex = self.maxIndex
-            }
+                self.CurrentDayLabel.text = ""
+            })
             
-            // get the current data
-            let currentDayData = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty][self.currentIndex]
-            
-            // build the date string
-            
-            let myDate = shortSingleRelativeDateFormatter.string(
-                from: Date(timeIntervalSinceReferenceDate: currentDayData[0].timeStamp))
-            
-            let myWeekday = dateFormatterLocalizedWeekdayShort.string(
-                from: Date(timeIntervalSinceReferenceDate: currentDayData[0].timeStamp))
-            
-            
-            // build the string for the country incideces as part of the today label
-            var incidenceString: String = ""
-            if GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCountry].isEmpty == false {
-                if GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCountry].count > self.currentIndex {
-                    if GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCountry][self.currentIndex].isEmpty == false {
-                        
-                        let curremtIncidence = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCountry][self.currentIndex].first!.cases7DaysPer100K
-                        
-                        
-                        if let incidenceNumber = number1FractionFormatter.string(from: NSNumber(value: curremtIncidence)) {
-                             
-                            incidenceString = " - \(incidenceNumber)"
+            // get the related data from the global storage in sync
+            GlobalStorageQueue.async(execute: {
+                
+                // get the current max index (could be changed because of new loaded data)
+                self.maxIndex = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty].count - 1
+                
+                // check bounds
+                if self.currentIndex > self.maxIndex {
+                    
+                    self.currentIndex = self.maxIndex
+                }
+                
+                if self.oldIndex > self.maxIndex {
+                    
+                    self.oldIndex = self.maxIndex
+                }
+                
+                // get the current data
+                let currentDayData = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCounty][self.currentIndex]
+                
+                // build the date string
+                
+                let myDate = shortSingleRelativeDateFormatter.string(
+                    from: Date(timeIntervalSinceReferenceDate: currentDayData[0].timeStamp))
+                
+                let myWeekday = dateFormatterLocalizedWeekdayShort.string(
+                    from: Date(timeIntervalSinceReferenceDate: currentDayData[0].timeStamp))
+                
+                
+                // build the string for the country incideces as part of the today label
+                var incidenceString: String = ""
+                if GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCountry].isEmpty == false {
+                    if GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCountry].count > self.currentIndex {
+                        if GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCountry][self.currentIndex].isEmpty == false {
+                            
+                            let curremtIncidence = GlobalStorage.unique.RKIData[GlobalStorage.unique.RKIDataCountry][self.currentIndex].first!.cases7DaysPer100K
+                            
+                            
+                            if let incidenceNumber = number1FractionFormatter.string(from: NSNumber(value: curremtIncidence)) {
+                                
+                                incidenceString = " - \(incidenceNumber)"
+                            }
                         }
                     }
                 }
-            }
-
-            // build the final label
-            let dateString = "\(myDate) (\(myWeekday))\(incidenceString)"
-            
-            // update IBOutlets
-            DispatchQueue.main.async(execute: {
                 
-                // so we have something to show
-                self.NotYetLabel.isHidden = true
+                // build the final label
+                let dateString = "\(myDate) (\(myWeekday))\(incidenceString)"
                 
-                // show and activate the buttons
-                self.BackwardButton.isHidden = false
-                self.BackwardButton.isEnabled = true
-                
-                self.ForwardButton.isHidden = false
-                self.ForwardButton.isEnabled = true
-                
-                self.TodayButton.isHidden = false
-                self.TodayButton.isEnabled = true
-
-                if (self.currentIndex == 0) {
+                // update IBOutlets
+                DispatchQueue.main.async(execute: {
                     
-                    self.ForwardButton.layer.borderColor = self.ButtonBorderColorDimmendCG
-                    self.ForwardButton.tintColor = self.ButtonBorderColorDimmendUI
+                    // so we have something to show
+                    self.NotYetLabel.isHidden = true
                     
-                    if self.currentIndex == self.maxIndex {
-                        
-                        self.BackwardButton.layer.borderColor = self.ButtonBorderColorDimmendCG
-                        self.BackwardButton.tintColor = self.ButtonBorderColorDimmendUI
-
-                    } else {
-                        
-                        self.BackwardButton.layer.borderColor = self.ButtonBorderColorCG
-                        self.BackwardButton.tintColor = self.ButtonBorderColorUI
-                    }
+                    // show and activate the buttons
+                    self.BackwardButton.isHidden = false
+                    self.BackwardButton.isEnabled = true
                     
-                } else {
-                    
+                    self.ForwardButton.isHidden = false
                     self.ForwardButton.isEnabled = true
-                    self.ForwardButton.layer.borderColor = self.ButtonBorderColorCG
                     
-                    if self.currentIndex == self.maxIndex {
+                    self.TodayButton.isHidden = false
+                    self.TodayButton.isEnabled = true
+                    
+                    if (self.currentIndex == 0) {
                         
-                        self.BackwardButton.layer.borderColor = self.ButtonBorderColorDimmendCG
-                        self.BackwardButton.tintColor = self.ButtonBorderColorDimmendUI
-
+                        self.ForwardButton.layer.borderColor = self.ButtonBorderColorDimmendCG
+                        self.ForwardButton.tintColor = self.ButtonBorderColorDimmendUI
+                        
+                        if self.currentIndex == self.maxIndex {
+                            
+                            self.BackwardButton.layer.borderColor = self.ButtonBorderColorDimmendCG
+                            self.BackwardButton.tintColor = self.ButtonBorderColorDimmendUI
+                            
+                        } else {
+                            
+                            self.BackwardButton.layer.borderColor = self.ButtonBorderColorCG
+                            self.BackwardButton.tintColor = self.ButtonBorderColorUI
+                        }
+                        
                     } else {
                         
-                        self.BackwardButton.layer.borderColor = self.ButtonBorderColorCG
-                        self.BackwardButton.tintColor = self.ButtonBorderColorUI
+                        self.ForwardButton.isEnabled = true
+                        self.ForwardButton.layer.borderColor = self.ButtonBorderColorCG
+                        
+                        if self.currentIndex == self.maxIndex {
+                            
+                            self.BackwardButton.layer.borderColor = self.ButtonBorderColorDimmendCG
+                            self.BackwardButton.tintColor = self.ButtonBorderColorDimmendUI
+                            
+                        } else {
+                            
+                            self.BackwardButton.layer.borderColor = self.ButtonBorderColorCG
+                            self.BackwardButton.tintColor = self.ButtonBorderColorUI
+                        }
                     }
+                    
+                    // and show the label
+                    self.CurrentDayLabel.isHidden = false
+                    self.CurrentDayLabel.text = dateString
+                    
+                }) // main
+                
+                // set the newDaycode (will force a redraw)
+                for index in 0 ..< GlobalUIData.unique.RKIMapOverlays.count {
+                    GlobalUIData.unique.RKIMapOverlays[index].changeDayIndex(newIndex: self.currentIndex)
                 }
-                                
-                // and show the label
-                self.CurrentDayLabel.isHidden = false
-                self.CurrentDayLabel.text = dateString
                 
-            }) // main
-            
-            // set the newDaycode (will force a redraw)
-            for index in 0 ..< GlobalUIData.unique.RKIMapOverlays.count {
-                GlobalUIData.unique.RKIMapOverlays[index].changeDayIndex(newIndex: self.currentIndex)
-            }
-            
-            // switch spinner OFF
-            DispatchQueue.main.async(execute:  {
+                // switch spinner OFF
+                DispatchQueue.main.async(execute:  {
+                    
+                    // switch the spinner OFF
+                    self.ActivityIndicator.stopAnimating()
+                    self.ActivityIndicator.isHidden = true
+                    
+                }) // main
                 
-                // switch the spinner OFF
-                self.ActivityIndicator.stopAnimating()
-                self.ActivityIndicator.isHidden = true
-                
-            }) // main
+            }) // GlobalStorageQueue
             
-        }) // GlobalStorageQueue
+        } else {
+            
+            #if DEBUG_PRINT_FUNCCALLS
+            print("MapViewController.updateMap(): RKIMapOverlaysBuild == false, do nothing")
+            #endif
+        }
     }
 
     

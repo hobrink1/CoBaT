@@ -298,8 +298,10 @@ specific public places form 21:00";
  **************************************************************************************************/
 
 /* no County Data available */
-"no-County-data" = "no data available (yet)";
+"no-County-data" = "no RKI data available (yet)";
 
+/* no Overlay Data available */
+"no-Overlay-data" = "no area data available (yet)";
 
 
 

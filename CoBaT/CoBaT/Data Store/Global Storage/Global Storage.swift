@@ -85,8 +85,8 @@ final class GlobalStorage: NSObject {
      
      -----------------------------------------------------------------------------------------------
      */
-    private var didRecieveStateData: Bool = false
-    private var didRecieveCountyData: Bool = false
+    public var didRecieveStateData: Bool = false
+    public var didRecieveCountyData: Bool = false
 
 
 
@@ -100,7 +100,7 @@ final class GlobalStorage: NSObject {
     
     // enum of the different data types
     public enum RKI_DataTypeEnum {
-        case county, state, age, countyShape, stateShape
+        case county, state, age, countyShape, stateBorder
     }
 
     /**

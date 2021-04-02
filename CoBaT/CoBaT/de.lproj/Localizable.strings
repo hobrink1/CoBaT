@@ -296,7 +296,11 @@ bestimmte öffentliche Plätze ab 21:00";
  **************************************************************************************************/
 
 /* no County Data available */
-"no-County-data" = "(noch) keine Daten verfügbar";
+"no-County-data" = "(noch) keine RKI Daten verfügbar";
+
+/* no Overlay Data available */
+"no-Overlay-data" = "(noch) keine Karten-Daten verfügbar";
+
 
 
 /**************************************************************************************************

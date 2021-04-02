@@ -99,7 +99,21 @@ final class MainViewController: UIViewController {
             
             let myDate: Date = Date(timeIntervalSinceReferenceDate: GlobalStorage.unique.RKIDataTimeStamps[0][0])
         
-            self.ValueRKIAsOf.text = longSingleRelativeDateTimeFormatter.string(from: myDate)
+            // state and county data do arravie to different times. To show that only one part is recieved,
+            // we show brakets araound the text
+            // so, check if both parts are already recieved
+            if (GlobalStorage.unique.didRecieveStateData == true)
+                && (GlobalStorage.unique.didRecieveCountyData == true) {
+                
+                // yes, both parts are available, so display without brakets
+                self.ValueRKIAsOf.text = longSingleRelativeDateTimeFormatter.string(from: myDate)
+                
+            } else {
+                
+                // no, one part is missing, so show brakets
+                self.ValueRKIAsOf.text = "(" + longSingleRelativeDateTimeFormatter.string(from: myDate) + ")"
+
+            }
             
          } else {
             

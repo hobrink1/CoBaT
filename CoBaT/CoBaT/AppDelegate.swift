@@ -9,7 +9,7 @@ import UIKit
 import Foundation
 import BackgroundTasks
 
-let VersionLabel: String = "CoBaT V2.2.0.2"
+let VersionLabel: String = "CoBaT V2.2.0.4"
 
 
 // simple variable to detect if we are in background or not

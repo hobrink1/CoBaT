@@ -47,7 +47,7 @@ final class RKIDataDownload: NSObject {
         
         RKI_DataTabStruct(.countyShape, "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID,Shape__Area,Shape__Length,GEN&outSR=4326&f=json"),
         
-        RKI_DataTabStruct(.stateShape, "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/Coronaf%C3%A4lle_in_den_Bundesl%C3%A4ndern/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID_1,Shape__Area,Shape__Length,LAN_ew_GEN&outSR=4326&f=json")
+        RKI_DataTabStruct(.stateBorder, "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/Coronaf%C3%A4lle_in_den_Bundesl%C3%A4ndern/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID_1,Shape__Area,Shape__Length,LAN_ew_GEN&outSR=4326&f=json")
 
        //,
         
@@ -523,8 +523,6 @@ final class RKIDataDownload: NSObject {
                                     centerLatitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude,
                                     boundingRectOriginX: mapRect.origin.x, y: mapRect.origin.y,
                                     boundingRectSizeWidth: mapRect.size.width, height: mapRect.size.height))
-                            
-                            
                              
                         } else {
                             
@@ -537,7 +535,6 @@ final class RKIDataDownload: NSObject {
                         errorText: "CoBaT.RKIDataDownload.handleRKIContent: county shape data: finished data conversion, will call GlobalStorage.unique.saveNewCountyShapeData()")
                     
                     GlobalUIData.unique.saveNewCountyShapeData()
-
                     
                 } else {
                     
@@ -552,10 +549,123 @@ final class RKIDataDownload: NSObject {
                 
                 
             // -------------------------------------------------------------------------------------
-            case .stateShape:
-                break
+            case .stateBorder:
                 
-            }
+                #if DEBUG_PRINT_FUNCCALLS
+                print("handleRKIContent StateBorder")
+                #endif
+                
+                let stateBorderData = try newJSONDecoder().decode(RKI_SS_StateShapeJSON.self, from: data)
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("handleRKIContent after decoding")
+                #endif
+                
+                if stateBorderData.features.isEmpty == false {
+                    
+                    // clean the old data
+                    GlobalUIData.unique.RKIMapCountyData.removeAll()
+                    
+                    // loop over data
+                    for dataIndex in 0 ..< stateBorderData.features.count {
+                        
+                        // get the next item as a reference for the current item
+                        let currentItem = stateBorderData.features[dataIndex]
+                        
+                        // get the main data
+                        let myID = currentItem.attributes.objectid1
+                        let name = currentItem.attributes.lanEwGEN
+                        let rings = currentItem.geometry.rings
+                        
+                        // check if we have something todo
+                        if rings.isEmpty == false {
+                            
+                            // prepare the min / max variables to find the bounding rectangle
+                            var minX: Double = Double.greatestFiniteMagnitude
+                            var maxX: Double = 0.0
+                            
+                            var minY: Double = Double.greatestFiniteMagnitude
+                            var maxY: Double = 0.0
+                            
+                            // prepare the data arrays
+                            var ringsResultX: [[Double]] = []
+                            var ringsResultY: [[Double]] = []
+                            
+                            // read and convert the shape data
+                            // loop over the first index of rings[[]]
+                            for outerIndex in 0 ..< rings.count {
+                                
+                                // append an empty array for the data
+                                ringsResultX.append([])
+                                ringsResultY.append([])
+                                
+                                // loop over the second index of rings[[]]
+                                for innerIndex in 0 ..< rings[outerIndex].count {
+                                    
+                                    // first step convert the GPS coordinate into a MKMapPoint
+                                    let currentMKPoint = MKMapPoint(CLLocationCoordinate2D(
+                                                                        latitude:  rings[outerIndex][innerIndex][1],
+                                                                        longitude: rings[outerIndex][innerIndex][0]))
+                                    
+                                    // store it into the array
+                                    ringsResultX[outerIndex].append(currentMKPoint.x)
+                                    ringsResultY[outerIndex].append(currentMKPoint.y)
+                                    
+                                    // calculate min and max values
+                                    minX = min(minX, currentMKPoint.x)
+                                    minY = min(minY, currentMKPoint.y)
+                                    maxX = max(maxX, currentMKPoint.x)
+                                    maxY = max(maxY, currentMKPoint.y)
+                                    
+                                } // inner
+                            } // outer
+                            
+                            // build the bounding rectangle
+                            let minPoint = MKMapPoint(x: minX, y: minY)
+                            let maxPoint = MKMapPoint(x: maxX, y: maxY)
+                            
+                            let mapRect = MKMapRect(x: minPoint.x,
+                                                    y: minPoint.y,
+                                                    width: maxPoint.x - minPoint.x,
+                                                    height: maxPoint.y - minPoint.y)
+                            
+                            // build the center coordinate
+                            let centerPoint = MKMapPoint(x: mapRect.midX, y: mapRect.midY)
+                            let centerCoordinate = centerPoint.coordinate
+                            
+                            GlobalUIData.unique.RKIMapStateData.append(
+                                GlobalUIData.RKIMapDataStruct(
+                                    "\(myID)",
+                                    name,
+                                    ringsResultX,
+                                    ringsResultY,
+                                    centerLatitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude,
+                                    boundingRectOriginX: mapRect.origin.x, y: mapRect.origin.y,
+                                    boundingRectSizeWidth: mapRect.size.width, height: mapRect.size.height))
+                             
+                        } else {
+                            
+                            GlobalStorage.unique.storeLastError(
+                                errorText: "CoBaT.RKIDataDownload.handleRKIContent: state border data: rings data of item [\(dataIndex)] (\"\(name)\") is empty, skip")
+                        }
+                    }
+                    
+                    GlobalStorage.unique.storeLastError(
+                        errorText: "CoBaT.RKIDataDownload.handleRKIContent: state border data: finished data conversion, will call GlobalStorage.unique.saveNewCountyShapeData()")
+                    
+                    GlobalUIData.unique.saveNewStateBorderData()
+                    
+                } else {
+                    
+                    GlobalStorage.unique.storeLastError(
+                        errorText: "CoBaT.RKIDataDownload.handleRKIContent: state border data were empty, do nothing")
+                }
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("handleRKIContent state border done")
+                #endif
+                
+            } // switch
             
         } catch let error as NSError {
             

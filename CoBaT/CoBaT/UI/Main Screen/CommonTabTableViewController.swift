@@ -48,18 +48,28 @@ final class CommonTabTableViewController: UITableViewController {
         [
             regulationsMatrixStruct(UIImage(named: "Empty")!, "no covid, no regulations"),
         ],
-        
+
         // 1: green
-        [
-            regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
-            regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
-            regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air Room"),
-            regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask in public"),
-            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse max 100"),
-            regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor max 200"),
-        ],
+         [
+             regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
+             regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
+             regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air Room"),
+             regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask in public"),
+             regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse max 100"),
+             regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor max 200"),
+         ],
         
-        // 2: Yellow
+        // 2: green
+         [
+             regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
+             regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
+             regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air Room"),
+             regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask in public"),
+             regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse max 100"),
+             regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor max 200"),
+         ],
+
+        // 3: Yellow
         [
             regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
             regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
@@ -70,7 +80,7 @@ final class CommonTabTableViewController: UITableViewController {
             regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor max 200"),
         ],
         
-        // 3: Red
+        // 4: Red
         [
             regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
             regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
@@ -82,7 +92,7 @@ final class CommonTabTableViewController: UITableViewController {
             
         ],
         
-        // 4: dark red
+        // 5: dark red
         [
             regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
             regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
@@ -94,7 +104,18 @@ final class CommonTabTableViewController: UITableViewController {
             regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor max 50"),
         ],
         
-        // 5: purple
+        // 6: purple
+        [
+            regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
+            regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),
+            regulationsMatrixStruct(UIImage(named: "Air Room")!,    "Air Room"),
+            regulationsMatrixStruct(UIImage(named: "Mask")!,        "wear mask in schools"),
+            regulationsMatrixStruct(UIImage(named: "Alkohol")!,     "Alkohol 9 PM"),
+            regulationsMatrixStruct(UIImage(named: "Inhouse")!,     "Inhouse max 5"),
+            regulationsMatrixStruct(UIImage(named: "Outhouse")!,    "Outdoor max 50"),
+        ],
+        
+        // 7: purple
         [
             regulationsMatrixStruct(UIImage(named: "Distance")!,    "keep Distance"),
             regulationsMatrixStruct(UIImage(named: "Wash")!,        "Wash often"),

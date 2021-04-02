@@ -30,14 +30,14 @@ final class GlobalUIData: NSObject {
     private let mapDataDirectory : String = "mapData"
     
     // this are the current filenames
-    private let mapDataCurrentFilenameCountyShapes: String = "RKICountyShapesV2"
-    private let mapDataCurrentFilenameStateShapes: String =  "RKIStateShapesV1"
+    private let mapDataCurrentFilenameCountyShapes: String = "RKICountyShapesV4"
+    private let mapDataCurrentFilenameStateBorders: String =  "RKIStateShapesV1"
 
     // in this array we store the old filenames. Used in self.checkMapFiles().
     // All files in that array have an outdated structure or outdated data. So they will be removed.
     // by this we can do some kind of version management, but there is no data migratiuon, we simply
     // reload the data from RKI website
-    private let mapDataOldFilenamesToDelete: [String] = ["RKICountyShapesV1", "RKIStateShapes"]
+    private let mapDataOldFilenamesToDelete: [String] = ["RKICountyShapesV1", "RKICountyShapesV2", "RKICountyShapesV3", "RKIStateShapes"]
 
     
     // The DetailsRKITableViewController uses this data to build local data out of the global Storage
@@ -152,7 +152,6 @@ final class GlobalUIData: NSObject {
         
         let boundingRectSizeWidth: Double // width of size of the bounding rectangle
         let boundingRectSizeHeight: Double // hight of size of the bounding rectangle
-
         
         
         init(_ myID: String,
@@ -167,15 +166,15 @@ final class GlobalUIData: NSObject {
              height boundingRectSizeHight: Double
              ) {
             
-            self.myID                   = myID
-            self.name                   = name
-            self.ringsX                 = ringsX
-            self.ringsY                 = ringsY
-            self.centerLatitude         = centerLatitude
-            self.centerLongitude        = centerLongitude
-            self.boundingRectOriginX    = boundingRectOriginX
-            self.boundingRectOriginY    = boundingRectOriginY
-            self.boundingRectSizeWidth  = boundingRectSizeWidth
+            self.myID                    = myID
+            self.name                    = name
+            self.ringsX                  = ringsX
+            self.ringsY                  = ringsY
+            self.centerLatitude          = centerLatitude
+            self.centerLongitude         = centerLongitude
+            self.boundingRectOriginX     = boundingRectOriginX
+            self.boundingRectOriginY     = boundingRectOriginY
+            self.boundingRectSizeWidth   = boundingRectSizeWidth
             self.boundingRectSizeHeight  = boundingRectSizeHight
 
         }
@@ -187,10 +186,16 @@ final class GlobalUIData: NSObject {
     public var RKIMapCountyData: [RKIMapDataStruct] = []
     public var RKIMapStateData: [RKIMapDataStruct] = []
     
-
     // this is the array of all overlays. The overlays will be generated once. The map reloads them
     // in viewDidLoad()
     public var RKIMapOverlays: [RKIMapOverlay] = []
+    
+    // we store the area data in separate arrays to keep the overlay data small
+    public var RKIMapAreaAndBorderData: [[[MKMapPoint]]] = []
+
+    // this is the array of all annotations. Like the overlays the annotations will be generated onse.
+    // The map reloads them in viewDidLoad()
+    public var RKIMapAnnotations: [CountyAnnotation] = []
     
     // a flag used in MapViewController to show "data not ready"
     public var RKIMapOverlaysBuild: Bool = false
@@ -198,15 +203,13 @@ final class GlobalUIData: NSObject {
     /**
      -----------------------------------------------------------------------------------------------
      
+     First step in the chain to enable the map
      
+     This methode checks the file directory structure and checks if the map data are already stored in files. If so load them, if not, try to get them from the RKI JSON websites.
+     
+     Both data types (countyArea and state borders will be handled. But county borders first, as they are more important.
      
      -----------------------------------------------------------------------------------------------
-     
-     - Parameters:
-     - :
-     
-     - Returns:
-     
      */
     private func handleRKIShapeData() {
         
@@ -216,6 +219,10 @@ final class GlobalUIData: NSObject {
             // Instance of a private filemanager
             let myFileManager = FileManager.default
             
+            
+            // ---------------------------------------------------------------------------------
+            // handle .applicationSupportDirectory directory
+
             // get the application support directory
             if let applicationSupportDirectoryURL = myFileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
                 
@@ -247,6 +254,10 @@ final class GlobalUIData: NSObject {
                     #endif
                 }
                 
+                
+                // ---------------------------------------------------------------------------------
+                // handle map directory
+
                 // build the path of the map data directory
                 let mapDataDirectoryPath = applicationSupportDirectoryPath + "/" + self.mapDataDirectory
                 
@@ -277,6 +288,10 @@ final class GlobalUIData: NSObject {
                     #endif
                 }
                 
+                
+                // ---------------------------------------------------------------------------------
+                // handle obsolete files
+
                 // if we got here, we have a valid map data directory
                 
                 // check if we have outdated files in that directory.
@@ -298,6 +313,10 @@ final class GlobalUIData: NSObject {
                         }
                     }
                 }
+                
+                
+                // ---------------------------------------------------------------------------------
+                // handle county data
                 
                 // now look for the current file
                 let mapDataCountyShapePath = mapDataDirectoryPath + "/" + self.mapDataCurrentFilenameCountyShapes
@@ -332,35 +351,74 @@ final class GlobalUIData: NSObject {
                     
                 } else {
                     
-                    GlobalStorage.unique.storeLastError(errorText: "handleRKIShapeData(): no local data file, try to get the data from RKI, call getRKIData(from: 2, until: 2)")
-
+                    GlobalStorage.unique.storeLastError(errorText: "handleRKIShapeData(): no local county data file, try to get the data from RKI, call getRKIData(from: 2, until: 2)")
                     
                     // get fresh data
                     RKIDataDownload.unique.getRKIData(from: 2, until: 2)
-                    
                 }
+                
+                
+                // ---------------------------------------------------------------------------------
+                // handle state data
+                
+                // now look for the current file
+                let mapDataStateShapePath = mapDataDirectoryPath + "/" + self.mapDataCurrentFilenameStateBorders
+                
+                if myFileManager.fileExists(atPath: mapDataStateShapePath) == true {
+                    
+                    // read the file
+                    do {
+                        
+                        #if DEBUG_PRINT_FUNCCALLS
+                        let start = CFAbsoluteTimeGetCurrent()
+                        #endif
+                        
+                        let fileURL = URL(fileURLWithPath: mapDataStateShapePath)
+                        let myData = try Data(contentsOf: fileURL)
+                        self.RKIMapStateData = try JSONDecoder().decode([RKIMapDataStruct].self,
+                                                                 from: myData)
+                        
+                        #if DEBUG_PRINT_FUNCCALLS
+                        let end = CFAbsoluteTimeGetCurrent()
+                        let duration = (end - start)
+                        print("handleRKIShapeData(): done in \(duration) sec! Will call self.buildCountyShapeOverlays()")
+                        #endif
+                        
+                        self.buildStateBorderOverlays()
+                        
+                    } catch let error as NSError {
+                        
+                        // encode did fail, log the message
+                        GlobalStorage.unique.storeLastError(errorText: "handleRKIShapeData(): Error: JSON dencoder could not dencode RKIMapCountyData or read from file failed: error: \"\(error.description)\"")
+                    }
+                    
+                } else {
+                    
+                    GlobalStorage.unique.storeLastError(errorText: "handleRKIShapeData(): no local state data file, try to get the data from RKI, call getRKIData(from: 3, until: 3)")
+                    
+                    // get fresh data
+                    RKIDataDownload.unique.getRKIData(from: 3, until: 3)
+                }
+                
+                
+ 
+                
+                
                 
             } else {
                 
                 // no app support directory
                 GlobalStorage.unique.storeLastError(errorText: "handleRKIShapeData(): ERROR: did not get a valid diretory for \".applicationSupportDirectory\", do nothing")
             }
-            
         })
     }
     
     /**
      -----------------------------------------------------------------------------------------------
      
-     
+     Builds the shape overlays for the counties
      
      -----------------------------------------------------------------------------------------------
-     
-     - Parameters:
-     - :
-     
-     - Returns:
-     
      */
     private func buildCountyShapeOverlays() {
         
@@ -373,9 +431,9 @@ final class GlobalUIData: NSObject {
                 print("buildCountyShapeOverlays(): just started, RKIMapCountyData has \(self.RKIMapCountyData.count) elements")
                 #endif
                 
-                // remove all old data
-                self.RKIMapOverlays.removeAll()
-                
+//                // remove all old data
+//                self.RKIMapOverlays.removeAll()
+//                self.RKIMapAreaAndBorderData.removeAll()
                 
                 // shortcut for the index of the county data
                 let typeIndex = GlobalStorage.unique.RKIDataCounty
@@ -387,8 +445,12 @@ final class GlobalUIData: NSObject {
                     let item = self.RKIMapCountyData[index]
                     let myID = item.myID
                     
+                    // in any case append an empty array, to keep index areaDataIndex in sync
+                    self.RKIMapAreaAndBorderData.append([])
+                    let indexInAABData = self.RKIMapAreaAndBorderData.count - 1
+
                     // check if we have a corresponding county item
-                    if let _ = GlobalStorage.unique.RKIData[typeIndex][0].firstIndex(where: { $0.myID == myID } ) {
+                    if let indexInRKIData = GlobalStorage.unique.RKIData[typeIndex][0].firstIndex(where: { $0.myID == myID } ) {
                         // we found a valid record, so we can build the overlay
                         
                         // build the needed values
@@ -404,13 +466,49 @@ final class GlobalUIData: NSObject {
                         let newOverlay = RKIMapOverlay(type: .countyArea,
                                                        myID: item.myID,
                                                        dayIndex: 0,
+                                                       areaDataIndex: indexInAABData,
                                                        map: nil,
                                                        center: centerCoordinate,
                                                        rect: boundingRectangle)
                         
+                        // convert the raw area data in ringsX / ringsY in MKMapPoints and store them in RKIMapAreaAndBorderData
+                        
+                        // now loop ofer ringsX/Y and build the mapPoints
+                        if item.ringsX.isEmpty == false {
+                            
+                            // loop over each ring
+                            for outerLoop in 0 ..< item.ringsX.count {
+                                
+                                // prepare an empty array
+                                self.RKIMapAreaAndBorderData[indexInAABData].append([])
+
+                                // check bounds
+                                if item.ringsX[outerLoop].isEmpty == false {
+                                    
+                                    // loop over ring elements
+                                    for innerLoop in 0 ..< item.ringsX[outerLoop].count {
+                                        
+                                        let newMKMapPoint = MKMapPoint(x: item.ringsX[outerLoop][innerLoop],
+                                                                       y: item.ringsY[outerLoop][innerLoop])
+                                        
+                                        self.RKIMapAreaAndBorderData[indexInAABData][outerLoop].append(newMKMapPoint)
+                                    }
+                                }
+                            }
+                        }
+                        
                         // append to the array of overlays
                         self.RKIMapOverlays.append(newOverlay)
                         
+                        let newAnnotation = CountyAnnotation(
+                            stateID: item.myID,
+                            title: item.name,
+                            subTitle: GlobalStorage.unique.RKIData[typeIndex][0][indexInRKIData].kindOf,
+                            coordinate: centerCoordinate)
+                        
+                        self.RKIMapAnnotations.append(newAnnotation)
+                        
+
                     } // found county
                 } // loop
                 
@@ -434,6 +532,121 @@ final class GlobalUIData: NSObject {
             }
         })
     }
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     Builds the shape overlays for the states
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    private func buildStateBorderOverlays() {
+        
+        GlobalStorageQueue.async(flags: .barrier, execute: {
+            
+            // check if we really have to do something
+            if self.RKIMapStateData.isEmpty == false {
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("buildStateBorderOverlays(): just started, RKIMapCountyData has \(self.RKIMapStateData.count) elements")
+                #endif
+                
+//                // remove all old data
+//                self.RKIMapOverlays.removeAll()
+//                self.RKIMapAreaAndBorderData.removeAll()
+                
+                // shortcut for the index of the county data
+                let typeIndex = GlobalStorage.unique.RKIDataState
+                
+                // loop over the shape array
+                for index in 0 ..< self.RKIMapStateData.count {
+                    
+                    // get a shortcut for the current element of RKIMapCountyData[]
+                    let item = self.RKIMapStateData[index]
+                    let myID = item.myID
+                    
+                    // in any case append an empty array, to keep index areaDataIndex in sync
+                    self.RKIMapAreaAndBorderData.append([])
+                    let indexInAABData = self.RKIMapAreaAndBorderData.count - 1
+
+                    // check if we have a corresponding county item
+                    if let _ = GlobalStorage.unique.RKIData[typeIndex][0].firstIndex(where: { $0.myID == myID } ) {
+                        // we found a valid record, so we can build the overlay
+                        
+                        // build the needed values
+                        let centerCoordinate = CLLocationCoordinate2D(latitude:  item.centerLatitude,
+                                                                      longitude: item.centerLongitude)
+                        
+                        let boundingRectangle = MKMapRect(x:      item.boundingRectOriginX,
+                                                          y:      item.boundingRectOriginY,
+                                                          width:  item.boundingRectSizeWidth,
+                                                          height: item.boundingRectSizeHeight)
+                        
+                        // build the overlay
+                        let newOverlay = RKIMapOverlay(type: .stateBorder,
+                                                       myID: item.myID,
+                                                       dayIndex: 0,
+                                                       areaDataIndex: indexInAABData,
+                                                       map: nil,
+                                                       center: centerCoordinate,
+                                                       rect: boundingRectangle)
+                        
+                        // convert the raw area data in ringsX / ringsY in MKMapPoints and store them in RKIMapAreaAndBorderData
+                        
+                        // now loop ofer ringsX/Y and build the mapPoints
+                        if item.ringsX.isEmpty == false {
+                            
+                            // loop over each ring
+                            for outerLoop in 0 ..< item.ringsX.count {
+                                
+                                // prepare an empty array
+                                self.RKIMapAreaAndBorderData[indexInAABData].append([])
+
+                                // check bounds
+                                if item.ringsX[outerLoop].isEmpty == false {
+                                    
+                                    // loop over ring elements
+                                    for innerLoop in 0 ..< item.ringsX[outerLoop].count {
+                                        
+                                        let newMKMapPoint = MKMapPoint(x: item.ringsX[outerLoop][innerLoop],
+                                                                       y: item.ringsY[outerLoop][innerLoop])
+                                        
+                                        self.RKIMapAreaAndBorderData[indexInAABData][outerLoop].append(newMKMapPoint)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        
+                        // append to the array of overlays
+                        self.RKIMapOverlays.append(newOverlay)
+                        
+                        
+                    } // found county
+                } // loop
+                
+                // set the flag
+                self.RKIMapOverlaysBuild = true
+                
+                // the map might have to be redrawn, so we send a notification
+                DispatchQueue.main.async(execute: {
+                    NotificationCenter.default.post(Notification(name: .CoBaT_Map_OverlaysBuild))
+                })
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("buildStateBorderOverlays just posted .CoBaT_Map_OverlaysBuild")
+                #endif
+                
+            } else {
+                
+                #if DEBUG_PRINT_FUNCCALLS
+                print("buildStateBorderOverlays(): just started,RKIMapCountyData.isEmpty == false, do nothing")
+                #endif
+            }
+        })
+    }
+    
+    
     
     // ---------------------------------------------------------------------------------------------
     // MARK: - RKI Data API
@@ -815,6 +1028,126 @@ final class GlobalUIData: NSObject {
     }
     
 
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     save new data of state border for the map to the local file and call
+     
+     -----------------------------------------------------------------------------------------------
+     */
+    public func saveNewStateBorderData() {
+        
+        GlobalStorageQueue.async(flags: .barrier, execute: {
+            
+            // Instance of a private filemanager
+            let myFileManager = FileManager.default
+            
+            // get the application support directory
+            if let applicationSupportDirectoryURL = myFileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+                
+                let applicationSupportDirectoryPath:String = applicationSupportDirectoryURL.path
+                //myFileManager.changeCurrentDirectoryPath(homeDirectoryPath)
+                
+                // check if we have to create the directory
+                if myFileManager.fileExists(atPath: applicationSupportDirectoryPath) == false {
+                    
+                    // does not exist, so create it
+                    do {
+                        try myFileManager.createDirectory(atPath: applicationSupportDirectoryPath,
+                                                          withIntermediateDirectories: false,
+                                                          attributes: nil)
+                        
+                        GlobalStorage.unique.storeLastError(errorText: "saveNewStateBorderData(): just created .applicationSupportDirectory")
+                        
+                    } catch let error  {
+                        
+                        GlobalStorage.unique.storeLastError(errorText: "saveNewStateBorderData(): creation of .applicationSupportDirectory directory failed, error: \"\(error)\", return")
+                        
+                        return
+                    }
+                    
+                } else {
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print("saveNewStateBorderData(): .applicationSupportDirectory exists")
+                    #endif
+                }
+                
+                // build the path of the placemark directory
+                let mapDataDirectoryPath = applicationSupportDirectoryPath + "/" + self.mapDataDirectory
+                
+                // check if we have to create the directory
+                if myFileManager.fileExists(atPath: mapDataDirectoryPath) == false {
+                    
+                    // does not exist, so create it
+                    do {
+                        try myFileManager.createDirectory(atPath: mapDataDirectoryPath,
+                                                          withIntermediateDirectories: false,
+                                                          attributes: nil)
+                        
+                        #if DEBUG_PRINT_FUNCCALLS
+                        print("saveNewStateBorderData(): just created mapData directory")
+                        #endif
+                        
+                    } catch let error  {
+                        
+                        GlobalStorage.unique.storeLastError(errorText: "saveNewStateBorderData(): creation of mapData directory failed, error: \"\(error)\"")
+                    }
+                    
+                } else {
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print("saveNewStateBorderData(): mapData directory exists")
+                    #endif
+                }
+                
+                // check if an old file exist, if so, remove it
+                let mapDataStateBorderPath = mapDataDirectoryPath + "/" + self.mapDataCurrentFilenameStateBorders
+                
+                if myFileManager.fileExists(atPath: mapDataStateBorderPath) == true {
+                    
+                    // delete the file
+                    do {
+                        try myFileManager.removeItem(atPath: mapDataStateBorderPath)
+                        
+                    } catch let error as NSError {
+                        
+                        // something went wrong
+                        GlobalStorage.unique.storeLastError(errorText: "saveNewStateBorderData(): ERROR deleting old mapFile: \(error.description)")
+                    }
+                }
+                
+                // try to save the data
+                do {
+                    // try to encode the county data and the timeStamps
+                    let encodedMapData = try JSONEncoder().encode(self.RKIMapStateData)
+                    
+                    let fileURL = URL(fileURLWithPath: mapDataStateBorderPath)
+                    
+                    // if we got to here, no errors encountered, so store it
+                    try encodedMapData.write(to: fileURL)
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print("saveNewStateBorderData(): done! Will call self.buildCountyShapeOverlays()")
+                    #endif
+                    
+                    self.buildStateBorderOverlays()
+                    
+                } catch let error as NSError {
+                    
+                    // encode did fail, log the message
+                    GlobalStorage.unique.storeLastError(errorText: "saveNewStateBorderData(): Error: JSON encoder could not encode RKIMapStateData or write to file failed: error: \"\(error.description)\"")
+                }
+
+                
+            } else {
+                
+                // no app support directory
+                GlobalStorage.unique.storeLastError(errorText: "saveNewStateBorderData(): ERROR: did not get a valid diretory for \".applicationSupportDirectory\", do nothing")
+            }
+        })
+    }
     
     /**
      -----------------------------------------------------------------------------------------------

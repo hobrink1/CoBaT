@@ -46,6 +46,7 @@ let numberNoFraction1DigitsFormatter = NumberFormatter()
 let numberNoFraction3DigitsFormatter = NumberFormatter()
 let numberNoFraction4DigitsFormatter = NumberFormatter()
 let number1Fraction3DigitsFormatter = NumberFormatter()
+let number1Fraction5DigitsFormatter = NumberFormatter()
 let numberNoFraction13DigitsFormatter = NumberFormatter()
 let number1Fraction13DigitsFormatter = NumberFormatter()
 let number3Fraction13DigitsFormatter = NumberFormatter()
@@ -358,6 +359,14 @@ func buildAllFormatters() {
     number1Fraction3DigitsFormatter.maximumFractionDigits = 1
     number1Fraction3DigitsFormatter.minimumFractionDigits = 1
     number1Fraction3DigitsFormatter.locale = Locale(identifier: preferredLanguage)
+
+    // formatter for decimals with no fraction in a 5 digit format
+    number1Fraction5DigitsFormatter.numberStyle = .decimal
+    number1Fraction5DigitsFormatter.paddingCharacter = " "
+    number1Fraction5DigitsFormatter.formatWidth = 3
+    number1Fraction5DigitsFormatter.maximumFractionDigits = 1
+    number1Fraction5DigitsFormatter.minimumFractionDigits = 1
+    number1Fraction5DigitsFormatter.locale = Locale(identifier: preferredLanguage)
 
 
     // formatter for decimals with no fraction in a 15 digit format
