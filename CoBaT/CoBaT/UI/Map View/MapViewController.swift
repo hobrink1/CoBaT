@@ -319,6 +319,20 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     // ---------------------------------------------------------------------------------------------
     // MARK: - Map Annotations
     // ---------------------------------------------------------------------------------------------
+    
+    /**
+     -----------------------------------------------------------------------------------------------
+     
+     mapView(viewFor annotation: )
+     
+     -----------------------------------------------------------------------------------------------
+     
+     - Parameters:
+     - :
+     
+     - Returns:
+     
+     */
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         
         // check if we have to deal with it...
@@ -345,50 +359,83 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             
             // parameterize the view
             
-            // our image
+            // our image, just nothing to show nothing
             view.image = #imageLiteral(resourceName: "PlacemarkEmpty") // PlacemarkEmpty
             
             view.frame.size.width = view.image!.size.width
             view.frame.size.height = view.image!.size.height
-            
-            view.layer.borderColor = UIColor.black.cgColor
-            
+                        
             // the callout
             view.canShowCallout = true
             view.isEnabled = true
-           
             view.calloutOffset = CGPoint(x: 0, y: (view.frame.size.height * -1))
             
+            // on the right AccessoryControl we want to show the deatils of that county
             let button = UIButton(type: .detailDisclosure)
-            //button.tintColor = WaysTintColorUIColor
             view.rightCalloutAccessoryView = button
             
+            // return the prepared view
             return view
-            
         }
         
-        
+        // if we do not have a view, return nil
         return nil
-
     }
     
     
     /**
      -----------------------------------------------------------------------------------------------
      
-     
+     mapView(calloutAccessoryControlTapped: )
      
      -----------------------------------------------------------------------------------------------
-     
-     - Parameters:
-     - :
-     
-     - Returns:
-     
      */
-    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         
-        
+        if view.annotation != nil {
+            if view.annotation!.isMember(of: CountyAnnotation.self) {
+                
+                // get the annotation
+                let myAnnotation = view.annotation! as! CountyAnnotation
+                
+                // set the global variables
+                let countyID = myAnnotation.countyID
+                
+                GlobalStorageQueue.async(execute: {
+                    
+                    // the details screen is called in two differnt scenarios: First form main screen and
+                    // in rki browser. to make sure that the right graph will be shown when user gets back
+                    // to the main screen, we have to save the selected arealevel and ID and restore it, when
+                    // the browsed detail screen disapeared
+                    // we do that by saving the two values in BrowseRKIDataTableViewController.detailsButtonTapped()
+                    // and restore it in DetailsRKIViewController.viewDidDisappear()
+
+                    // save the current values
+                    GlobalUIData.unique.UIDetailsRKIAreaLevelSaved = GlobalUIData.unique.UIDetailsRKIAreaLevel
+                    GlobalUIData.unique.UIDetailsRKISelectedMyIDSaved = GlobalUIData.unique.UIDetailsRKISelectedMyID
+
+                    // now set the values of the selected county
+                    GlobalUIData.unique.UIDetailsRKIAreaLevel = GlobalStorage.unique.RKIDataCounty
+                    GlobalUIData.unique.UIDetailsRKISelectedMyID = countyID
+                    
+                    #if DEBUG_PRINT_FUNCCALLS
+                    print("MapViewController.calloutAccessoryControlTapped(): just set ID: \"\(GlobalUIData.unique.UIDetailsRKISelectedMyID)\" and Area to \(GlobalUIData.unique.UIDetailsRKIAreaLevel), post .CoBaT_Graph_NewDetailSelected")
+                    #endif
+                    
+                    
+                    DispatchQueue.main.async(execute: {
+                        
+                        // report that we have selected a new detail
+                        NotificationCenter.default.post(Notification(name: .CoBaT_Graph_NewDetailSelected))
+                    
+                        // and call the details view
+                        self.performSegue(
+                            withIdentifier: "CallDetailsRKIViewControllerFromAnnotation",
+                            sender: self)
+                    })
+                })
+            }
+        }
     }
     
     // ---------------------------------------------------------------------------------------------
@@ -582,11 +629,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         // save the center coordinate and span persistent
         GlobalStorageQueue.async(flags: .barrier, execute: {
-            
-            GlobalUIData.unique.UIMapLastCenterCoordinate = self.MyMapView.centerCoordinate
-            GlobalUIData.unique.UIMapLastSpan = self.MyMapView.region.span
-            
-            GlobalUIData.unique.saveMapRegion()
+           
+            if let myMap = self.MyMapView {
+                GlobalUIData.unique.UIMapLastCenterCoordinate = myMap.centerCoordinate
+                GlobalUIData.unique.UIMapLastSpan = myMap.region.span
+                
+                GlobalUIData.unique.saveMapRegion()
+            }
         })
     }
 
@@ -711,7 +760,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 #endif
                 
                 self.restoreMapRegion()
-
             })
         
         

@@ -501,7 +501,7 @@ final class GlobalUIData: NSObject {
                         self.RKIMapOverlays.append(newOverlay)
                         
                         let newAnnotation = CountyAnnotation(
-                            stateID: item.myID,
+                            countyID: item.myID,
                             title: item.name,
                             subTitle: GlobalStorage.unique.RKIData[typeIndex][0][indexInRKIData].kindOf,
                             coordinate: centerCoordinate)

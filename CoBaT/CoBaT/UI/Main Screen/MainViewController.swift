@@ -95,27 +95,66 @@ final class MainViewController: UIViewController {
     private func updateRKIAsOfLabel() {
         
         // check if we have a timeInterval
-        if GlobalStorage.unique.RKIDataTimeStamps[0].isEmpty == false {
+        if (GlobalStorage.unique.RKIDataTimeStamps[1].isEmpty == false)
+            && (GlobalStorage.unique.RKIDataTimeStamps[2].isEmpty == false) {
             
-            let myDate: Date = Date(timeIntervalSinceReferenceDate: GlobalStorage.unique.RKIDataTimeStamps[0][0])
-        
+            
             // state and county data do arravie to different times. To show that only one part is recieved,
-            // we show brakets araound the text
-            // so, check if both parts are already recieved
-            if (GlobalStorage.unique.didRecieveStateData == true)
-                && (GlobalStorage.unique.didRecieveCountyData == true) {
+            // we show brackets around the text
+            
+            // first test the state date
+            let stateDate: Date
+            let stateDateText: String
+            
+            if (GlobalStorage.unique.RKIDataTimeStamps[1].isEmpty == false) {
                 
-                // yes, both parts are available, so display without brakets
-                self.ValueRKIAsOf.text = longSingleRelativeDateTimeFormatter.string(from: myDate)
+                stateDate = Date(timeIntervalSinceReferenceDate: GlobalStorage.unique.RKIDataTimeStamps[1][0])
+                stateDateText = longSingleRelativeDateTimeFormatter.string(from: stateDate)
                 
             } else {
                 
-                // no, one part is missing, so show brakets
-                self.ValueRKIAsOf.text = "(" + longSingleRelativeDateTimeFormatter.string(from: myDate) + ")"
-
+                stateDate = Date.distantPast
+                stateDateText = ""
             }
             
-         } else {
+            // so test the county date as well
+            let countyDate: Date
+            let countyDateText: String
+            
+            if GlobalStorage.unique.RKIDataTimeStamps[2].isEmpty == false {
+                
+                countyDate = Date(timeIntervalSinceReferenceDate: GlobalStorage.unique.RKIDataTimeStamps[2][0])
+                countyDateText = longSingleRelativeDateTimeFormatter.string(from: countyDate)
+                
+            } else {
+                
+                countyDate = Date.distantPast
+                countyDateText = ""
+            }
+            
+            
+            // so, check if both parts are already recieved
+            if stateDateText == countyDateText {
+                
+                // yes, both parts are available, so display without brackets
+                self.ValueRKIAsOf.text = stateDateText
+                
+            } else {
+                
+                // they are different, so check which one is newer, show that one
+                if stateDate < countyDate {
+                    
+                    // county date is newer, show this with brackets
+                    self.ValueRKIAsOf.text = "(" + countyDateText + ")"
+                    
+                } else {
+                    
+                    // state date is newer, show this with brackets
+                    self.ValueRKIAsOf.text = "(" + stateDateText + ")"
+                }
+            }
+            
+        } else {
             
             // tell the user, that we do not have any data
             self.ValueRKIAsOf.text = NSLocalizedString("No-RKI-Available", comment: "No RKI Data available message")
