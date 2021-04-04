@@ -67,7 +67,7 @@ final class CovidRating: NSObject {
             
         } else if value < 35.0 {
             
-            backgroundColor = UIColor(red: 203/255, green: 255/255, blue: 168/255, alpha: 1.0)
+            backgroundColor = UIColor(red: 217/255, green: 255/255, blue: 168/255, alpha: 1.0)
             foregroundColor = UIColor.black
             forgroundLowerColor = UIColor(red: 62/255, green: 62/255, blue: 62/255, alpha: 1.0)
            grade = 2
