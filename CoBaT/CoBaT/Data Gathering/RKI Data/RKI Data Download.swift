@@ -108,7 +108,7 @@ final class RKIDataDownload: NSObject {
                                     if let mimeType = httpResponse.mimeType {
                                         
                                         // check the mime type
-                                        if mimeType == "text/plain" {
+                                        if mimeType == "application/json" {
                                             
                                             // right mime type, go ahead
                                             
@@ -136,7 +136,7 @@ final class RKIDataDownload: NSObject {
                                             
                                             // not the right mimeType, log message and return
                                             GlobalStorage.unique.storeLastError(
-                                                errorText: "CoBaT.RKIDataDownload.getRKIData: Error: URLSession.dataTask, wrong mimeType (\"\(mimeType)\" instead of \"text/plain\"), return")
+                                                errorText: "CoBaT.RKIDataDownload.getRKIData: Error: URLSession.dataTask, wrong mimeType (\"\(mimeType)\" instead of \"application/json\"), return")
                                             return
                                         }
                                         

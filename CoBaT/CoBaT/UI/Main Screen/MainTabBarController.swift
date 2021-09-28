@@ -126,7 +126,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
      */
     private func refreshAfterUIDataRestored() {
         
-        // as we change the UI, zuse main threat
+        // as we change the UI, use main threat
         DispatchQueue.main.async(execute: {
             
             
@@ -156,7 +156,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
             // get the current one
             let item = self.tabBar.items![index]
             
-            // check the titlke
+            // check the title
             if (item.title == didSelect.title)
                 //&& (UIDataAreRestored == true)
                 && (index != GlobalUIData.unique.UIMainTabBarSelectedTab) {
