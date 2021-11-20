@@ -111,7 +111,7 @@ final class HelpTableViewController: UITableViewController {
                 localDataBuild.append(localDataStruct(
                                         dataType: item.localDataType,
                                         label1: "",
-                                        label2: "\(VersionLabel) © 2021 Hartwig Hopfenzitz"))
+                                        label2: "\(VersionLabel) © 2022 Hartwig Hopfenzitz"))
                 
                 
                 

@@ -2793,6 +2793,12 @@ final class iCloudService: NSObject {
                     self.userIsLoggedIn = false
                 })
                 
+            case .temporarilyUnavailable:
+                GlobalStorageQueue.async(flags: .barrier, execute: {
+                    print("iCloudService.checkUserAccount(): iCloud Temporarily Unavaible, set userIsLoggedIn = false")
+                    self.userIsLoggedIn = false
+                })
+                
             @unknown default:
                 GlobalStorageQueue.async(flags: .barrier, execute: {
                     print("iCloudService.checkUserAccount(): @unknown default, set userIsLoggedIn = false")
